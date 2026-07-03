@@ -10,23 +10,48 @@ function rank(players, prizes) {
     .map((p, i) => ({ ...p, prize: prizes[i] || 0 }))
 }
 
-// Current leaderboard period, as ISO UTC bounds for the API.
-const FROM = `${config.leaderboard.startAt}T00:00:00.000Z`
-const TO = `${config.leaderboard.endAt}T23:59:59.999Z`
-
-const REFRESH_MS = 90_000
+const REFRESH_MS = 300_000
+const RETRY_MS = 180_000
+const RATE_LIMIT_MS = 300_000
 
 // Module-level cache so tab switches / multiple components don't refetch.
-const cache = new Map() // casinoId -> { players, updatedAt }
+const cache = new Map() // cacheKey -> { players, updatedAt }
 const listeners = new Set()
 
-async function refresh(casinoId) {
-  const qs = new URLSearchParams({ casino: casinoId, from: FROM, to: TO })
+function getMonthRange(date) {
+  const year = date.getUTCFullYear()
+  const month = date.getUTCMonth()
+  const start = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0))
+  const end = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999))
+  return { from: start.toISOString(), to: end.toISOString() }
+}
+
+function getCasinoRange(casinoId) {
+  const now = new Date()
+  const monthRange = getMonthRange(now)
+  if (casinoId === 'betbolt') {
+    const start = new Date(Date.UTC(now.getUTCFullYear(), 5, 23, 0, 0, 0, 0))
+    return { from: start.toISOString(), to: monthRange.to }
+  }
+  if (casinoId === 'casebattle') {
+    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
+    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 14, 23, 59, 59, 999))
+    return { from: start.toISOString(), to: end.toISOString() }
+  }
+  return monthRange
+}
+
+function cacheKeyFor(casinoId, range) {
+  return `${casinoId}:${range.from}:${range.to}`
+}
+
+async function refresh(casinoId, range) {
+  const qs = new URLSearchParams({ casino: casinoId, from: range.from, to: range.to })
   const res = await fetch(`/api/leaderboard?${qs}`)
-  if (!res.ok) throw new Error(`api ${res.status}`)
+  if (!res.ok) throw Object.assign(new Error(`api ${res.status}`), { status: res.status })
   const data = await res.json()
   if (!Array.isArray(data.players)) throw new Error('bad payload')
-  cache.set(casinoId, data)
+  cache.set(cacheKeyFor(casinoId, range), data)
   listeners.forEach((fn) => fn())
 }
 
@@ -39,23 +64,37 @@ async function refresh(casinoId) {
 export function useLeaderboard(casinoId = casinos[0].id) {
   const casino = casinos.find((c) => c.id === casinoId) ?? casinos[0]
   const [, force] = useState(0)
+  const range = getCasinoRange(casino.id)
+  const cacheKey = cacheKeyFor(casino.id, range)
 
   useEffect(() => {
     const bump = () => force((n) => n + 1)
     listeners.add(bump)
 
     let timer
-    const tick = () => refresh(casino.id).catch(() => {}) // keep fallback on error
-    if (!cache.has(casino.id)) tick()
-    timer = setInterval(tick, REFRESH_MS)
+    const tick = async () => {
+      let delay = REFRESH_MS
+      try {
+        await refresh(casino.id, range)
+      } catch (err) {
+        if (err.status === 429 || String(err.message).includes('429')) {
+          delay = RATE_LIMIT_MS
+        } else {
+          delay = RETRY_MS
+        }
+      }
+      timer = setTimeout(tick, delay)
+    }
+
+    if (!cache.has(cacheKey)) tick()
 
     return () => {
       listeners.delete(bump)
-      clearInterval(timer)
+      clearTimeout(timer)
     }
-  }, [casino.id])
+  }, [cacheKey, casino.id, range])
 
-  const live = cache.get(casino.id)
+  const live = cache.get(cacheKey)
   const source = live?.players?.length ? live.players : casino.players
 
   const players = useMemo(

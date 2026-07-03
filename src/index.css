@@ -808,20 +808,18 @@ img { display: block; max-width: 100%; }
   place-items: center;
 }
 .bonus-icon img {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
   animation: floatY 3.4s ease-in-out infinite;
   will-change: transform;
 }
-/* per-emblem trims INSIDE the fixed slot, so visual sizes match without
-   moving the titles (slot height never changes) */
-.bonus-grid .bonus-card:nth-child(2) .bonus-icon img { max-width: 84%; max-height: 84%; }
-.bonus-grid .bonus-card:nth-child(3) .bonus-icon img { max-width: 96%; max-height: 96%; }
-.bonus-grid .bonus-card:nth-child(4) .bonus-icon img { max-width: 92%; max-height: 92%; }
+.bonus-grid .bonus-card:nth-child(1) .bonus-icon img,
+.bonus-grid .bonus-card:nth-child(2) .bonus-icon img {
+  width: 92px;
+  height: 92px;
+}
 .bonus-card.featured .bonus-icon img { filter: drop-shadow(0 0 26px rgba(255, 77, 87, 0.85)); }
 
 /* stagger each card so they bob out of sync */

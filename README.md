@@ -2,7 +2,7 @@
 
 A React + Vite affiliate site for code **NSBROOKLYN**: a home page (hero, bonus
 cards, leaderboard promo) and a tabbed **leaderboard** page covering both
-partner casinos — BetBolt and CaseBattle — with monthly pools ($2,500 BetBolt + $500 CaseBattle).
+partner casinos — BetBolt and CaseBattle — with prize pools ($2,500 BetBolt + $500 CaseBattle).
 
 Design ported from the [tegens](https://github.com/aspct49-dev/tegens) site
 (sidebar shell, podium, bonus cards, topo texture) recolored to the NSBROOKLYN

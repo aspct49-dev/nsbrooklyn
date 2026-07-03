@@ -15,11 +15,11 @@ import ResponsibleGambling from './pages/ResponsibleGambling'
 const ROUTE_META = {
   '/': {
     title: 'NSBROOKLYN — $3,000 BetBolt & CaseBattle Leaderboards',
-    description: 'Wager on BetBolt or CaseBattle under code NSB and climb the $3,000 monthly leaderboards. Rakeback, deposit bonuses, free cases & more.',
+    description: 'Wager on BetBolt or CaseBattle under code NSB and climb the $3,000 wager leaderboards. Rakeback, deposit bonuses, free cases & more.',
   },
   '/leaderboard': {
     title: 'NSBROOKLYN — $3,000 Wager Leaderboards (Code NSB)',
-    description: 'Live BetBolt & CaseBattle wager leaderboards for code NSB. Climb the ranks and win your share of the $3,000 monthly prize pools.',
+    description: 'Live BetBolt & CaseBattle wager leaderboards for code NSB. Climb the ranks and win your share of the $3,000 prize pools.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',

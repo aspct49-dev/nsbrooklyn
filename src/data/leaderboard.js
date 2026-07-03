@@ -29,7 +29,7 @@ export const config = {
   rankAvatars: ['/magicpiggy.png', '/befy.png', '/pug.png'],
 
   socials: {
-    discord: 'https://discord.gg/YCustgcxB',
+    discord: 'https://discord.com/invite/nsbrooklyntv',
     x: 'https://x.com/NSBrooklyn',
     kick: 'https://kick.com/nsbrooklyntv',
   },
@@ -125,7 +125,7 @@ export const bonuses = [
   {
     img: '/orb.png',
     title: '$3,000', // tip: keep in sync with config.prizePool
-    subtitle: 'Monthly Leaderboards',
+    subtitle: 'Leaderboard Pools',
     accent: 'gold',
     featured: true,
     rows: [
@@ -158,7 +158,7 @@ export const bonuses = [
     rows: [
       { group: 'On BetBolt' },
       'Bi-weekly lossback up to 10%',
-      '$2,500 monthly leaderboard',
+      '$500 biweekly leaderboard',
       'Wager milestones — coming July 7th',
       { group: 'On CaseBattle' },
       '5% deposit bonus from me',

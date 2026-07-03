@@ -10,8 +10,7 @@ const nav = [
   { label: 'Home', icon: <IconHome />, to: '/', end: true },
   { label: 'Leaderboards', icon: <IconTrophy />, to: '/leaderboard', badge: `$${(config.prizePool / 1000)}K` },
   { label: 'Winners', icon: <IconMedal />, to: '/winners' },
-  { label: 'Bonuses', icon: <IconGift />, to: '/', hash: '#bonuses' },
-  { label: 'Challenges', icon: <IconSword />, soon: true },
+  { label: 'Rewards', icon: <IconSword />, soon: true },
 ]
 
 function NavItems({ onClose }) {

@@ -16,6 +16,7 @@ export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
   const { players, casino } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
+  const periodLabel = casino.id === 'casebattle' ? 'Biweekly' : 'Monthly'
 
   return (
     <section className="section" id="leaderboard">
@@ -26,7 +27,7 @@ export default function Leaderboard() {
             <CasinoBrand casino={casino} />
           </div>
           <h1 className="lb-title">
-            <span className="grad">{fmtMoney(casino.prizePool)}</span> <span className="white">Monthly</span><br />
+            <span className="grad">{fmtMoney(casino.prizePool)}</span> <span className="white">{periodLabel}</span><br />
             <span className="grad">Leaderboard</span>
           </h1>
           <p className="lb-sub">

@@ -24,7 +24,6 @@ export default function Footer() {
             <h4>Navigate</h4>
             <Link to="/">Home</Link>
             <Link to="/leaderboard">Leaderboards</Link>
-            <Link to="/#bonuses">Bonuses</Link>
             {casinos.map((c) => (
               <a key={c.id} href={c.url} target="_blank" rel="noreferrer">Play on {c.name}</a>
             ))}
