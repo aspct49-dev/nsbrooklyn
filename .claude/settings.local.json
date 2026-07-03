@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(cd /c/nsbrooklyn-clone && npm run dev)",
-      "Read(//c/nsbrooklyn-clone/**)"
-    ]
-  }
-}

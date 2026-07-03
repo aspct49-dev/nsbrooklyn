@@ -5,3 +5,6 @@ dist
 .vercel
 *.log
 /data/
+
+# local tooling
+.claude/
