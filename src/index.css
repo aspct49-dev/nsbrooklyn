@@ -25,9 +25,9 @@
   --accent-grad-h: linear-gradient(135deg, #ff5a63 0%, #ef2d3c 100%);
   --magenta-grad: linear-gradient(135deg, #ff5a63 0%, #b3121f 100%);
 
-  /* podium metals */
-  --gold: #ffce4f;
-  --gold-2: #f7a317;
+  /* podium metals (1st place = brand red) */
+  --gold: #ff4d57;
+  --gold-2: #c40f1d;
   --silver: #d7e0ef;
   --silver-2: #99a6c2;
   --bronze: #e8a168;
@@ -74,7 +74,7 @@ body::before {
   background:
     radial-gradient(900px 600px at 80% -5%, rgba(239, 45, 60, 0.16), transparent 60%),
     radial-gradient(700px 500px at 10% 10%, rgba(239, 45, 60, 0.12), transparent 60%),
-    radial-gradient(600px 500px at 50% 110%, rgba(247, 163, 23, 0.08), transparent 60%);
+    radial-gradient(600px 500px at 50% 110%, rgba(239, 45, 60, 0.08), transparent 60%);
   pointer-events: none;
 }
 
@@ -84,10 +84,9 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background: url('/topography.webp') center / cover no-repeat;
-  filter: invert(1);
-  mix-blend-mode: screen;
-  opacity: 0.14;
+  background: url('/12315.jpg') center / cover no-repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -329,16 +328,17 @@ img { display: block; max-width: 100%; }
 }
 .hero-inner { position: relative; z-index: 3; padding: 54px 48px; max-width: 720px; font-family: 'Rubik', sans-serif; font-weight: 400; }
 
-/* Vampy mascot filling the hero's right side */
+/* NS Brooklyn logo filling the hero's right side */
 .hero-art {
   position: absolute;
-  right: 6%;
-  bottom: -4px;
-  height: 104%;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 84%;
   width: auto;
-  max-width: 46%;
+  max-width: 44%;
   object-fit: contain;
-  object-position: bottom right;
+  object-position: center right;
   z-index: 2;
   pointer-events: none;
   user-select: none;
@@ -471,24 +471,29 @@ img { display: block; max-width: 100%; }
   grid-template-columns: 1fr 1.1fr 1fr;
   gap: 22px;
   align-items: start;
-  margin-bottom: 34px;
+  max-width: 880px;
+  margin: 0 auto 34px;
 }
 .podium-col { display: flex; flex-direction: column; }
 .podium-col.second, .podium-col.third { margin-top: 48px; }
 
+/* the lb_card.png frame IS the card: no box border/bg of its own.
+   Frame is 376x760 with an ornamental plaque in the bottom ~18%. */
 .podium-card {
   position: relative;
-  background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 70%);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  padding: 46px 18px 24px;
+  background: url('/lb_card.png') center / 100% 100% no-repeat;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.55));
+  aspect-ratio: 10 / 16;
+  padding: 17% 16px 0;
   text-align: center;
-  box-shadow: var(--shadow);
 }
 .podium-col.first .podium-card {
-  padding-top: 54px;
-  border-color: rgba(255, 206, 79, 0.5);
-  box-shadow: 0 0 50px -12px rgba(255, 206, 79, 0.45), var(--shadow);
+  filter:
+    drop-shadow(0 18px 32px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 26px rgba(255, 77, 87, 0.4));
 }
 
 .avatar-wrap { position: relative; width: 76px; margin: 0 auto 26px; }
@@ -530,32 +535,24 @@ img { display: block; max-width: 100%; }
 }
 .wager-pill .cur { color: #3ddc84; margin-right: 1px; }
 
-.prize-plaque {
-  position: relative;
-  margin: 16px 14px 26px;
-  text-align: center;
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+/* prize amount seated in the frame's ornamental bottom plaque */
+.frame-prize {
+  position: absolute;
+  left: 50%;
+  /* center the text on the plaque band's midline (band ≈ 8–17% from bottom),
+     so different font sizes per rank all align identically */
+  bottom: 12.5%;
+  transform: translate(-50%, 50%);
+  width: 56%;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
-/* the ribbon body: swallowtail-notched banner (trophy stays unclipped outside) */
-.prize-plaque .ribbon {
-  position: relative;
-  border-radius: 11px 11px 0 0;
-  padding: 14px 12px 22px;
-  color: #14110a;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
-}
-.prize-plaque .amt { font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 24px; }
-.prize-plaque .trophy {
-  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-  width: 30px; height: 30px; border-radius: 50%;
-  display: grid; place-items: center; font-size: 14px;
-  background: var(--bg-1); box-shadow: var(--shadow);
-  z-index: 2;
-}
-.podium-col.first .prize-plaque .ribbon { background: linear-gradient(135deg, var(--gold), var(--gold-2)); }
-.podium-col.first .prize-plaque .amt { font-size: 28px; }
-.podium-col.second .prize-plaque .ribbon { background: linear-gradient(135deg, var(--silver), var(--silver-2)); }
-.podium-col.third .prize-plaque .ribbon { background: linear-gradient(135deg, var(--bronze), var(--bronze-2)); color: #fff; }
+.podium-col.first .frame-prize { font-size: 26px; color: var(--gold); }
+.podium-col.second .frame-prize { color: var(--silver); }
+.podium-col.third .frame-prize { color: var(--bronze); }
 
 /* ---------------------------------------------------------------- table */
 .lb-status {
@@ -679,8 +676,8 @@ img { display: block; max-width: 100%; }
 .rg-bar {
   display: flex; align-items: center; gap: 16px;
   margin-top: 30px; padding: 16px 20px;
-  background: rgba(255, 196, 77, 0.06);
-  border: 1px solid rgba(255, 196, 77, 0.28);
+  background: rgba(255, 77, 87, 0.06);
+  border: 1px solid rgba(255, 77, 87, 0.28);
   border-radius: 14px;
 }
 .rg-18 {
@@ -688,7 +685,7 @@ img { display: block; max-width: 100%; }
   width: 46px; height: 46px; border-radius: 50%;
   display: grid; place-items: center;
   font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 16px;
-  color: #14110a; background: linear-gradient(135deg, #ffd560, #f3a51a);
+  color: #fff; background: linear-gradient(135deg, #ff5a63, #c11322);
 }
 .rg-bar p { color: var(--text-soft); font-size: 13px; line-height: 1.55; margin: 0; }
 .rg-bar a { color: var(--blue-2); font-weight: 700; }
@@ -740,11 +737,11 @@ img { display: block; max-width: 100%; }
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  background: linear-gradient(180deg, #ffe89a 0%, var(--gold) 45%, var(--gold-2) 100%);
+  background: linear-gradient(180deg, #ff9aa0 0%, var(--gold) 45%, var(--gold-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 6px 26px rgba(255, 196, 77, 0.45));
+  filter: drop-shadow(0 6px 26px rgba(255, 77, 87, 0.45));
 }
 .bonus-heading-sub {
   font-family: 'Rubik', sans-serif;
@@ -768,8 +765,8 @@ img { display: block; max-width: 100%; }
 
 .bonus-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
   align-items: stretch;
   padding-top: 22px;
 }
@@ -780,8 +777,8 @@ img { display: block; max-width: 100%; }
   align-items: center;
   text-align: center;
   border-radius: 18px;
-  padding: 78px 26px 30px;
-  margin-top: 64px;
+  padding: 84px 22px 26px;
+  margin-top: 60px;
   background: linear-gradient(180deg, #231019 0%, #150a0f 100%);
   border: 1.5px solid var(--border-strong);
   box-shadow: var(--shadow);
@@ -789,37 +786,61 @@ img { display: block; max-width: 100%; }
 }
 .bonus-card:hover { transform: translateY(-6px); }
 .bonus-card.gold {
-  border-color: rgba(255, 196, 77, 0.55);
-  box-shadow: 0 0 40px -16px rgba(255, 196, 77, 0.5), var(--shadow);
+  border-color: rgba(255, 77, 87, 0.55);
+  box-shadow: 0 0 40px -16px rgba(255, 77, 87, 0.5), var(--shadow);
 }
 .bonus-card.featured {
-  background: linear-gradient(180deg, #2a2516 0%, #150a0f 55%);
-  border-color: rgba(255, 196, 77, 0.75);
-  box-shadow: 0 0 50px -10px rgba(255, 196, 77, 0.55), var(--shadow);
-  transform: scale(1.05);
+  background: linear-gradient(180deg, #2a1216 0%, #150a0f 55%);
+  border-color: rgba(255, 77, 87, 0.75);
+  box-shadow: 0 0 50px -10px rgba(255, 77, 87, 0.55), var(--shadow);
   z-index: 2;
 }
 .bonus-card.featured:hover { transform: scale(1.05) translateY(-6px); }
 
 .bonus-icon {
   position: absolute;
-  top: -66px;
+  top: -60px;
   left: 50%;
   transform: translateX(-50%);
-  width: 132px;
-  height: 132px;
+  width: 120px;
+  height: 120px;
   display: grid;
   place-items: center;
 }
 .bonus-icon img {
-  width: 100%;
-  height: 100%;
+  /* max constraints (not 100%/100%): the image can never paint outside the box */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.65));
   animation: floatY 3.4s ease-in-out infinite;
   will-change: transform;
 }
-.bonus-card.featured .bonus-icon img { filter: drop-shadow(0 0 26px rgba(255, 196, 77, 0.85)); }
+/* per-emblem size trims so all four floats read the same visual size
+   (each image has a different content shape — tall glass, wide orb, …) */
+.bonus-grid .bonus-card:nth-child(1) .bonus-icon {
+  width: 112px;
+  height: 112px;
+  top: -62px; /* tall glass: lift it so its base clears the title */
+}
+.bonus-grid .bonus-card:nth-child(2) .bonus-icon {
+  width: 94px;
+  height: 94px;
+  top: -47px;
+}
+.bonus-grid .bonus-card:nth-child(3) .bonus-icon {
+  width: 114px;
+  height: 114px;
+  top: -57px;
+}
+.bonus-grid .bonus-card:nth-child(4) .bonus-icon {
+  width: 112px;
+  height: 112px;
+  top: -56px;
+}
+.bonus-card.featured .bonus-icon img { filter: drop-shadow(0 0 26px rgba(255, 77, 87, 0.85)); }
 
 /* stagger each card so they bob out of sync */
 .bonus-grid .bonus-card:nth-child(1) .bonus-icon img { animation-delay: 0s; }
@@ -838,7 +859,7 @@ img { display: block; max-width: 100%; }
 .bonus-title {
   font-family: 'Chakra Petch', sans-serif;
   font-weight: 700;
-  font-size: 34px;
+  font-size: 28px;
   letter-spacing: 0.02em;
   line-height: 1;
 }
@@ -865,6 +886,18 @@ img { display: block; max-width: 100%; }
 }
 .bonus-card.featured .bonus-row { background: rgba(28, 10, 17, 0.6); }
 
+/* small section label between reward rows ("Team Rewards", …) */
+.bonus-group-label {
+  margin-top: 6px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--blue-2);
+}
+.bonus-rows .bonus-group-label:first-child { margin-top: 0; }
+
 .bonus-claim {
   width: 100%;
   margin-top: auto;
@@ -880,20 +913,20 @@ img { display: block; max-width: 100%; }
   transition: filter 0.18s ease, transform 0.18s ease;
 }
 .bonus-claim:hover { filter: brightness(1.08); transform: translateY(-2px); }
-.bonus-claim.gold { background: linear-gradient(135deg, #ffd560, #f3a51a); }
+.bonus-claim.gold { background: linear-gradient(135deg, #ff5a63, #c11322); color: #fff; }
 .bonus-claim.blue { background: var(--accent-grad); color: #fff; box-shadow: var(--glow-blue); }
 
 /* ---------------------------------------------------------------- promo banner */
 .promo {
   position: relative;
-  isolation: isolate;          /* so the blend mode mixes with #CFB53B, not the page */
+  isolation: isolate;          /* so the blend mode mixes with #B3121F, not the page */
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid rgba(207, 181, 59, 0.55);
-  background-color: #CFB53B;    /* gold base */
-  box-shadow: 0 0 60px -18px rgba(207, 181, 59, 0.5), var(--shadow);
+  border: 1px solid rgba(179, 18, 31, 0.55);
+  background-color: #B3121F;    /* red base */
+  box-shadow: 0 0 60px -18px rgba(239, 45, 60, 0.5), var(--shadow);
 }
-/* sweets_bg overlaid onto the gold base */
+/* sweets_bg overlaid onto the red base */
 .promo::before {
   content: '';
   position: absolute;
@@ -938,7 +971,7 @@ img { display: block; max-width: 100%; }
 }
 .promo-title .amt {
   display: block;
-  background: linear-gradient(180deg, #ffe89a 0%, var(--gold) 50%, var(--gold-2) 100%);
+  background: linear-gradient(180deg, #ff9aa0 0%, var(--gold) 50%, var(--gold-2) 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.55));
 }
@@ -987,19 +1020,23 @@ img { display: block; max-width: 100%; }
 .promo-pcard { position: relative; width: 150px; margin-top: 30px; }
 .promo-pcard.first { width: 162px; margin-top: 0; z-index: 2; }
 
+/* same lb_card.png frame treatment as the leaderboard podium */
 .promo-pcard-top {
   position: relative;
-  background: linear-gradient(180deg, #2a141c 0%, #1a0c11 100%);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  padding: 40px 12px 16px;
+  background: url('/lb_card.png') center / 100% 100% no-repeat;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  aspect-ratio: 10 / 16;
+  padding: 42px 12px 0;
   text-align: center;
-  box-shadow: var(--shadow);
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.55));
 }
 .promo-pcard.first .promo-pcard-top {
-  padding-top: 46px;
-  border-color: rgba(255, 206, 79, 0.5);
-  box-shadow: 0 0 44px -14px rgba(255, 206, 79, 0.5), var(--shadow);
+  padding-top: 48px;
+  filter:
+    drop-shadow(0 14px 24px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 20px rgba(255, 77, 87, 0.4));
 }
 
 .promo-avatar {
@@ -1035,35 +1072,30 @@ img { display: block; max-width: 100%; }
 }
 .promo-pwager .cur { color: #3ddc84; margin-right: 1px; }
 
+/* prize seated in the frame's bottom plaque, same as the leaderboard podium */
 .promo-plaque {
-  position: relative;
-  margin: 12px 8px 0;
+  position: absolute;
+  left: 50%;
+  /* centered on the plaque band midline — same alignment as the lb podium */
+  bottom: 12.5%;
+  transform: translate(-50%, 50%);
+  width: 60%;
   text-align: center;
   font-family: 'Chakra Petch', sans-serif; font-weight: 700;
-  filter: drop-shadow(0 9px 14px rgba(0, 0, 0, 0.5));
 }
-/* ribbon body: swallowtail-notched banner (trophy stays unclipped outside) */
 .promo-plaque .ribbon {
-  position: relative;
-  border-radius: 10px 10px 0 0;
-  padding: 11px 10px 18px;
-  color: #14110a;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 68%, 0 100%);
-  background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
+  background: none;
+  padding: 0;
+  clip-path: none;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
-.promo-plaque .amt { font-size: 18px; }
-.promo-pcard.first .promo-plaque .ribbon { background: linear-gradient(135deg, var(--gold), var(--gold-2)); }
-.promo-pcard.first .promo-plaque .amt { font-size: 21px; }
-.promo-pcard.second .promo-plaque .ribbon { background: linear-gradient(135deg, var(--silver), var(--silver-2)); }
-.promo-pcard.third .promo-plaque .ribbon { background: linear-gradient(135deg, var(--bronze), var(--bronze-2)); color: #fff; }
-.promo-plaque .trophy {
-  position: absolute; bottom: -11px; left: 50%; transform: translateX(-50%);
-  width: 26px; height: 26px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: #0e1626; color: #ffce4f; box-shadow: var(--shadow);
-  z-index: 2;
-}
-.promo-plaque .trophy svg { width: 14px; height: 14px; }
+.promo-plaque .amt { font-size: 17px; }
+.promo-plaque .trophy { display: none; }
+.promo-pcard.first .promo-plaque .ribbon { color: var(--gold); }
+.promo-pcard.first .promo-plaque .amt { font-size: 20px; }
+.promo-pcard.second .promo-plaque .ribbon { color: var(--silver); }
+.promo-pcard.third .promo-plaque .ribbon { color: var(--bronze); }
 
 /* ---------------------------------------------------------------- rewards */
 .rw-callout {
@@ -1118,7 +1150,7 @@ img { display: block; max-width: 100%; }
 }
 .rw-tier.bronze   { --tier: #d08a5a; }
 .rw-tier.silver   { --tier: #b9c4d8; }
-.rw-tier.gold     { --tier: #ffce4f; }
+.rw-tier.gold     { --tier: #ef2d3c; }
 .rw-tier.platinum { --tier: #cfe9ef; }
 .rw-tier.diamond  { --tier: #5fd3e6; }
 .rw-tier.infernal { --tier: #ff5a52; }
@@ -1212,6 +1244,10 @@ img { display: block; max-width: 100%; }
 @media (max-width: 1080px) {
   .nb-links, .nb-socials { display: none; }
   .hamburger { display: block; }
+  /* 4-up cards get cramped below this — go 2x2 */
+  .bonus-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 66px; }
+  .bonus-card.featured { transform: none; }
+  .bonus-card.featured:hover { transform: translateY(-6px); }
 }
 @media (max-width: 980px) {
   .bonus-grid { grid-template-columns: 1fr; gap: 44px; }

@@ -12,7 +12,7 @@ export default function Home() {
       {/* HERO */}
       <div className="container">
         <section className="hero">
-          <img className="hero-art" src="/vampy.png" alt="" aria-hidden="true" />
+          <img className="hero-art" src="/nsbrooklyn.png" alt="" aria-hidden="true" />
           <div className="hero-inner">
             <span className="hero-tag"><span className="dot" /> BETBOLT &amp; CASEBATTLE PARTNER · CODE {config.referralCode}</span>
             <h1>

@@ -96,19 +96,21 @@ export const casinos = [
   },
 ]
 
-// The three "choose your bonus" cards on the home page.
-// `featured: true` gives the highlighted middle treatment.
+// The four "choose your bonus" cards on the home page.
+// `featured: true` gives the highlighted treatment.
+// Rows are strings; use { group: '...' } to insert a small section label.
 export const bonuses = [
   {
-    img: '/giftbox.png',
+    img: '/drink.png',
     title: 'BETBOLT',
     subtitle: 'Under code NSBROOKLYN',
     accent: 'gold',
     rows: [
-      'Sign up with code NSBROOKLYN',
-      'Instant rakeback on wagers',
-      'Deposit bonus on first deposit',
-      'Wagers count toward the board',
+      'Instant lossback from BetBolt',
+      'Daily, weekly & monthly bonuses',
+      'Juicy level-up bonus',
+      'VIP transfers',
+      'Exclusive VIP program for high rollers',
     ],
     cta: 'CLAIM BONUS',
     href: 'https://betbolt.com/?r=NSBROOKLYN',
@@ -129,18 +131,33 @@ export const bonuses = [
     to: '/leaderboard',
   },
   {
-    img: '/coin.png',
+    img: '/gold_pot.png',
     title: 'CASEBATTLE',
     subtitle: 'Under code NSBROOKLYN',
     accent: 'gold',
     rows: [
-      'Use code NSBROOKLYN at sign-up',
-      'Free cases when you join',
-      'Wager rewards as you open',
-      'Wagers count toward the board',
+      'Daily promo codes',
+      'Up to 10% lossback',
+      '5% deposit bonus from the site',
     ],
     cta: 'CLAIM BONUS',
     href: 'https://casebattle.com/?r=NSBROOKLYN',
+  },
+  {
+    img: '/red_gem.png',
+    title: 'NSBROOKLYN',
+    subtitle: 'From me personally',
+    accent: 'gold',
+    rows: [
+      { group: 'On BetBolt' },
+      'Bi-weekly lossback up to 10%',
+      '$2,500 monthly leaderboard',
+      'Wager milestones — coming July 7th',
+      { group: 'On CaseBattle' },
+      '5% deposit bonus from me',
+    ],
+    cta: 'CLAIM VIA DISCORD',
+    href: config.socials.discord,
   },
 ]
 

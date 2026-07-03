@@ -12,6 +12,7 @@ function Card({ player, rank }) {
   const avatar = config.rankAvatars[rank - 1]
   return (
     <div className={`podium-col ${m.cls}`}>
+      {/* lb_card.png frame — prize renders inside its bottom plaque */}
       <div className="podium-card">
         <div className="avatar-wrap">
           <div className="avatar">
@@ -24,12 +25,7 @@ function Card({ player, rank }) {
         <div className="wager-pill">
           <span className="cur">$</span>{fmtMoney(player.wagered, 2).slice(1)}
         </div>
-      </div>
-      <div className="prize-plaque">
-        <div className="ribbon">
-          <span className="amt">{fmtMoney(player.prize)}</span>
-        </div>
-        <span className="trophy">🏆</span>
+        <div className="frame-prize">{fmtMoney(player.prize)}</div>
       </div>
     </div>
   )
