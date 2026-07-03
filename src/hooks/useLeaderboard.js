@@ -64,6 +64,7 @@ async function refresh(casinoId, range) {
 export function useLeaderboard(casinoId = casinos[0].id) {
   const casino = casinos.find((c) => c.id === casinoId) ?? casinos[0]
   const [, force] = useState(0)
+  const [error, setError] = useState(null)
   const range = getCasinoRange(casino.id)
   const cacheKey = cacheKeyFor(casino.id, range)
 
@@ -76,7 +77,9 @@ export function useLeaderboard(casinoId = casinos[0].id) {
       let delay = REFRESH_MS
       try {
         await refresh(casino.id, range)
+        setError(null)
       } catch (err) {
+        setError(err.message || 'Leaderboard fetch failed')
         if (err.status === 429 || String(err.message).includes('429')) {
           delay = RATE_LIMIT_MS
         } else {
@@ -104,7 +107,7 @@ export function useLeaderboard(casinoId = casinos[0].id) {
 
   return {
     loading: !live,
-    error: null,
+    error,
     players,
     updatedAt: live?.updatedAt ?? null,
     casino,

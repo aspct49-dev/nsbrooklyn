@@ -14,7 +14,7 @@ const periodEnd = `${config.leaderboard.endAt}T23:59:59Z`
 
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
-  const { players, casino } = useLeaderboard(activeId)
+  const { players, casino, error } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
   const periodLabel = casino.id === 'casebattle' ? 'Biweekly' : 'Monthly'
 
@@ -46,6 +46,11 @@ export default function Leaderboard() {
               Visit {casino.name} <IconExternal />
             </a>
           </div>
+          {error ? (
+            <div className="alert alert-warning" style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(255, 200, 0, 0.12)', color: '#f7a11b', border: '1px solid rgba(255, 200, 0, 0.28)' }}>
+              Live leaderboard unavailable: {error}. Verify your Vercel env vars and API access.
+            </div>
+          ) : null}
         </div>
 
         <Podium top3={top3} />
