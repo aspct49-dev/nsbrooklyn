@@ -1,100 +1,39 @@
-/* Minimal inline SVG icons (no icon dependency). stroke/fill inherit currentColor. */
+// Minimal inline SVG icon set (no external icon dependency).
 
-export function Icon({ type, ...props }) {
-  const I = ICONS[type] || ICONS.link
-  return <I {...props} />
-}
+export const IconHome = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+)
+export const IconTrophy = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h12v4a6 6 0 0 1-12 0z"/><path d="M6 6H3v1a3 3 0 0 0 3 3M18 6h3v1a3 3 0 0 1-3 3M9 17h6M10 21h4M12 14v3"/></svg>
+)
+export const IconGift = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7S11 2 8 3 9 7 12 7M12 7s1-5 4-4-1 4-4 4"/></svg>
+)
+export const IconBolt = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8z"/></svg>
+)
+export const IconSword = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>
+)
+export const IconMedal = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="15" r="6"/><path d="M12 13.5v3M10.5 15h3"/><path d="M8.5 8.5 6 3h12l-2.5 5.5"/></svg>
+)
+export const IconExternal = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+)
 
-const S = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'currentColor' }
-
-const ICONS = {
-  kick: (p) => (
-    <svg {...S} {...p}>
-      <path d="M3 3h5v6l4-6h6l-6 9 6 9h-6l-4-6v6H3z" />
-    </svg>
-  ),
-  twitch: (p) => (
-    <svg {...S} {...p}>
-      <path d="M4 2 3 6v13h4v3h3l3-3h4l4-4V2zm15 11-2 2h-4l-3 3v-3H7V4h12zM11 7h2v5h-2zm5 0h2v5h-2z" />
-    </svg>
-  ),
-  youtube: (p) => (
-    <svg {...S} {...p}>
-      <path d="M22 7.4a3 3 0 0 0-2.1-2.1C18 4.8 12 4.8 12 4.8s-6 0-7.9.5A3 3 0 0 0 2 7.4 31 31 0 0 0 1.6 12 31 31 0 0 0 2 16.6a3 3 0 0 0 2.1 2.1c1.9.5 7.9.5 7.9.5s6 0 7.9-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 22.4 12 31 31 0 0 0 22 7.4M10 15.2V8.8l5.2 3.2z" />
-    </svg>
-  ),
-  x: (p) => (
-    <svg {...S} {...p}>
-      <path d="M18.2 2H21l-6.6 7.5L22 22h-6.1l-4.8-6.2L5.6 22H3l7-8L2.3 2h6.2l4.3 5.7zm-2.1 18h1.6L8 3.6H6.3z" />
-    </svg>
-  ),
-  discord: (p) => (
-    <svg {...S} {...p}>
-      <path d="M20 4.5A17 17 0 0 0 15.7 3l-.2.4a13 13 0 0 1 3.7 1.9 15 15 0 0 0-12.4 0A13 13 0 0 1 10.5 3.4L10.3 3A17 17 0 0 0 6 4.5C3 9 2.2 13.4 2.6 17.7A17 17 0 0 0 7.7 20l.6-1a11 11 0 0 1-1.9-.9l.5-.4a12 12 0 0 0 10.2 0l.5.4a11 11 0 0 1-1.9.9l.6 1a17 17 0 0 0 5.1-2.3c.5-5-.8-9.3-3.4-13.2M9.2 15c-.9 0-1.6-.9-1.6-1.9s.7-1.9 1.6-1.9 1.7.9 1.6 1.9-.7 1.9-1.6 1.9m5.6 0c-.9 0-1.6-.9-1.6-1.9s.7-1.9 1.6-1.9 1.7.9 1.6 1.9-.7 1.9-1.6 1.9" />
-    </svg>
-  ),
-  instagram: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  ),
-  copy: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="9" y="9" width="11" height="11" rx="2" />
-      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
-    </svg>
-  ),
-  check: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  ),
-  arrow: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  ),
-  menu: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M4 7h16M4 12h16M4 17h16" />
-    </svg>
-  ),
-  close: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M6 6l12 12M18 6 6 18" />
-    </svg>
-  ),
-  link: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" />
-    </svg>
-  ),
-  bolt: (p) => (
-    <svg {...S} {...p}>
-      <path d="M13 2 4 14h6l-1 8 9-12h-6z" />
-    </svg>
-  ),
-  swords: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 3l8 8M3 3v4M3 3h4M21 3l-8 8m8-8v4m0-4h-4M6.5 14.5 4 17l3 3 2.5-2.5M17.5 14.5 20 17l-3 3-2.5-2.5M4 17l-1.5 1.5M20 17l1.5 1.5" />
-    </svg>
-  ),
-  crown: (p) => (
-    <svg {...S} {...p}>
-      <path d="M3 7l4.5 4L12 4l4.5 7L21 7l-1.6 11H4.6zM4.6 20h14.8v1.5H4.6z" />
-    </svg>
-  ),
-  chevron: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  ),
-  gift: (p) => (
-    <svg {...S} {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="8" width="18" height="4" />
-      <path d="M5 12v8h14v-8M12 8v12M12 8s-4.5.2-5.5-2C5.8 4.4 7.5 3 9 3.5c2 .7 3 4.5 3 4.5s1-3.8 3-4.5c1.5-.5 3.2.9 2.5 2.5-1 2.2-5.5 2-5.5 2z" />
-    </svg>
-  ),
-}
+export const IconDiscord = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.3.5c1.6.4 2.9 1 4.1 1.8a13.6 13.6 0 0 0-11.6 0c1.2-.8 2.6-1.4 4.1-1.8L11.4 3a19.8 19.8 0 0 0-4.9 1.4C3.3 9 2.4 13.4 2.8 17.8A19.9 19.9 0 0 0 8.9 21l.4-.6c-.7-.3-1.4-.7-2-1.1l.5-.3a14.2 14.2 0 0 0 12.2 0l.5.3c-.6.4-1.3.8-2 1.1l.4.6a19.9 19.9 0 0 0 6.1-3.2c.5-5-.9-9.4-4.4-12.5zM9.3 15.4c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.8.9 1.7 1.9c0 1-.8 1.9-1.7 1.9zm5.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.8.9 1.7 1.9c0 1-.7 1.9-1.7 1.9z"/></svg>
+)
+export const IconX = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+)
+export const IconKick = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 3h6v4.5h2.25V5.25H13.5V3H21v6.75h-2.25V12H21V21h-7.5v-2.25H11.25V16.5H9V21H3z"/></svg>
+)
+export const IconYoutube = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7.4-1.5.4-4.7.4-4.7zM9.8 15.3V8.7l5.7 3.3z"/></svg>
+)
+export const IconInstagram = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+)

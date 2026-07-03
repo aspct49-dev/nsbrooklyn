@@ -1,41 +1,47 @@
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function diff(target) {
   const ms = Math.max(0, new Date(target).getTime() - Date.now())
-  const d = Math.floor(ms / 86400000)
-  const h = Math.floor((ms % 86400000) / 3600000)
-  const m = Math.floor((ms % 3600000) / 60000)
-  const s = Math.floor((ms % 60000) / 1000)
-  return { d, h, m, s }
+  return {
+    ended: ms === 0,
+    days: Math.floor(ms / 86400000),
+    hours: Math.floor((ms / 3600000) % 24),
+    mins: Math.floor((ms / 60000) % 60),
+    secs: Math.floor((ms / 1000) % 60),
+  }
 }
 
 const pad = (n) => String(n).padStart(2, '0')
 
-export default function Countdown({ target }) {
-  const [t, setT] = useState(() => diff(target))
+export default function Countdown({ endDate }) {
+  const [t, setT] = useState(() => diff(endDate))
 
   useEffect(() => {
-    const id = setInterval(() => setT(diff(target)), 1000)
+    const id = setInterval(() => setT(diff(endDate)), 1000)
     return () => clearInterval(id)
-  }, [target])
+  }, [endDate])
+
+  if (t.ended) {
+    return <div className="cd-ended">🏁 This leaderboard has ended — winners are being paid out!</div>
+  }
 
   const cells = [
-    { v: t.d, l: 'Days' },
-    { v: t.h, l: 'Hours' },
-    { v: t.m, l: 'Minutes' },
-    { v: t.s, l: 'Seconds' },
+    { n: t.days, l: 'Days' },
+    { n: t.hours, l: 'Hours' },
+    { n: t.mins, l: 'Minutes' },
+    { n: t.secs, l: 'Seconds' },
   ]
 
   return (
     <div className="countdown">
       {cells.map((c, i) => (
-        <Fragment key={c.l}>
-          {i > 0 && <span className="colon">:</span>}
-          <div className="count-cell">
-            <div className="cv">{pad(c.v)}</div>
-            <div className="cl">{c.l}</div>
+        <div key={c.l} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="cd-cell">
+            <div className="num">{pad(c.n)}</div>
+            <div className="lbl">{c.l}</div>
           </div>
-        </Fragment>
+          {i < cells.length - 1 && <span className="cd-sep hide-sm">:</span>}
+        </div>
       ))}
     </div>
   )
