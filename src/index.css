@@ -324,11 +324,11 @@ img { display: block; max-width: 100%; }
   margin-top: 28px;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgba(255, 77, 87, 0.35);
   background:
-    radial-gradient(700px 400px at 85% 20%, rgba(239, 45, 60, 0.25), transparent 65%),
-    radial-gradient(500px 400px at 10% 90%, rgba(239, 45, 60, 0.18), transparent 60%),
-    linear-gradient(160deg, #24101a 0%, #12070c 100%);
+    radial-gradient(700px 400px at 85% 20%, rgba(255, 80, 90, 0.30), transparent 65%),
+    radial-gradient(500px 400px at 10% 90%, rgba(255, 60, 70, 0.20), transparent 60%),
+    linear-gradient(160deg, #7a1220 0%, #3a070d 100%);
   box-shadow: var(--shadow);
 }
 .hero-inner { position: relative; z-index: 3; padding: 54px 48px; max-width: 720px; font-family: 'Rubik', sans-serif; font-weight: 400; }
