@@ -6,6 +6,7 @@ import Countdown from '../components/Countdown'
 import Podium from '../components/Podium'
 import LeaderboardTable from '../components/LeaderboardTable'
 import CasinoPicker from '../components/CasinoPicker'
+import CasinoBrand from '../components/CasinoBrand'
 import { IconExternal } from '../components/icons'
 
 // Countdown target = end of the leaderboard's last day, in UTC.
@@ -21,11 +22,9 @@ export default function Leaderboard() {
       <div className="container">
         {/* HEADER */}
         <div className="lb-hero">
-          <img
-            className={`lb-logo ${casino.logoInvert ? 'invert' : ''}`}
-            src={casino.logo}
-            alt={casino.name}
-          />
+          <div className="lb-brand">
+            <CasinoBrand casino={casino} />
+          </div>
           <h1 className="lb-title">
             <span className="grad">{fmtMoney(casino.prizePool)}</span> <span className="white">Monthly</span><br />
             <span className="grad">Leaderboard</span>

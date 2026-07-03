@@ -1,32 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { IconChevron } from './icons'
-
-/* One brand row, identical size for every casino:
-   - `brandParts` set → icon + styled wordmark text (e.g. Case + Battle)
-   - otherwise the casino's wordmark image (inverted to white if flagged). */
-function Brand({ casino }) {
-  if (casino.brandParts) {
-    return (
-      <span className="picker-brand">
-        <img className="picker-cube" src={casino.brandIcon} alt="" />
-        <span className="picker-wordmark">
-          {casino.brandParts.map((p) => (
-            <span key={p.text} style={{ color: p.color }}>{p.text}</span>
-          ))}
-        </span>
-      </span>
-    )
-  }
-  return (
-    <span className="picker-brand">
-      <img
-        className={`picker-logo ${casino.logoInvert ? 'invert' : ''}`}
-        src={casino.logo}
-        alt={casino.name}
-      />
-    </span>
-  )
-}
+import CasinoBrand from './CasinoBrand'
 
 /* Sexyboom-style site switcher: a framed pill showing the active casino,
    expanding into a stacked list of all casinos. */
@@ -57,7 +31,7 @@ export default function CasinoPicker({ casinos, activeId, onChange }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <Brand casino={active} />
+        <CasinoBrand casino={active} />
         <span className="picker-chev"><IconChevron /></span>
       </button>
 
@@ -75,7 +49,7 @@ export default function CasinoPicker({ casinos, activeId, onChange }) {
                 setOpen(false)
               }}
             >
-              <Brand casino={c} />
+              <CasinoBrand casino={c} />
             </button>
           ))}
         </div>

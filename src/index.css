@@ -777,7 +777,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   text-align: center;
   border-radius: 18px;
-  padding: 84px 22px 26px;
+  padding: 0 22px 26px; /* top space comes from the in-flow icon slot */
   margin-top: 60px;
   background: linear-gradient(180deg, #231019 0%, #150a0f 100%);
   border: 1.5px solid var(--border-strong);
@@ -797,49 +797,31 @@ img { display: block; max-width: 100%; }
 }
 .bonus-card.featured:hover { transform: scale(1.05) translateY(-6px); }
 
+/* Icon slot is IN FLOW (not absolute): a fixed 110px box pulled up over the
+   card edge with a negative margin. The title lays out below the slot, so
+   icon/title overlap is impossible and all four titles align. */
 .bonus-icon {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
+  margin: -66px auto 14px;
   display: grid;
   place-items: center;
 }
 .bonus-icon img {
-  /* max constraints (not 100%/100%): the image can never paint outside the box */
   width: auto;
   height: auto;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.6));
   animation: floatY 3.4s ease-in-out infinite;
   will-change: transform;
 }
-/* per-emblem size trims so all four floats read the same visual size
-   (each image has a different content shape — tall glass, wide orb, …) */
-.bonus-grid .bonus-card:nth-child(1) .bonus-icon {
-  width: 112px;
-  height: 112px;
-  top: -62px; /* tall glass: lift it so its base clears the title */
-}
-.bonus-grid .bonus-card:nth-child(2) .bonus-icon {
-  width: 94px;
-  height: 94px;
-  top: -47px;
-}
-.bonus-grid .bonus-card:nth-child(3) .bonus-icon {
-  width: 114px;
-  height: 114px;
-  top: -57px;
-}
-.bonus-grid .bonus-card:nth-child(4) .bonus-icon {
-  width: 112px;
-  height: 112px;
-  top: -56px;
-}
+/* per-emblem trims INSIDE the fixed slot, so visual sizes match without
+   moving the titles (slot height never changes) */
+.bonus-grid .bonus-card:nth-child(2) .bonus-icon img { max-width: 84%; max-height: 84%; }
+.bonus-grid .bonus-card:nth-child(3) .bonus-icon img { max-width: 96%; max-height: 96%; }
+.bonus-grid .bonus-card:nth-child(4) .bonus-icon img { max-width: 92%; max-height: 92%; }
 .bonus-card.featured .bonus-icon img { filter: drop-shadow(0 0 26px rgba(255, 77, 87, 0.85)); }
 
 /* stagger each card so they bob out of sync */
@@ -854,6 +836,36 @@ img { display: block; max-width: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
   .bonus-icon img { animation: none; }
+  .particles { display: none; }
+}
+
+/* ---------------------------------------------- ambient red particles */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #ff5a63;
+  opacity: var(--p-opacity, 0.2);
+  box-shadow: 0 0 8px 2px rgba(255, 77, 87, 0.45);
+  animation-name: p-float, p-glow;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: alternate, alternate;
+  will-change: transform, opacity;
+}
+@keyframes p-float {
+  from { transform: translate3d(0, 14px, 0); }
+  to { transform: translate3d(9px, -30px, 0); }
+}
+@keyframes p-glow {
+  from { opacity: calc(var(--p-opacity, 0.2) * 0.35); }
+  to { opacity: var(--p-opacity, 0.2); }
 }
 
 .bonus-title {
@@ -1245,12 +1257,12 @@ img { display: block; max-width: 100%; }
   .nb-links, .nb-socials { display: none; }
   .hamburger { display: block; }
   /* 4-up cards get cramped below this — go 2x2 */
-  .bonus-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 66px; }
+  .bonus-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 84px; }
   .bonus-card.featured { transform: none; }
   .bonus-card.featured:hover { transform: translateY(-6px); }
 }
 @media (max-width: 980px) {
-  .bonus-grid { grid-template-columns: 1fr; gap: 44px; }
+  .bonus-grid { grid-template-columns: 1fr; gap: 80px; }
   .bonus-card.featured { transform: none; }
   .bonus-card.featured:hover { transform: translateY(-6px); }
   .navbar-inner { height: 60px; padding: 0 18px; }
@@ -1339,12 +1351,12 @@ img { display: block; max-width: 100%; }
   font-family: 'Chakra Petch', sans-serif;
 }
 .picker-toggle {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 16px;
+  justify-content: center; /* brand centered; chevron pinned right */
+  padding: 0 40px;
   height: 54px;
   border-radius: 13px;
   background: linear-gradient(180deg, #2a1216 0%, #180a0e 100%);
@@ -1354,12 +1366,16 @@ img { display: block; max-width: 100%; }
 }
 .picker-toggle:hover { border-color: rgba(255, 77, 87, 0.85); }
 .picker-chev {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   display: grid;
   place-items: center;
   color: var(--blue-2);
   transition: transform 0.18s ease;
 }
-.casino-picker.open .picker-chev { transform: rotate(180deg); }
+.casino-picker.open .picker-chev { transform: translateY(-50%) rotate(180deg); }
 
 .picker-menu {
   position: absolute;
@@ -1391,30 +1407,53 @@ img { display: block; max-width: 100%; }
 .picker-item:hover { background: rgba(255, 77, 87, 0.1); }
 .picker-item.active { background: rgba(255, 77, 87, 0.16); }
 
-/* brand rows — identical footprint for every casino */
-.picker-brand {
+/* ---------------------------------------- shared casino brand lockup */
+/* em-sized: set font-size on a wrapper and the whole lockup scales.
+   Same footprint for every casino, wherever it renders. */
+.casino-brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  height: 26px;
+  gap: 0.55em;
+  font-family: 'Chakra Petch', sans-serif;
+  line-height: 1;
 }
-.picker-logo {
-  height: 22px;
+.cb-logoimg {
+  height: 1.45em;
   width: auto;
-  max-width: 140px;
+  max-width: 9em;
   object-fit: contain;
 }
-.picker-logo.invert {
+.cb-logoimg.invert {
   filter: invert(1) hue-rotate(180deg);
 }
-.picker-cube {
-  height: 24px;
-  width: 24px;
+.cb-cube {
+  height: 1.45em;
+  width: 1.45em;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 0.28em;
 }
-.picker-wordmark {
+.cb-wordmark {
   font-weight: 700;
-  font-size: 16.5px;
+  font-size: 1em;
   letter-spacing: 0.01em;
+}
+
+/* picker context: small rows */
+.casino-picker .casino-brand { font-size: 16.5px; }
+
+/* leaderboard header context: big lockup above the title */
+.lb-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.lb-brand .casino-brand { font-size: 34px; }
+.lb-brand .cb-logoimg.invert {
+  filter: invert(1) hue-rotate(180deg) drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
+}
+.lb-brand .cb-cube {
+  filter: drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
+}
+.lb-brand .cb-wordmark {
+  text-shadow: 0 4px 22px rgba(239, 45, 60, 0.45);
 }
