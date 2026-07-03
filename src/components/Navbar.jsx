@@ -61,8 +61,7 @@ export default function Navbar() {
       <header className="navbar">
         <div className="navbar-inner">
           <Link className="nb-brand" to="/" onClick={close} aria-label="NSBROOKLYN home">
-            <img src="/nsbrooklyn.png" alt="NSBROOKLYN logo" />
-            <span>{config.brandName}</span>
+            <img src="/logo_vertical.png" alt="NSBROOKLYN logo" />
           </Link>
 
           <nav className="nb-links">
@@ -82,7 +81,7 @@ export default function Navbar() {
       {/* mobile drawer (off-canvas) */}
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <Link className="sidebar-logo" to="/" onClick={close} aria-label="NSBROOKLYN home">
-          <img src="/nsbrooklyn.png" alt="NSBROOKLYN logo" />
+          <img src="/logo_vertical.png" alt="NSBROOKLYN logo" />
         </Link>
 
         <nav className="nav">

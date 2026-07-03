@@ -8,10 +8,10 @@
 
 :root {
   /* base surfaces — deep maroon-black */
-  --bg-0: #120a0d;          /* page background, darkest maroon */
-  --bg-1: #170d11;          /* main content background */
-  --bg-2: #251319;          /* cards / panels */
-  --bg-3: #311a21;          /* raised elements, hover */
+  --bg-0: #3c1018;          /* page background, brighter red-maroon */
+  --bg-1: #431218;          /* main content background */
+  --bg-2: #51161f;          /* cards / panels */
+  --bg-3: #5d1d28;          /* raised elements, hover */
   --bg-glass: rgba(37, 19, 25, 0.6);
 
   /* brand accents (nsbrooklyn: crimson red) */
@@ -159,46 +159,51 @@ img { display: block; max-width: 100%; }
   height: 70px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 18px;
 }
 .nb-brand {
   display: flex;
   align-items: center;
-  gap: 11px;
-  font-family: 'Rubik', system-ui, sans-serif;
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  flex: 0 0 auto;
+  min-width: 128px;
 }
 .nb-brand img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--border-strong);
+  width: auto;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 0;
+  border: none;
+  padding: 0;
 }
 .nb-links {
   display: flex;
+  flex: 1;
+  justify-content: center;
   align-items: center;
-  gap: 4px;
-  margin-left: 8px;
+  gap: 18px;
+  margin: 0 12px;
 }
 .nb-links .nav-item { padding: 9px 13px; }
 .nb-links .nav-item .badge,
 .nb-links .nav-item .soon { margin-left: 6px; }
-.nb-spacer { flex: 1; }
-.nb-socials { display: flex; gap: 8px; }
+.nb-spacer { display: none; }
+.nb-socials { display: flex; gap: 10px; align-items: center; }
 .nb-socials a {
-  width: 38px; height: 38px;
+  width: 40px; height: 40px;
   display: grid; place-items: center;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--bg-2);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.08);
   color: var(--text-soft);
   transition: all 0.18s ease;
 }
-.nb-socials a:hover { background: var(--bg-3); color: #fff; transform: translateY(-2px); border-color: var(--border-strong); }
+.nb-socials a:hover {
+  background: rgba(239,45,60,0.16);
+  color: #fff;
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.16);
+}
 .nb-socials svg { width: 18px; height: 18px; }
 .hamburger { display: none; font-size: 24px; padding: 4px 8px; }
 .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 110; }
@@ -1318,14 +1323,15 @@ img { display: block; max-width: 100%; }
    ============================================================================ */
 
 /* Brand images: the NS logo and casino marks aren't transparent cutouts like
-   the tegens assets were, so frame them as rounded posters instead. */
+   the tegens assets were, so keep the NS logo clean and horizontal. */
 .sidebar-logo { margin: 0; }
 .sidebar-logo img {
-  width: 78%;
-  max-width: 190px;
-  border-radius: 18px;
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--glow-violet);
+  width: auto;
+  max-width: 220px;
+  height: 56px;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   filter: none;
 }
 .footer .f-brand img { border-radius: 10px; }

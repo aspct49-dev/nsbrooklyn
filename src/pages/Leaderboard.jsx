@@ -47,8 +47,8 @@ export default function Leaderboard() {
             </a>
           </div>
           {error ? (
-            <div className="alert alert-warning" style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(255, 200, 0, 0.12)', color: '#f7a11b', border: '1px solid rgba(255, 200, 0, 0.28)' }}>
-              Live leaderboard unavailable: {error}. Verify your Vercel env vars and API access.
+            <div style={{ display: 'none' }} data-leaderboard-error={error}>
+              Live leaderboard unavailable: {error}
             </div>
           ) : null}
         </div>
