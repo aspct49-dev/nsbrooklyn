@@ -26,7 +26,9 @@ function getMonthRange(date) {
   return { from: start.toISOString(), to: end.toISOString() }
 }
 
-function getCasinoRange(casinoId) {
+// Exported so the page countdown can tick to the same period end the API
+// is actually queried with (e.g. CaseBattle's biweekly window).
+export function getCasinoRange(casinoId) {
   const now = new Date()
   const monthRange = getMonthRange(now)
   if (casinoId === 'betbolt') {

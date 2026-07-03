@@ -7,23 +7,23 @@
    ============================================================================ */
 
 :root {
-  /* base surfaces — bright Brooklyn red */
-  --bg-0: #ff0d0d;          /* page background */
-  --bg-1: #3f0608;          /* main content background */
-  --bg-2: #560a0c;          /* cards / panels */
-  --bg-3: #6d0f11;          /* raised elements, hover */
-  --bg-glass: rgba(35, 10, 12, 0.75);
+  /* base surfaces — deep red-maroon */
+  --bg-0: #3c1018;          /* page background */
+  --bg-1: #431218;          /* main content background */
+  --bg-2: #51161f;          /* cards / panels */
+  --bg-3: #5d1d28;          /* raised elements, hover */
+  --bg-glass: rgba(37, 19, 25, 0.6);
 
-  /* brand accents (NS Brooklyn red) */
-  --blue: #ff1f24;
-  --blue-2: #ff6d6d;
+  /* brand accents (nsbrooklyn: crimson red) */
+  --blue: #ef2d3c;
+  --blue-2: #ff5a63;
   /* legacy aliases kept so component classes keep working */
   --violet: var(--blue);
   --violet-2: var(--blue-2);
-  --magenta: #ff1f24;
-  --accent-grad: linear-gradient(135deg, #ff2c35 0%, #b40000 100%);
-  --accent-grad-h: linear-gradient(135deg, #ff7a7a 0%, #ff2c35 100%);
-  --magenta-grad: linear-gradient(135deg, #ff7a7a 0%, #b40000 100%);
+  --magenta: #ef2d3c;
+  --accent-grad: linear-gradient(135deg, #f03e4d 0%, #b3121f 100%);
+  --accent-grad-h: linear-gradient(135deg, #ff5a63 0%, #ef2d3c 100%);
+  --magenta-grad: linear-gradient(135deg, #ff5a63 0%, #b3121f 100%);
 
   /* podium metals (1st place = brand red) */
   --gold: #ff4d57;
@@ -57,7 +57,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(180deg, #ff0f0f 0%, #b30000 100%);
+  background: var(--bg-0);
   color: var(--text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -72,9 +72,9 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(950px 700px at 75% 0%, rgba(255, 70, 70, 0.22), transparent 55%),
-    radial-gradient(850px 600px at 15% 15%, rgba(255, 95, 95, 0.16), transparent 50%),
-    radial-gradient(650px 450px at 55% 110%, rgba(255, 40, 40, 0.14), transparent 50%);
+    radial-gradient(900px 600px at 80% -5%, rgba(239, 45, 60, 0.16), transparent 60%),
+    radial-gradient(700px 500px at 10% 10%, rgba(239, 45, 60, 0.12), transparent 60%),
+    radial-gradient(600px 500px at 50% 110%, rgba(239, 45, 60, 0.08), transparent 60%);
   pointer-events: none;
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { config, casinos } from '../data/leaderboard'
 import { fmtMoney } from '../utils'
-import { useLeaderboard } from '../hooks/useLeaderboard'
+import { useLeaderboard, getCasinoRange } from '../hooks/useLeaderboard'
 import Countdown from '../components/Countdown'
 import Podium from '../components/Podium'
 import LeaderboardTable from '../components/LeaderboardTable'
@@ -9,14 +9,14 @@ import CasinoPicker from '../components/CasinoPicker'
 import CasinoBrand from '../components/CasinoBrand'
 import { IconExternal } from '../components/icons'
 
-// Countdown target = end of the leaderboard's last day, in UTC.
-const periodEnd = `${config.leaderboard.endAt}T23:59:59Z`
-
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
   const { players, casino, error } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
   const periodLabel = casino.id === 'casebattle' ? 'Biweekly' : 'Monthly'
+  // Countdown ticks to the end of the same period the API is queried with
+  // (BetBolt: end of month; CaseBattle: its biweekly window).
+  const periodEnd = getCasinoRange(casino.id).to
 
   return (
     <section className="section" id="leaderboard">
