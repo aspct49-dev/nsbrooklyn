@@ -5,6 +5,7 @@ import { useLeaderboard } from '../hooks/useLeaderboard'
 import Countdown from '../components/Countdown'
 import Podium from '../components/Podium'
 import LeaderboardTable from '../components/LeaderboardTable'
+import CasinoPicker from '../components/CasinoPicker'
 import { IconExternal } from '../components/icons'
 
 // Countdown target = end of the leaderboard's last day, in UTC.
@@ -33,24 +34,8 @@ export default function Leaderboard() {
             Compete against other players under code {config.referralCode} and win big rewards!
           </p>
 
-          {/* CASINO SWITCHER — just above the code row */}
-          <div className="lb-tabs" role="tablist">
-            {casinos.map((c) => (
-              <button
-                key={c.id}
-                role="tab"
-                aria-selected={c.id === activeId}
-                className={`lb-tab ${c.id === activeId ? 'active' : ''}`}
-                onClick={() => setActiveId(c.id)}
-              >
-                <img
-                  className={`lb-tab-logo ${c.logoInvert ? 'invert' : ''}`}
-                  src={c.logo}
-                  alt={c.name}
-                />
-              </button>
-            ))}
-          </div>
+          {/* CASINO SWITCHER — dropdown picker, just above the code row */}
+          <CasinoPicker casinos={casinos} activeId={activeId} onChange={setActiveId} />
 
           <div className="lb-actions">
             <div className="code-chip">

@@ -8,7 +8,7 @@
 
 export const config = {
   brandName: 'NSBROOKLYN',
-  referralCode: 'NSBROOKLYN',
+  referralCode: 'NSB',
   // Shown on the legal pages. TODO: replace with your real support email
   // (or leave it — the legal pages also point users to your Discord).
   contactEmail: 'support@nsbrooklyn.com',
@@ -29,9 +29,9 @@ export const config = {
   rankAvatars: ['/magicpiggy.png', '/befy.png', '/pug.png'],
 
   socials: {
-    discord: 'https://discord.gg/',      // ← replace with real invite
-    instagram: 'https://instagram.com/', // ← replace with real profile
-    kick: 'https://kick.com/',           // ← replace with real channel
+    discord: 'https://discord.gg/YCustgcxB',
+    x: 'https://x.com/NSBrooklyn',
+    kick: 'https://kick.com/nsbrooklyntv',
   },
 
   // Promo banner under the bonus cards on the home page. The top-3 winner
@@ -54,7 +54,7 @@ export const casinos = [
   {
     id: 'betbolt',
     name: 'BetBolt',
-    url: 'https://betbolt.com/?r=NSBROOKLYN', // ← replace with real affiliate link
+    url: 'https://betbolt.com/?r=NSB',
     logo: '/betbolt_logo.png', // transparent wordmark (dark text — inverted to white via CSS)
     logoInvert: true,
     prizePool: 2500,
@@ -77,8 +77,15 @@ export const casinos = [
   {
     id: 'casebattle',
     name: 'CaseBattle',
-    url: 'https://casebattle.com/?r=NSBROOKLYN', // ← replace with real affiliate link
+    url: 'https://casebattle.com/r/NSB',
     logo: '/casebattle_logo.png', // square ninja-cube icon — masked with a border radius
+    // Rendered as icon + styled wordmark ("Case" white / "Battle" orange),
+    // matching casebattle.com's own branding.
+    brandIcon: '/casebattle_logo.png',
+    brandParts: [
+      { text: 'Case', color: '#ffffff' },
+      { text: 'Battle', color: '#f7a11b' },
+    ],
     prizePool: 500,
     prizes: [250, 125, 75, 30, 20],
     players: [
@@ -103,7 +110,7 @@ export const bonuses = [
   {
     img: '/drink.png',
     title: 'BETBOLT',
-    subtitle: 'Under code NSBROOKLYN',
+    subtitle: 'Under code NSB',
     accent: 'gold',
     rows: [
       'Instant lossback from BetBolt',
@@ -113,7 +120,7 @@ export const bonuses = [
       'Exclusive VIP program for high rollers',
     ],
     cta: 'CLAIM BONUS',
-    href: 'https://betbolt.com/?r=NSBROOKLYN',
+    href: 'https://betbolt.com/?r=NSB',
   },
   {
     img: '/orb.png',
@@ -122,7 +129,7 @@ export const bonuses = [
     accent: 'gold',
     featured: true,
     rows: [
-      'Must be under code NSBROOKLYN',
+      'Must be under code NSB',
       'Wager on BetBolt or CaseBattle',
       'Climb to secure Top Places',
       'Win big rewards & enjoy!',
@@ -133,7 +140,7 @@ export const bonuses = [
   {
     img: '/gold_pot.png',
     title: 'CASEBATTLE',
-    subtitle: 'Under code NSBROOKLYN',
+    subtitle: 'Under code NSB',
     accent: 'gold',
     rows: [
       'Daily promo codes',
@@ -141,7 +148,7 @@ export const bonuses = [
       '5% deposit bonus from the site',
     ],
     cta: 'CLAIM BONUS',
-    href: 'https://casebattle.com/?r=NSBROOKLYN',
+    href: 'https://casebattle.com/r/NSB',
   },
   {
     img: '/red_gem.png',

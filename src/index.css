@@ -539,9 +539,9 @@ img { display: block; max-width: 100%; }
 .frame-prize {
   position: absolute;
   left: 50%;
-  /* center the text on the plaque band's midline (band ≈ 8–17% from bottom),
-     so different font sizes per rank all align identically */
-  bottom: 12.5%;
+  /* center the text on the plaque band's midline — measured in lb_card.png:
+     band interior y 615–666 of 760 ⇒ center 15.8% from bottom */
+  bottom: 15.8%;
   transform: translate(-50%, 50%);
   width: 56%;
   font-family: 'Chakra Petch', sans-serif;
@@ -1076,8 +1076,8 @@ img { display: block; max-width: 100%; }
 .promo-plaque {
   position: absolute;
   left: 50%;
-  /* centered on the plaque band midline — same alignment as the lb podium */
-  bottom: 12.5%;
+  /* centered on the plaque band midline (15.8% — measured in lb_card.png) */
+  bottom: 15.8%;
   transform: translate(-50%, 50%);
   width: 60%;
   text-align: center;
@@ -1324,48 +1324,97 @@ img { display: block; max-width: 100%; }
 .lb-logo { height: 68px; border-radius: 12px; }
 .lb-logo.invert { height: 54px; }
 /* dark transparent wordmarks: flip to white, keep brand hues (blue bolt) */
-.lb-logo.invert,
-.lb-tab-logo.invert {
+.lb-logo.invert {
   filter: invert(1) hue-rotate(180deg) drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
   border-radius: 0;
 }
-.lb-tab-logo.invert { height: 26px; width: auto; max-width: 130px; object-fit: contain; }
 
-/* casino switcher tabs (leaderboard page) */
-.lb-tabs {
+/* ------------------------------------------- casino picker (lb page) */
+/* Dropdown site switcher, framed to match the lb cards: crimson panel,
+   red border. Every brand row is the same fixed size. */
+.casino-picker {
+  position: relative;
+  width: 250px;
+  margin: 0 auto 18px;
+  font-family: 'Chakra Petch', sans-serif;
+}
+.picker-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 16px;
+  height: 54px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #2a1216 0%, #180a0e 100%);
+  border: 1.5px solid rgba(255, 77, 87, 0.55);
+  box-shadow: 0 0 30px -10px rgba(255, 77, 87, 0.4), var(--shadow);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.picker-toggle:hover { border-color: rgba(255, 77, 87, 0.85); }
+.picker-chev {
+  display: grid;
+  place-items: center;
+  color: var(--blue-2);
+  transition: transform 0.18s ease;
+}
+.casino-picker.open .picker-chev { transform: rotate(180deg); }
+
+.picker-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  border-radius: 13px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #241014 0%, #150a0f 100%);
+  border: 1.5px solid rgba(255, 77, 87, 0.45);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8);
+  animation: picker-in 0.15s ease;
+}
+@keyframes picker-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.picker-item {
+  width: 100%;
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 0 0 18px;
-  flex-wrap: wrap;
+  align-items: center;
+  height: 52px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
 }
-.lb-tab {
+.picker-item:last-child { border-bottom: none; }
+.picker-item:hover { background: rgba(255, 77, 87, 0.1); }
+.picker-item.active { background: rgba(255, 77, 87, 0.16); }
+
+/* brand rows — identical footprint for every casino */
+.picker-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 18px;
-  border-radius: 12px;
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  color: var(--text-soft);
-  font-family: 'Rubik', system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  transition: all 0.18s ease;
+  gap: 9px;
+  height: 26px;
 }
-.lb-tab:hover { background: var(--bg-3); color: var(--text); transform: translateY(-1px); }
-.lb-tab.active {
-  background: rgba(239, 45, 60, 0.14);
-  border-color: rgba(239, 45, 60, 0.4);
-  color: #fff;
-  box-shadow: var(--glow-violet);
+.picker-logo {
+  height: 22px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
 }
-.lb-tab-logo { height: 34px; width: 34px; object-fit: cover; border-radius: 8px; }
-.lb-tab-pool {
-  font-size: 11px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent-grad);
-  color: #fff;
+.picker-logo.invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+.picker-cube {
+  height: 24px;
+  width: 24px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.picker-wordmark {
+  font-weight: 700;
+  font-size: 16.5px;
+  letter-spacing: 0.01em;
 }
