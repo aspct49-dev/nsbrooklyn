@@ -48,7 +48,16 @@ function cacheKeyFor(casinoId, range) {
 async function refresh(casinoId, range) {
   const qs = new URLSearchParams({ casino: casinoId, from: range.from, to: range.to })
   const res = await fetch(`/api/leaderboard?${qs}`)
-  if (!res.ok) throw Object.assign(new Error(`api ${res.status}`), { status: res.status })
+  if (!res.ok) {
+    let message = `api ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.error) message = body.error
+    } catch (err) {
+      /* ignore parse errors */
+    }
+    throw Object.assign(new Error(message), { status: res.status })
+  }
   const data = await res.json()
   if (!Array.isArray(data.players)) throw new Error('bad payload')
   cache.set(cacheKeyFor(casinoId, range), data)
@@ -98,7 +107,7 @@ export function useLeaderboard(casinoId = casinos[0].id) {
   }, [cacheKey, casino.id, range])
 
   const live = cache.get(cacheKey)
-  const source = live?.players?.length ? live.players : casino.players
+  const source = live?.players?.length ? live.players : error ? [] : casino.players
 
   const players = useMemo(
     () => rank(source, casino.prizes),

@@ -12,6 +12,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
     res.status(200).json(data)
   } catch (err) {
+    console.error('api/leaderboard error', err)
     const status = err.status || 500
     // Don't leak upstream details beyond the message we crafted ourselves.
     res.status(status).json({ error: err.message })
