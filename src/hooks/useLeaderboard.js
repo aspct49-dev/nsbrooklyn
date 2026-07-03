@@ -10,9 +10,9 @@ function rank(players, prizes) {
     .map((p, i) => ({ ...p, prize: prizes[i] || 0 }))
 }
 
-const REFRESH_MS = 300_000
+const REFRESH_MS = 600_000
 const RETRY_MS = 180_000
-const RATE_LIMIT_MS = 300_000
+const RATE_LIMIT_MS = 600_000
 
 // Module-level cache so tab switches / multiple components don't refetch.
 const cache = new Map() // cacheKey -> { players, updatedAt }
