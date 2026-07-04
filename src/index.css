@@ -170,11 +170,14 @@ img { display: block; max-width: 100%; }
 }
 .nb-brand img {
   width: auto;
-  height: 84px;
+  height: 104px; /* taller than the 70px bar — deliberate badge overhang */
   object-fit: contain;
   border-radius: 0;
   border: none;
   padding: 0;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
 }
 .nb-links {
   display: flex;
@@ -1270,7 +1273,7 @@ img { display: block; max-width: 100%; }
   .bonus-card.featured { transform: none; }
   .bonus-card.featured:hover { transform: translateY(-6px); }
   .navbar-inner { height: 60px; padding: 0 18px; }
-  .nb-brand img { width: 34px; height: 34px; }
+  .nb-brand img { width: auto; height: 56px; }
   .hero-inner { padding: 38px 26px; }
   .stats { grid-template-columns: 1fr; }
   .podium { grid-template-columns: 1fr; }
