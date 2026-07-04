@@ -18,6 +18,23 @@ const RATE_LIMIT_MS = 600_000
 const cache = new Map() // cacheKey -> { players, updatedAt }
 const listeners = new Set()
 
+// Admin-configured periods from /api/settings (set in the /admin panel).
+// Loaded once; components re-render (via listeners) when they arrive.
+let adminSettings = null
+let settingsPromise = null
+export function loadSettings() {
+  if (!settingsPromise) {
+    settingsPromise = fetch('/api/settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        adminSettings = s
+        listeners.forEach((fn) => fn())
+      })
+      .catch(() => {})
+  }
+  return settingsPromise
+}
+
 function getMonthRange(date) {
   const year = date.getUTCFullYear()
   const month = date.getUTCMonth()
@@ -27,8 +44,14 @@ function getMonthRange(date) {
 }
 
 // Exported so the page countdown can tick to the same period end the API
-// is actually queried with (e.g. CaseBattle's biweekly window).
+// is actually queried with. Admin-panel settings win; the hardcoded
+// defaults below are the fallback when nothing is configured.
 export function getCasinoRange(casinoId) {
+  const configured = adminSettings?.casinos?.[casinoId]
+  if (configured?.startAt && configured?.endAt) {
+    return { from: configured.startAt, to: configured.endAt }
+  }
+
   const now = new Date()
   const monthRange = getMonthRange(now)
   if (casinoId === 'betbolt') {
@@ -87,7 +110,9 @@ export function useLeaderboard(casinoId = casinos[0].id) {
     const tick = async () => {
       let delay = REFRESH_MS
       try {
-        await refresh(casino.id, range)
+        // admin-configured periods first, so we query the right window
+        await loadSettings()
+        await refresh(casino.id, getCasinoRange(casino.id))
         setError(null)
       } catch (err) {
         setError(err.message || 'Leaderboard fetch failed')
@@ -106,7 +131,7 @@ export function useLeaderboard(casinoId = casinos[0].id) {
       listeners.delete(bump)
       clearTimeout(timer)
     }
-  }, [cacheKey, casino.id, range])
+  }, [cacheKey, casino.id])
 
   const live = cache.get(cacheKey)
   const source = live?.players?.length ? live.players : error ? [] : casino.players

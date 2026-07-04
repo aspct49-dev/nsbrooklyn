@@ -9,6 +9,7 @@ import Winners from './pages/Winners'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import ResponsibleGambling from './pages/ResponsibleGambling'
+import Admin from './pages/Admin'
 
 // Per-route <title> + description so each page is distinct for search engines
 // and browser tabs. (Social scrapers read the static tags in index.html.)
@@ -28,6 +29,7 @@ const ROUTE_META = {
   '/privacy': { title: 'NSBROOKLYN — Privacy Policy', description: 'How NSBROOKLYN collects, uses and protects your information.' },
   '/terms': { title: 'NSBROOKLYN — Terms & Conditions', description: 'The terms governing use of the NSBROOKLYN website and leaderboards.' },
   '/responsible-gambling': { title: 'NSBROOKLYN — Responsible Gambling', description: 'Gamble responsibly. 18+. Tips, warning signs and where to get help.' },
+  '/admin': { title: 'NSBROOKLYN — Admin Panel', description: 'Manage the NSBROOKLYN leaderboards.' },
 }
 
 function setMeta(selector, attr, value) {
@@ -66,6 +68,7 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/responsible-gambling" element={<ResponsibleGambling />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
 
           <Footer />

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { config } from '../data/leaderboard'
+import { useAuth, loginUrl, logoutUrl } from '../hooks/useAuth'
 import {
   IconHome, IconTrophy, IconMedal, IconGift, IconSword,
   IconDiscord, IconKick, IconX,
@@ -51,6 +52,35 @@ function Socials() {
   )
 }
 
+// Login with Discord / logged-in user chip (+ admin link, logout)
+function AuthArea() {
+  const { loading, user, isAdmin } = useAuth()
+  const [menu, setMenu] = useState(false)
+
+  if (loading) return null
+  if (!user) {
+    return (
+      <a className="nb-login" href={loginUrl}>
+        <IconDiscord /> <span className="nb-login-txt">Login</span>
+      </a>
+    )
+  }
+  return (
+    <div className="nb-user" onMouseLeave={() => setMenu(false)}>
+      <button className="nb-user-chip" onClick={() => setMenu((v) => !v)}>
+        {user.avatar ? <img src={user.avatar} alt="" /> : <span className="nb-user-initial">{user.name[0]}</span>}
+        <span className="nb-user-name">{user.name}</span>
+      </button>
+      {menu && (
+        <div className="nb-user-menu">
+          {isAdmin && <Link to="/admin" onClick={() => setMenu(false)}>Admin Panel</Link>}
+          <a href={logoutUrl}>Log out</a>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
@@ -74,6 +104,8 @@ export default function Navbar() {
             <Socials />
           </div>
 
+          <AuthArea />
+
           <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">☰</button>
         </div>
       </header>
@@ -92,6 +124,9 @@ export default function Navbar() {
 
         <div className="sidebar-socials">
           <Socials />
+        </div>
+        <div className="sidebar-auth">
+          <AuthArea />
         </div>
       </aside>
       {open && <div className="scrim" onClick={close} />}
