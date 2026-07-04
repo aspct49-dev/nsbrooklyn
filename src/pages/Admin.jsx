@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { casinos } from '../data/leaderboard'
 import { useAuth, loginUrl } from '../hooks/useAuth'
+import { getCasinoRange } from '../hooks/useLeaderboard'
 import { IconDiscord } from '../components/icons'
 
 // ISO UTC ↔ <input type="datetime-local"> (which works in local time)
@@ -12,15 +13,16 @@ function isoToLocal(iso) {
 }
 const localToIso = (local) => (local ? new Date(local).toISOString() : null)
 
-function statusOf(c) {
+function statusOf(c, isDefault) {
   if (!c?.startAt || !c?.endAt) return { label: 'Not configured', cls: 'off' }
+  const suffix = isDefault ? ' (default)' : ''
   const now = Date.now()
-  if (now < new Date(c.startAt)) return { label: 'Upcoming', cls: 'soon' }
-  if (now > new Date(c.endAt)) return { label: 'Ended', cls: 'ended' }
-  return { label: 'Live', cls: 'live' }
+  if (now < new Date(c.startAt)) return { label: `Upcoming${suffix}`, cls: 'soon' }
+  if (now > new Date(c.endAt)) return { label: `Ended${suffix}`, cls: 'ended' }
+  return { label: `Live${suffix}`, cls: 'live' }
 }
 
-function BoardCard({ casino, value, onSave, saving }) {
+function BoardCard({ casino, value, isDefault, onSave, saving }) {
   const [start, setStart] = useState(isoToLocal(value?.startAt))
   const [end, setEnd] = useState(isoToLocal(value?.endAt))
   const [msg, setMsg] = useState(null)
@@ -29,7 +31,7 @@ function BoardCard({ casino, value, onSave, saving }) {
     setEnd(isoToLocal(value?.endAt))
   }, [value?.startAt, value?.endAt])
 
-  const st = statusOf(value)
+  const st = statusOf(value, isDefault)
 
   const save = async () => {
     setMsg(null)
@@ -68,6 +70,13 @@ function BoardCard({ casino, value, onSave, saving }) {
       {start && end && (
         <p className="admin-utc">
           UTC: {localToIso(start)?.slice(0, 16).replace('T', ' ')} → {localToIso(end)?.slice(0, 16).replace('T', ' ')}
+        </p>
+      )}
+
+      {isDefault && (
+        <p className="admin-utc">
+          Showing the built-in default period — it runs the site until you save
+          your own dates here.
         </p>
       )}
 
@@ -156,15 +165,23 @@ export default function Admin() {
         </div>
 
         <div className="admin-grid">
-          {casinos.map((c) => (
-            <BoardCard
-              key={c.id}
-              casino={c}
-              value={settings?.casinos?.[c.id]}
-              onSave={save}
-              saving={saving}
-            />
-          ))}
+          {casinos.map((c) => {
+            const saved = settings?.casinos?.[c.id]
+            // no saved settings yet → prefill with the built-in default
+            // period that's currently driving the site
+            const fallback = getCasinoRange(c.id)
+            const value = saved ?? { startAt: fallback.from, endAt: fallback.to }
+            return (
+              <BoardCard
+                key={c.id}
+                casino={c}
+                value={value}
+                isDefault={!saved}
+                onSave={save}
+                saving={saving}
+              />
+            )
+          })}
         </div>
       </div>
     </section>
