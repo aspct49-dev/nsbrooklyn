@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { config } from '../data/leaderboard'
 import { useAuth, loginUrl, logoutUrl } from '../hooks/useAuth'
@@ -52,10 +52,27 @@ function Socials() {
   )
 }
 
-// Login with Discord / logged-in user chip (+ admin link, logout)
+// Login with Discord / logged-in user chip (+ admin link, logout).
+// The menu closes on outside click / Escape — NOT on mouse-leave, which
+// would dismiss it while the cursor crosses the gap below the chip.
 function AuthArea() {
   const { loading, user, isAdmin } = useAuth()
   const [menu, setMenu] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!menu) return
+    const onDown = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setMenu(false)
+    }
+    const onKey = (e) => e.key === 'Escape' && setMenu(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [menu])
 
   if (loading) return null
   if (!user) {
@@ -66,7 +83,7 @@ function AuthArea() {
     )
   }
   return (
-    <div className="nb-user" onMouseLeave={() => setMenu(false)}>
+    <div className="nb-user" ref={ref}>
       <button className="nb-user-chip" onClick={() => setMenu((v) => !v)}>
         {user.avatar ? <img src={user.avatar} alt="" /> : <span className="nb-user-initial">{user.name[0]}</span>}
         <span className="nb-user-name">{user.name}</span>
