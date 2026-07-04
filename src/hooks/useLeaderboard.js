@@ -145,6 +145,8 @@ export function useLeaderboard(casinoId = casinos[0].id) {
     loading: !live,
     error,
     players,
+    // full fetched list (not capped to paid places) — used by the stats strip
+    allPlayers: source,
     updatedAt: live?.updatedAt ?? null,
     casino,
   }

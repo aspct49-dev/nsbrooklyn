@@ -7,11 +7,12 @@ import Podium from '../components/Podium'
 import LeaderboardTable from '../components/LeaderboardTable'
 import CasinoPicker from '../components/CasinoPicker'
 import CasinoBrand from '../components/CasinoBrand'
+import LeaderboardStats from '../components/LeaderboardStats'
 import { IconExternal } from '../components/icons'
 
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
-  const { players, casino, error } = useLeaderboard(activeId)
+  const { players, allPlayers, casino, error, updatedAt } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
   const periodLabel = casino.id === 'casebattle' ? 'Biweekly' : 'Monthly'
   // Countdown ticks to the end of the same period the API is queried with
@@ -58,7 +59,7 @@ export default function Leaderboard() {
         <div className="lb-ends-lbl">Leaderboard ends in</div>
         <Countdown endDate={periodEnd} />
 
-        <div style={{ height: 40 }} />
+        <LeaderboardStats allPlayers={allPlayers} casino={casino} updatedAt={updatedAt} />
 
         <LeaderboardTable rows={players} startRank={1} />
 

@@ -1607,3 +1607,73 @@ img { display: block; max-width: 100%; }
   .admin-grid { grid-template-columns: 1fr; }
   .nb-login-txt { display: none; }
 }
+
+/* --------------------------------------------- leaderboard stats strip */
+.lb-stats {
+  margin: 40px 0;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow);
+  padding: 24px 26px 26px;
+}
+.lb-stats-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.lb-stats-eyebrow {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue-2);
+  margin-bottom: 4px;
+}
+.lb-stats-head h3 {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 20px;
+  color: var(--text);
+}
+.lb-stats-updated { color: var(--text-muted); font-size: 12.5px; white-space: nowrap; }
+
+.lb-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+.lb-stat {
+  padding: 16px 20px;
+  border-right: 1px solid var(--border);
+}
+.lb-stat:last-child { border-right: none; }
+.lb-stat-label {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+}
+.lb-stat-value {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.lb-stat-value.gold { color: #ffd977; }
+
+@media (max-width: 720px) {
+  .lb-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .lb-stat:nth-child(2) { border-right: none; }
+  .lb-stat:nth-child(1), .lb-stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+  .lb-stats-head { flex-direction: column; align-items: flex-start; }
+}
