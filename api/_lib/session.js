@@ -51,11 +51,13 @@ export function readSession(req) {
 
 export function isAdmin(session) {
   if (!session) return false
-  const ids = (process.env.ADMIN_DISCORD_IDS || '')
+  // Entries may be numeric Discord IDs (robust — can't change) or
+  // usernames (convenient, but break if the user renames themselves).
+  const list = (process.env.ADMIN_DISCORD_IDS || '')
     .split(',')
-    .map((s) => s.trim())
+    .map((s) => s.trim().toLowerCase())
     .filter(Boolean)
-  return ids.includes(session.id)
+  return list.includes(String(session.id)) || list.includes((session.name || '').toLowerCase())
 }
 
 export function requireAdmin(req) {
