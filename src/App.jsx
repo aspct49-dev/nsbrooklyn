@@ -46,8 +46,8 @@ function RouteMeta() {
     setMeta('meta[name="description"]', 'content', meta.description)
     setMeta('meta[property="og:title"]', 'content', meta.title)
     setMeta('meta[property="og:description"]', 'content', meta.description)
-    setMeta('meta[property="og:url"]', 'content', `https://nsbrooklyn.com${pathname}`)
-    setMeta('link[rel="canonical"]', 'href', `https://nsbrooklyn.com${pathname === '/' ? '/' : pathname}`)
+    setMeta('meta[property="og:url"]', 'content', `https://usecodensb.gg${pathname}`)
+    setMeta('link[rel="canonical"]', 'href', `https://usecodensb.gg${pathname === '/' ? '/' : pathname}`)
   }, [pathname])
   return null
 }
