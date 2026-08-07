@@ -3,15 +3,17 @@ import { Link, NavLink } from 'react-router-dom'
 import { config } from '../data/leaderboard'
 import { useAuth, loginUrl, logoutUrl } from '../hooks/useAuth'
 import {
-  IconHome, IconTrophy, IconMedal, IconGift, IconSword,
+  IconHome, IconTrophy, IconMedal, IconGift, IconBolt, IconTicket,
   IconDiscord, IconKick, IconX,
 } from './icons'
 
 const nav = [
   { label: 'Home', icon: <IconHome />, to: '/', end: true },
-  { label: 'Leaderboards', icon: <IconTrophy />, to: '/leaderboard', badge: `$${(config.prizePool / 1000)}K` },
+  { label: 'Leaderboard', icon: <IconTrophy />, to: '/leaderboard', badge: `$${(config.prizePool / 1000)}K` },
+  { label: 'Giveaways', icon: <IconGift />, to: '/giveaways' },
+  { label: 'Raffle', icon: <IconTicket />, to: '/raffles' },
+  { label: 'Milestones', icon: <IconBolt />, to: '/milestones' },
   { label: 'Winners', icon: <IconMedal />, to: '/winners' },
-  { label: 'Rewards', icon: <IconSword />, soon: true },
 ]
 
 function NavItems({ onClose }) {

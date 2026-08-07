@@ -2,8 +2,11 @@
 //  NSBROOKLYN LEADERBOARDS — EDIT EVERYTHING HERE
 // ----------------------------------------------------------------------------
 //  This is the only file you need to touch to update the site's content.
-//  Change the prize pools, the casinos/code, the countdown end date, and the
+//  Change the prize pools, the casino/code, the countdown end date, and the
 //  player lists below. The site rebuilds the podium + tables automatically.
+//
+//  Giveaways are NOT here — they're created and drawn from the /admin panel
+//  and stored server-side (see api/_lib/giveaways.js for the built-in default).
 // ============================================================================
 
 export const config = {
@@ -12,17 +15,10 @@ export const config = {
   // Shown on the legal pages. TODO: replace with your real support email
   // (or leave it — the legal pages also point users to your Discord).
   contactEmail: 'support@nsbrooklyn.com',
-  prizePool: 3000, // combined $ pool across both casinos, shown in the hero
+  prizePool: 5000, // leaderboard $ pool, shown in the hero + navbar badge
 
-  // Both partner casinos are joined with this on legal pages / footer.
-  casinoNames: 'BetBolt & CaseBattle',
-
-  // The active leaderboard period (dates inclusive, 'YYYY-MM-DD'). The
-  // countdown ticks down to the end of `endAt` UTC. Update each period.
-  leaderboard: {
-    startAt: '2026-07-01',
-    endAt: '2026-07-31',
-  },
+  // Partner casino, joined into the legal pages / footer copy.
+  casinoNames: 'BetBolt',
 
   // Decorative profile pictures by rank (1st, 2nd, 3rd). Ranks past this list
   // fall back to the player's initial. Files live in /public.
@@ -35,12 +31,12 @@ export const config = {
   },
 
   // Promo banner under the bonus cards on the home page. The top-3 winner
-  // cards pull from the first casino's board so they match the leaderboard.
+  // cards pull from the leaderboard so they always match.
   promo: {
-    amount: 3000,
+    amount: 5000,
     title: 'LEADERBOARD',
-    subtitle: 'Climb to the top of the leaderboards & win crazy prizes!',
-    cta: 'View Leaderboards',
+    subtitle: 'Climb to the top of the leaderboard & win crazy prizes!',
+    cta: 'View Leaderboard',
     to: '/leaderboard',
   },
 }
@@ -49,6 +45,7 @@ export const config = {
 //  CASINOS — one entry per partner site. Each gets its own leaderboard tab,
 //  prize ladder and player list. `prizes` are per rank, 1st → last; players
 //  are ranked by wagered amount. (Each prize list sums to that casino's pool.)
+//  With a single entry the leaderboard page hides the casino switcher.
 // ============================================================================
 export const casinos = [
   {
@@ -57,8 +54,9 @@ export const casinos = [
     url: 'https://betbolt.com/?r=NSB',
     logo: '/betbolt_logo.png', // transparent wordmark (dark text — inverted to white via CSS)
     logoInvert: true,
-    prizePool: 2500,
-    prizes: [1100, 600, 300, 150, 100, 80, 60, 50, 40, 20],
+    periodLabel: 'Monthly',
+    prizePool: 5000,
+    prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
     // Placeholder standings — swap for real API data later. Names are masked
     // on render ("BlazeKing" -> "B*******g"), so full names are fine here.
     players: [
@@ -74,34 +72,23 @@ export const casinos = [
       { name: 'ghostrider', wagered: 33450 },
     ],
   },
-  {
-    id: 'casebattle',
-    name: 'CaseBattle',
-    url: 'https://casebattle.com/r/NSB',
-    logo: '/casebattle_logo.png', // square ninja-cube icon — masked with a border radius
-    // Rendered as icon + styled wordmark ("Case" white / "Battle" orange),
-    // matching casebattle.com's own branding.
-    brandIcon: '/casebattle_logo.png',
-    brandParts: [
-      { text: 'Case', color: '#ffffff' },
-      { text: 'Battle', color: '#f7a11b' },
-    ],
-    prizePool: 500,
-    prizes: [250, 125, 75, 30, 20],
-    players: [
-      { name: 'knifelord', wagered: 96400 },
-      { name: 'dragonlore', wagered: 88210 },
-      { name: 'caseopen99', wagered: 71350 },
-      { name: 'skinsniper', wagered: 64020 },
-      { name: 'unboxgod', wagered: 51890 },
-      { name: 'fadecheck', wagered: 44760 },
-      { name: 'stattrakx', wagered: 38900 },
-      { name: 'goldenbutterflyr', wagered: 31240 },
-      { name: 'bluegem', wagered: 26780 },
-      { name: 'pinkslipnick', wagered: 21050 },
-    ],
-  },
 ]
+
+// ============================================================================
+//  WAGER MILESTONES — one-off rewards paid the first time a player crosses
+//  each tier while wagering on BetBolt under code NSB. Claimed via Discord.
+// ============================================================================
+export const milestones = [
+  { wager: 1_000, reward: 10 },
+  { wager: 10_000, reward: 20 },
+  { wager: 25_000, reward: 50 },
+  { wager: 100_000, reward: 100 },
+  { wager: 500_000, reward: 200 },
+  { wager: 1_000_000, reward: 500 },
+  { wager: 5_000_000, reward: 1_000 },
+]
+
+export const milestoneTotal = milestones.reduce((sum, m) => sum + m.reward, 0)
 
 // The four "choose your bonus" cards on the home page.
 // `featured: true` gives the highlighted treatment.
@@ -124,47 +111,50 @@ export const bonuses = [
   },
   {
     img: '/orb.png',
-    title: '$3,000', // tip: keep in sync with config.prizePool
-    subtitle: 'Leaderboard Pools',
+    title: '$5,000', // tip: keep in sync with config.prizePool
+    subtitle: 'Leaderboard Pool',
     accent: 'gold',
     featured: true,
     rows: [
       'Must be under code NSB',
-      'Wager on BetBolt or CaseBattle',
+      'Wager on BetBolt to enter',
       'Climb to secure Top Places',
       'Win big rewards & enjoy!',
     ],
-    cta: 'VIEW LEADERBOARDS',
+    cta: 'VIEW LEADERBOARD',
     to: '/leaderboard',
   },
   {
-    img: '/gold_pot.png',
-    title: 'CASEBATTLE',
-    subtitle: 'Under code NSB',
+    img: '/giftbox.png',
+    title: 'GIVEAWAYS',
+    subtitle: 'Free to enter',
     accent: 'gold',
     rows: [
-      'Daily promo codes',
-      'Up to 10% lossback',
-      '5% deposit bonus from the site',
+      { group: 'Discord giveaways' },
+      'Log in with Discord & click enter',
+      'No wagering needed — totally free',
+      { group: 'Weekly wager raffle' },
+      'Every $100 wagered = 1 ticket',
+      '5 winners share $250 each week',
     ],
-    cta: 'CLAIM BONUS',
-    href: 'https://casebattle.com/r/NSB',
+    cta: 'ENTER GIVEAWAYS',
+    to: '/giveaways',
   },
   {
-    img: '/red_gem.png',
-    title: 'NSBROOKLYN',
+    img: '/gold_pot.png',
+    title: 'MILESTONES',
     subtitle: 'From me personally',
     accent: 'gold',
     rows: [
-      { group: 'On BetBolt' },
+      { group: 'Wager rewards' },
+      '7 tiers from $1K up to $5M wagered',
+      'Up to $1,000 per milestone',
+      { group: 'Plus' },
       'Bi-weekly lossback up to 10%',
-      '$500 biweekly leaderboard',
-      'Wager milestones — coming July 7th',
-      { group: 'On CaseBattle' },
-      '5% deposit bonus from me',
+      'Claimed instantly via Discord',
     ],
-    cta: 'CLAIM VIA DISCORD',
-    href: config.socials.discord,
+    cta: 'VIEW MILESTONES',
+    to: '/milestones',
   },
 ]
 
@@ -172,7 +162,7 @@ export const bonuses = [
 // period ends and it will render automatically (newest first).
 // Example:
 // {
-//   id: '2026-06', label: 'June 2026', prizePool: 6000,
-//   winners: [{ rank: 1, name: 'stackedbagg', wagered: 210500, prize: 2000 }, …],
+//   id: '2026-06', label: 'June 2026', prizePool: 5000,
+//   winners: [{ rank: 1, name: 'stackedbagg', wagered: 210500, prize: 2200 }, …],
 // }
 export const pastWinners = []

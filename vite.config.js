@@ -6,6 +6,8 @@ import react from '@vitejs/plugin-react'
 // .env.local (gitignored) and are injected into process.env for parity.
 const API_ROUTES = {
   '/api/leaderboard': './api/leaderboard.js',
+  '/api/giveaways': './api/giveaways.js',
+  '/api/raffles': './api/raffles.js',
   '/api/settings': './api/settings.js',
   '/api/auth/login': './api/auth/login.js',
   '/api/auth/callback': './api/auth/callback.js',

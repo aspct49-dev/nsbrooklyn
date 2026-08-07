@@ -16,3 +16,14 @@ export const maskName = (name) => {
 }
 
 export const initials = (name) => (name ? name[0].toUpperCase() : '?')
+
+// ISO UTC ↔ <input type="datetime-local">, which works in the admin's local
+// time. Used by every date field in the /admin panel.
+export function isoToLocal(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+export const localToIso = (local) => (local ? new Date(local).toISOString() : null)

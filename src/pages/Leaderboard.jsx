@@ -14,9 +14,8 @@ export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
   const { players, allPlayers, casino, error, updatedAt } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
-  const periodLabel = casino.id === 'casebattle' ? 'Biweekly' : 'Monthly'
-  // Countdown ticks to the end of the same period the API is queried with
-  // (BetBolt: end of month; CaseBattle: its biweekly window).
+  const periodLabel = casino.periodLabel || 'Monthly'
+  // Countdown ticks to the end of the same period the API is queried with.
   const periodEnd = getCasinoRange(casino.id).to
 
   return (
@@ -35,8 +34,10 @@ export default function Leaderboard() {
             Compete against other players under code {config.referralCode} and win big rewards!
           </p>
 
-          {/* CASINO SWITCHER — dropdown picker, just above the code row */}
-          <CasinoPicker casinos={casinos} activeId={activeId} onChange={setActiveId} />
+          {/* CASINO SWITCHER — only worth showing with more than one board */}
+          {casinos.length > 1 && (
+            <CasinoPicker casinos={casinos} activeId={activeId} onChange={setActiveId} />
+          )}
 
           <div className="lb-actions">
             <div className="code-chip">

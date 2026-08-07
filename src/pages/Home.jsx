@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom'
 import { config, casinos } from '../data/leaderboard'
 import { fmtMoney } from '../utils'
 import BonusCards from '../components/BonusCards'
 import PromoBanner from '../components/PromoBanner'
-import { IconExternal } from '../components/icons'
+import { IconExternal, IconGift } from '../components/icons'
 
-const [betbolt, casebattle] = casinos
+const [betbolt] = casinos
 
 export default function Home() {
   return (
@@ -14,14 +15,15 @@ export default function Home() {
         <section className="hero">
           <img className="hero-art" src="/nsbrooklyn.png" alt="" aria-hidden="true" />
           <div className="hero-inner">
-            <span className="hero-tag"><span className="dot" /> BETBOLT &amp; CASEBATTLE PARTNER · CODE {config.referralCode}</span>
+            <span className="hero-tag"><span className="dot" /> BETBOLT PARTNER · CODE {config.referralCode}</span>
             <h1>
               <span className="grad">{fmtMoney(config.prizePool)}</span><br />
-              LEADERBOARDS
+              LEADERBOARD
             </h1>
             <p>
-              Climb to the top of the {betbolt.name} and {casebattle.name} leaderboards under
-              code <strong>{config.referralCode}</strong> and win your share of crazy prizes.
+              Climb to the top of the {betbolt.name} leaderboard under
+              code <strong>{config.referralCode}</strong> and win your share of crazy prizes —
+              plus weekly giveaways and wager milestones on top.
             </p>
             <div className="code-row">
               <div className="code-chip">
@@ -33,9 +35,9 @@ export default function Home() {
               <a className="btn btn-primary" href={betbolt.url} target="_blank" rel="noreferrer">
                 Play on {betbolt.name} <IconExternal />
               </a>
-              <a className="btn btn-ghost" href={casebattle.url} target="_blank" rel="noreferrer">
-                Open cases on {casebattle.name} <IconExternal />
-              </a>
+              <Link className="btn btn-ghost" to="/giveaways">
+                <IconGift /> Weekly giveaway
+              </Link>
             </div>
           </div>
         </section>

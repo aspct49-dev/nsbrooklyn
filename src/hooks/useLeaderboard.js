@@ -58,11 +58,6 @@ export function getCasinoRange(casinoId) {
     const start = new Date(Date.UTC(now.getUTCFullYear(), 5, 23, 0, 0, 0, 0))
     return { from: start.toISOString(), to: monthRange.to }
   }
-  if (casinoId === 'casebattle') {
-    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
-    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 14, 23, 59, 59, 999))
-    return { from: start.toISOString(), to: end.toISOString() }
-  }
   return monthRange
 }
 

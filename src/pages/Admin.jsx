@@ -1,17 +1,11 @@
 import { useEffect, useState } from 'react'
 import { casinos } from '../data/leaderboard'
+import { isoToLocal, localToIso } from '../utils'
 import { useAuth, loginUrl } from '../hooks/useAuth'
 import { getCasinoRange } from '../hooks/useLeaderboard'
 import { IconDiscord } from '../components/icons'
-
-// ISO UTC ↔ <input type="datetime-local"> (which works in local time)
-function isoToLocal(iso) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-const localToIso = (local) => (local ? new Date(local).toISOString() : null)
+import RaffleAdmin from '../components/RaffleAdmin'
+import GiveawayAdmin from '../components/GiveawayAdmin'
 
 function statusOf(c, isDefault) {
   if (!c?.startAt || !c?.endAt) return { label: 'Not configured', cls: 'off' }
@@ -153,10 +147,6 @@ export default function Admin() {
       <div className="container">
         <div className="admin-head">
           <h1 className="section-title">Admin Panel</h1>
-          <p className="section-sub">
-            Set when each leaderboard starts and ends. The site's countdowns and
-            the API date ranges follow these settings.
-          </p>
           {settings?.updatedAt && (
             <p className="admin-meta">
               Last updated {new Date(settings.updatedAt).toLocaleString()} by {settings.updatedBy}
@@ -164,25 +154,40 @@ export default function Admin() {
           )}
         </div>
 
-        <div className="admin-grid">
-          {casinos.map((c) => {
-            const saved = settings?.casinos?.[c.id]
-            // no saved settings yet → prefill with the built-in default
-            // period that's currently driving the site
-            const fallback = getCasinoRange(c.id)
-            const value = saved ?? { startAt: fallback.from, endAt: fallback.to }
-            return (
-              <BoardCard
-                key={c.id}
-                casino={c}
-                value={value}
-                isDefault={!saved}
-                onSave={save}
-                saving={saving}
-              />
-            )
-          })}
+        <div className="admin-section">
+          <div className="admin-section-head">
+            <div>
+              <h2 className="admin-section-title">Leaderboard period</h2>
+              <p className="section-sub">
+                Set when the leaderboard starts and ends. The site's countdown and
+                the API date range follow these settings.
+              </p>
+            </div>
+          </div>
+
+          <div className="admin-grid">
+            {casinos.map((c) => {
+              const saved = settings?.casinos?.[c.id]
+              // no saved settings yet → prefill with the built-in default
+              // period that's currently driving the site
+              const fallback = getCasinoRange(c.id)
+              const value = saved ?? { startAt: fallback.from, endAt: fallback.to }
+              return (
+                <BoardCard
+                  key={c.id}
+                  casino={c}
+                  value={value}
+                  isDefault={!saved}
+                  onSave={save}
+                  saving={saving}
+                />
+              )
+            })}
+          </div>
         </div>
+
+        <GiveawayAdmin />
+        <RaffleAdmin />
       </div>
     </section>
   )

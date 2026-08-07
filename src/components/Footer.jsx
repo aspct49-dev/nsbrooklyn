@@ -14,16 +14,19 @@ export default function Footer() {
               <span>{config.brandName}</span>
             </div>
             <p className="f-desc">
-              The official {config.casinoNames} leaderboards for code{' '}
+              The official {config.casinoNames} leaderboard for code{' '}
               <strong>{config.referralCode}</strong>. Wager, climb the ranks, and win
-              your share of the prize pools.
+              your share of the prize pool.
             </p>
           </div>
 
           <div className="f-col">
             <h4>Navigate</h4>
             <Link to="/">Home</Link>
-            <Link to="/leaderboard">Leaderboards</Link>
+            <Link to="/leaderboard">Leaderboard</Link>
+            <Link to="/giveaways">Giveaways</Link>
+            <Link to="/raffles">Wager Raffle</Link>
+            <Link to="/milestones">Milestones</Link>
             {casinos.map((c) => (
               <a key={c.id} href={c.url} target="_blank" rel="noreferrer">Play on {c.name}</a>
             ))}

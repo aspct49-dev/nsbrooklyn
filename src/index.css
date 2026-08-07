@@ -1677,3 +1677,426 @@ img { display: block; max-width: 100%; }
   .lb-stat:nth-child(1), .lb-stat:nth-child(2) { border-bottom: 1px solid var(--border); }
   .lb-stats-head { flex-direction: column; align-items: flex-start; }
 }
+.lb-stats-updated svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+
+/* =========================================== shared raffle/giveaway bits
+   `.gw-*` are the layout primitives shared by /raffles, /giveaways and
+   /milestones (eyebrow, step cards, fairness disclosure, admin forms).
+   `.gv-*` below are specific to the Discord-entry giveaway cards. */
+.gw-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue-2);
+  background: rgba(239, 45, 60, 0.12);
+  border: 1px solid rgba(239, 45, 60, 0.3);
+  padding: 7px 16px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.gw-eyebrow svg { width: 15px; height: 15px; }
+
+.gw-banner {
+  text-align: center;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffd977;
+  background: rgba(255, 200, 60, 0.08);
+  border: 1px solid rgba(255, 200, 60, 0.3);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin: 32px 0;
+}
+.gw-banner.done { color: #3ddc84; background: rgba(61, 220, 132, 0.08); border-color: rgba(61, 220, 132, 0.32); }
+
+/* three-up "how it works" strip, shared by /giveaways and /milestones */
+.gw-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 34px 0;
+}
+.gw-step {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 24px 22px 22px;
+  box-shadow: var(--shadow);
+}
+.gw-step-n {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--accent-grad);
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 17px;
+  margin-bottom: 14px;
+}
+.gw-step h4 {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 7px;
+}
+.gw-step p { color: var(--text-soft); font-size: 14px; line-height: 1.55; }
+
+.gw-sub-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+.gw-entries-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.gw-winners, .gw-past { margin-top: 34px; }
+.gw-past .winners-card { margin-bottom: 26px; }
+
+.gw-tickets {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #ffd977;
+}
+.gw-odds { color: var(--text-soft); font-size: 14px; }
+
+.gw-commit {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.gw-commit code, .gw-fair code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-soft);
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.gw-fair {
+  margin-top: 18px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+.gw-fair summary {
+  cursor: pointer;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  color: var(--blue-2);
+}
+.gw-fair p { color: var(--text-soft); font-size: 13.5px; margin: 12px 0; line-height: 1.6; }
+.gw-fair-row {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+}
+.gw-fair-row span {
+  flex: none;
+  width: 90px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gw-fair-row code { word-break: break-all; }
+
+/* -------------------------------------------------- giveaway admin cards */
+.gw-form-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.gw-form-row .admin-label { flex: 1 1 140px; }
+.gw-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.gw-actions .admin-save { width: auto; flex: 1 1 auto; min-width: 96px; }
+.gw-actions .danger { border-color: rgba(255, 77, 87, 0.4); color: var(--blue-2); }
+.gw-winner-list {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 13px 15px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  color: var(--text-soft);
+  line-height: 1.9;
+}
+.gw-winner-list b { color: #ffd977; }
+
+.admin-section { margin-bottom: 52px; }
+.admin-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.admin-section-head .section-sub { margin-top: 6px; max-width: 620px; font-size: 14.5px; }
+.admin-section-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 26px;
+  color: #fff;
+}
+.admin-grid.one { grid-template-columns: minmax(0, 1fr); max-width: 620px; }
+
+/* ============================================================ milestones */
+.ms-ladder {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin: 12px 0 34px;
+}
+.ms-card {
+  position: relative;
+  text-align: center;
+  background: linear-gradient(180deg, #231019 0%, #150a0f 100%);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 22px 16px 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.ms-card:hover { transform: translateY(-5px); border-color: rgba(255, 77, 87, 0.55); }
+.ms-card.top {
+  border-color: rgba(255, 200, 60, 0.6);
+  box-shadow: 0 0 44px -14px rgba(255, 200, 60, 0.45), var(--shadow);
+}
+.ms-tier {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-bottom: 14px;
+}
+.ms-card.top .ms-tier { color: #ffd977; border-color: rgba(255, 200, 60, 0.4); }
+.ms-wager {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.ms-wager-lbl, .ms-reward-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.ms-arrow { color: var(--blue-2); font-size: 18px; margin: 10px 0 6px; }
+.ms-reward {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffd977;
+  line-height: 1;
+}
+.ms-cta { display: flex; justify-content: center; margin-top: 8px; }
+.ms-cta .btn { gap: 10px; }
+
+/* ================================================ Discord-entry giveaways */
+.gv-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+.gv-past-title { margin: 44px 0 16px; }
+
+.gv-card {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #231019 0%, #150a0f 100%);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 24px 24px 22px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.gv-card:hover { transform: translateY(-4px); }
+.gv-card.is-entered { border-color: rgba(61, 220, 132, 0.5); }
+.gv-card.past { opacity: 0.92; }
+
+.gv-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.gv-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 21px;
+  color: #fff;
+  line-height: 1.2;
+}
+.gv-desc { color: var(--text-soft); font-size: 13.5px; margin-top: 6px; line-height: 1.5; }
+
+.gv-prize {
+  flex: none;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 45%;
+}
+.gv-prize-lbl {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gv-prize-val {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: #ffd977;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.gv-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.gv-meta b { color: #fff; font-size: 15px; }
+
+/* the shared countdown, shrunk to fit inside a card */
+.gv-countdown { margin-bottom: 16px; }
+.gv-countdown .countdown { gap: 8px; }
+.gv-countdown .cd-cell { min-width: 56px; padding: 10px 6px; }
+.gv-countdown .cd-cell .num { font-size: 24px; }
+.gv-countdown .cd-cell .lbl { font-size: 9px; margin-top: 5px; }
+.gv-countdown .cd-sep { font-size: 20px; }
+.gv-countdown .cd-ended { font-size: 15px; text-align: center; }
+
+.gv-entry { margin-top: auto; text-align: center; }
+.gv-enter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--accent-grad);
+  color: #fff;
+  font-family: 'Rubik', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: var(--glow-blue);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+.gv-enter:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
+.gv-enter:disabled { opacity: 0.6; cursor: default; }
+.gv-enter.discord { background: #5865f2; box-shadow: none; }
+.gv-enter svg { width: 18px; height: 18px; }
+
+.gv-entered {
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(61, 220, 132, 0.12);
+  border: 1px solid rgba(61, 220, 132, 0.42);
+  color: #3ddc84;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+.gv-note { color: var(--text-muted); font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
+.gv-note.err { color: var(--blue-2); }
+.gv-note a { color: var(--blue-2); text-decoration: underline; }
+
+/* winners */
+.gv-winners { margin-top: auto; }
+.gv-winners-lbl {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: #ffd977;
+  margin-bottom: 12px;
+}
+.gv-winners-lbl svg { width: 15px; height: 15px; }
+.gv-winner {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
+  border-radius: 13px;
+  background: rgba(255, 200, 60, 0.07);
+  border: 1px solid rgba(255, 200, 60, 0.3);
+  margin-bottom: 9px;
+}
+.gv-winner.you { background: rgba(61, 220, 132, 0.1); border-color: rgba(61, 220, 132, 0.45); }
+.gv-winner-name { font-weight: 700; color: #fff; font-size: 15px; overflow-wrap: anywhere; }
+.gv-winner-prize { color: var(--text-soft); font-size: 12.5px; margin-top: 2px; }
+.gv-place {
+  margin-left: auto;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex: none;
+}
+.gv-you {
+  margin-left: 8px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #3ddc84;
+}
+
+.gv-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+  border: 2px solid var(--bg-3);
+}
+.gv-avatar-fallback {
+  display: grid; place-items: center;
+  background: var(--accent-grad);
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+}
+
+.gv-entrants-panel { max-width: 620px; margin: 0 auto 22px; }
+.gv-entrants-panel .gw-winner-list { max-height: 320px; overflow-y: auto; margin-bottom: 0; }
+
+@media (max-width: 860px) {
+  .gw-steps { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .hide-sm-cell { display: none; }
+  .gw-actions .admin-save { flex: 1 1 100%; }
+  .gv-list { grid-template-columns: 1fr; }
+  .gv-card-head { flex-direction: column; }
+  .gv-prize { text-align: left; max-width: 100%; }
+}

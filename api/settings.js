@@ -5,7 +5,7 @@ import { requireAdmin } from './_lib/session.js'
 import { getSettings, saveSettings } from './_lib/settingsStore.js'
 import { assertIso } from './_lib/leaderboard.js'
 
-const CASINOS = ['betbolt', 'casebattle']
+const CASINOS = ['betbolt']
 
 export default async function handler(req, res) {
   try {
@@ -34,9 +34,11 @@ export default async function handler(req, res) {
         throw Object.assign(new Error('No casino settings in body'), { status: 400 })
       }
 
-      // merge over existing so updating one board keeps the other
+      // merge over existing so updating one board keeps the other — and so
+      // saving a period never clobbers the stored giveaways
       const prev = (await getSettings()) || { casinos: {} }
       const next = {
+        ...prev,
         casinos: { ...prev.casinos, ...casinos },
         updatedAt: new Date().toISOString(),
         updatedBy: session.name,

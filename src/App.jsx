@@ -5,6 +5,9 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import Leaderboard from './pages/Leaderboard'
+import Giveaways from './pages/Giveaways'
+import Raffles from './pages/Raffles'
+import Milestones from './pages/Milestones'
 import Winners from './pages/Winners'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
@@ -15,12 +18,24 @@ import Admin from './pages/Admin'
 // and browser tabs. (Social scrapers read the static tags in index.html.)
 const ROUTE_META = {
   '/': {
-    title: 'NSBROOKLYN — $3,000 BetBolt & CaseBattle Leaderboards',
-    description: 'Wager on BetBolt or CaseBattle under code NSB and climb the $3,000 wager leaderboards. Rakeback, deposit bonuses, free cases & more.',
+    title: 'NSBROOKLYN — $5,000 BetBolt Leaderboard (Code NSB)',
+    description: 'Wager on BetBolt under code NSB and climb the $5,000 wager leaderboard. Weekly giveaways, wager milestones, rakeback and deposit bonuses.',
   },
   '/leaderboard': {
-    title: 'NSBROOKLYN — $3,000 Wager Leaderboards (Code NSB)',
-    description: 'Live BetBolt & CaseBattle wager leaderboards for code NSB. Climb the ranks and win your share of the $3,000 prize pools.',
+    title: 'NSBROOKLYN — $5,000 Wager Leaderboard (Code NSB)',
+    description: 'Live BetBolt wager leaderboard for code NSB. Climb the ranks and win your share of the $5,000 prize pool.',
+  },
+  '/giveaways': {
+    title: 'NSBROOKLYN — Discord Giveaways',
+    description: 'Free giveaways hosted by NSBROOKLYN. Log in with Discord and enter with one click — no wagering required, winners drawn live.',
+  },
+  '/raffles': {
+    title: 'NSBROOKLYN — Weekly $250 Wager Raffle',
+    description: 'Every $100 wagered on BetBolt under code NSB earns a raffle ticket. 5 winners share $250 every week — provably fair draws.',
+  },
+  '/milestones': {
+    title: 'NSBROOKLYN — Wager Milestone Rewards',
+    description: 'Earn up to $1,000 per milestone wagering on BetBolt under code NSB. Seven tiers from $1K to $5M wagered.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',
@@ -64,6 +79,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/giveaways" element={<Giveaways />} />
+            <Route path="/raffles" element={<Raffles />} />
+            <Route path="/milestones" element={<Milestones />} />
             <Route path="/winners" element={<Winners />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

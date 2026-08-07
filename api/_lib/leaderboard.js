@@ -1,7 +1,8 @@
 // Shared server-side leaderboard fetchers WITH caching.
-// Used by the Vercel function (api/leaderboard.js) and the Vite dev
-// middleware (vite.config.js). Secrets come from environment variables —
-// they must NEVER be imported by client code in src/.
+// Used by the Vercel function (api/leaderboard.js), the giveaway ticket
+// counts (api/giveaways.js) and the Vite dev middleware (vite.config.js).
+// Secrets come from environment variables — they must NEVER be imported by
+// client code in src/.
 //
 // Caching model (protects against BetBolt's aggressive 429 rate limits):
 //   - fresh cache (< TTL)          → served directly, upstream never called
@@ -56,30 +57,7 @@ async function fetchBetbolt({ from, to, env }) {
   }))
 }
 
-async function fetchCasebattle({ from, to, env }) {
-  const dealId = env.CASEBATTLE_DEAL_ID
-  const password = env.CASEBATTLE_PASSWORD
-  if (!dealId || !password) {
-    throw Object.assign(new Error('CASEBATTLE_DEAL_ID / CASEBATTLE_PASSWORD not configured'), { status: 500 })
-  }
-
-  const url = new URL(`https://api.casebattle.com/deals/${dealId}/leaderboard`)
-  url.searchParams.set('password', password)
-  url.searchParams.set('from', from)
-  url.searchParams.set('to', to)
-  url.searchParams.set('limit', '50')
-
-  const res = await fetch(url)
-  if (!res.ok) throw upstreamError('CaseBattle', res)
-  const body = await res.json()
-
-  return (Array.isArray(body) ? body : []).map((row) => ({
-    name: row.user?.username ?? 'anonymous',
-    wagered: Number(row.amount) || 0,
-  }))
-}
-
-const FETCHERS = { betbolt: fetchBetbolt, casebattle: fetchCasebattle }
+const FETCHERS = { betbolt: fetchBetbolt }
 
 async function fetchFresh({ casino, from, to, env, key }) {
   try {
