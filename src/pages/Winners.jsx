@@ -23,7 +23,10 @@ export default function Winners() {
               <div className="winners-card" key={p.id}>
                 <div className="winners-card-head">
                   <h3>{p.label}</h3>
-                  <span className="wc-pool">{fmtMoney(p.prizePool)} prize pool</span>
+                  <div className="wc-tags">
+                    {p.paid && <span className="wc-paid">✓ {p.paid}</span>}
+                    <span className="wc-pool">{fmtMoney(p.prizePool)} prize pool</span>
+                  </div>
                 </div>
                 <div className="lb-table-wrap">
                   <table className="lb-table">

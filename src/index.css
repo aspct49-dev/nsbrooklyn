@@ -736,6 +736,16 @@ img { display: block; max-width: 100%; }
   border: 1px solid rgba(239, 45, 60, 0.32);
   padding: 4px 14px; border-radius: 999px;
 }
+.wc-tags { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+/* Payout confirmation — green so it reads as "settled", not as a prize figure */
+.wc-paid {
+  font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px;
+  color: #3ddc84;
+  background: rgba(61, 220, 132, 0.1);
+  border: 1px solid rgba(61, 220, 132, 0.38);
+  padding: 4px 13px; border-radius: 999px;
+  white-space: nowrap;
+}
 
 /* ---------------------------------------------------------------- bonus cards */
 .bonus-heading {

@@ -166,6 +166,9 @@ export const pastWinners = [
     id: '2026-07',
     label: 'June 24 — July 31, 2026',
     prizePool: 2500,
+    // Optional — rendered as a badge on /winners. Omit if a period's prizes
+    // haven't gone out yet.
+    paid: 'Paid within 48 hours',
     winners: [
       { rank: 1, name: 'nspswitch', wagered: 207891.34, prize: 1100 },
       { rank: 2, name: 'NSBbastard', wagered: 181516.80, prize: 600 },
