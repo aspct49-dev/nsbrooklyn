@@ -117,15 +117,15 @@ export default function Navbar() {
             <NavItems onClose={close} />
           </nav>
 
-          <div className="nb-spacer" />
+          <div className="nb-right">
+            <div className="nb-socials">
+              <Socials />
+            </div>
 
-          <div className="nb-socials">
-            <Socials />
+            <AuthArea />
+
+            <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">☰</button>
           </div>
-
-          <AuthArea />
-
-          <button className="hamburger" onClick={() => setOpen(true)} aria-label="Open menu">☰</button>
         </div>
       </header>
 

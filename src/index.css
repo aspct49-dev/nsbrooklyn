@@ -152,21 +152,34 @@ img { display: block; max-width: 100%; }
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(255, 30, 30, 0.22);
 }
+/* Full-bleed three-column grid: brand hard left, links dead centre, socials
+   and login hard right. The side tracks are equal `1fr`s so the middle column
+   lands at the true centre of the bar — centring it in whatever space two
+   unequal sides happen to leave is what made it look off before.
+   Columns are assigned explicitly so the right group stays in column 3 even
+   when the links are hidden on mobile and stop being a grid item. */
 .navbar-inner {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 28px;
+  width: 100%;
+  padding: 0 32px;
   height: 70px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 18px;
 }
 .nb-brand {
+  grid-column: 1;
+  justify-self: start;
   display: flex;
   align-items: center;
-  flex: 0 0 auto;
-  min-width: 128px;
+  min-width: 0;
+}
+.nb-right {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 .nb-brand img {
   width: auto;
@@ -180,17 +193,15 @@ img { display: block; max-width: 100%; }
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
 }
 .nb-links {
+  grid-column: 2;
+  justify-self: center;
   display: flex;
-  flex: 1;
-  justify-content: center;
   align-items: center;
   gap: 18px;
-  margin: 0 12px;
 }
 .nb-links .nav-item { padding: 9px 13px; }
 .nb-links .nav-item .badge,
 .nb-links .nav-item .soon { margin-left: 6px; }
-.nb-spacer { display: none; }
 .nb-socials { display: flex; gap: 10px; align-items: center; }
 .nb-socials a {
   width: 40px; height: 40px;
@@ -1273,6 +1284,8 @@ img { display: block; max-width: 100%; }
 @media (max-width: 1080px) {
   .nb-links, .nb-socials { display: none; }
   .hamburger { display: block; }
+  /* the centre column collapses to nothing — drop the gaps around it too */
+  .navbar-inner { gap: 0; }
   /* 4-up cards get cramped below this — go 2x2 */
   .bonus-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 84px; }
   .bonus-card.featured { transform: none; }
