@@ -94,9 +94,17 @@ export const countTickets = (entries) => entries.reduce((sum, e) => sum + e.tick
 // --------------------------------------------------------------- the draw
 
 /**
- * Draw the winners, weighted by ticket count and without replacement — one
- * player can only win once, and more tickets means proportionally better
- * odds. Fewer eligible entrants than prizes ⇒ fewer winners.
+ * How many of a raffle's prizes one player may take. A player stays in the
+ * pool after winning, so they can place more than once, but they drop out
+ * once they hit this cap — which keeps a whale with most of the tickets from
+ * sweeping the whole board.
+ */
+export const MAX_WINS_PER_PLAYER = 2
+
+/**
+ * Draw the winners, weighted by ticket count. A player can win up to
+ * MAX_WINS_PER_PLAYER prizes; more tickets means proportionally better odds.
+ * Fewer eligible entrants than prize slots ⇒ fewer winners.
  *
  * Pure and deterministic: same entries + same seed ⇒ same winners.
  */
@@ -106,6 +114,7 @@ export function drawWinners({ entries, prizeCount, prizeAmount, seed }) {
     count: prizeCount,
     seed,
     weight: (e) => e.tickets,
+    maxPicks: MAX_WINS_PER_PLAYER,
   }).map((winner, i) => ({
     place: i + 1,
     name: winner.name,

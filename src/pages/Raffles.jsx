@@ -71,8 +71,9 @@ function Winners({ raffle }) {
           <p>
             The winning seed was generated and its SHA-256 hash published before
             entries closed, so the result was locked in before the draw. Winners
-            are picked one at a time from the ticket pool (no player can win
-            twice) using <code>HMAC-SHA256(seed, n)</code> for draw&nbsp;<code>n</code>.
+            are picked one at a time from the ticket pool using{' '}
+            <code>HMAC-SHA256(seed, n)</code> for draw&nbsp;<code>n</code>. A player
+            stays in the pool after winning and can place twice, then drops out.
           </p>
           <div className="gw-fair-row"><span>Seed hash</span><code>{raffle.seedHash}</code></div>
           <div className="gw-fair-row"><span>Seed</span><code>{raffle.seed}</code></div>
@@ -217,7 +218,7 @@ export default function Raffles() {
           <div className="gw-step">
             <span className="gw-step-n">3</span>
             <h4>{current.prizeCount} winners get {fmtMoney(current.prizeAmount)}</h4>
-            <p>Winners are drawn at random from the ticket pool. One prize per player.</p>
+            <p>Winners are drawn at random from the ticket pool. A player can win up to two prizes.</p>
           </div>
         </div>
 

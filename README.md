@@ -68,9 +68,11 @@ runs until an admin saves their own.
 Shared by both. When a giveaway/raffle becomes visible the server generates a
 random seed and publishes only its SHA-256 hash, so the outcome is fixed before
 entries close and can't be rerolled. Winners are drawn with
-`HMAC-SHA256(seed, n)` without replacement — nobody wins twice — weighted by
-tickets for raffles and uniformly for giveaways. After the draw the seed and the
-exact entrant snapshot are published so anyone can replay it.
+`HMAC-SHA256(seed, n)`, weighted by tickets for raffles and uniformly for
+giveaways. A per-item cap controls repeat wins: giveaway entrants can win once
+(they only hold one entry), while raffle players stay in the pool and may take
+up to `MAX_WINS_PER_PLAYER` prizes before dropping out. After the draw the seed
+and the exact entrant snapshot are published so anyone can replay it.
 
 ## Deploy
 Vercel preset: **Vite**. `vercel.json` rewrites non-`/api` routes to
