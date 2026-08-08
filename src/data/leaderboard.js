@@ -75,13 +75,37 @@ export const casinos = [
 ]
 
 // ============================================================================
-//  WAGER MILESTONES — one-off rewards paid the first time a player crosses
-//  each tier while wagering on BetBolt under code NSB. Claimed via Discord.
+//  RANK MILESTONES — a one-off cash reward, paid by NSBROOKLYN, the first
+//  time a player reaches each BetBolt VIP rank under code NSB.
+//
+//  `from`/`to` are BetBolt's own wager range for that rank (levels I–V), and
+//  `perks` is how many of the PERKS list below the rank unlocks — BetBolt
+//  grants them cumulatively, so a count is enough to describe each tier.
+//  Icons are BetBolt's rank art in /public.
 // ============================================================================
+
+// Every VIP perk in unlock order. A rank's `perks` count unlocks the first N.
+export const rankPerks = [
+  'Daily Reward',
+  'Weekly Reward',
+  'Monthly Reward',
+  'Tailored Bonusing',
+  'VIP Channel',
+  'Level Up Reward',
+  'Tier Up Reward',
+  'Personal Host',
+  'Private Events',
+]
+
 export const milestones = [
-  { wager: 500_000, reward: 500 },
-  { wager: 1_000_000, reward: 1_000 },
-  { wager: 5_000_000, reward: 5_000 },
+  { key: 'rock', name: 'Rock', levels: '', icon: '/rock_0.webp', from: 0, to: 10_000, perks: 3, reward: 0 },
+  { key: 'bronze', name: 'Bronze', levels: 'I–V', icon: '/bronze_5.webp', from: 10_000, to: 50_000, perks: 3, reward: 25 },
+  { key: 'silver', name: 'Silver', levels: 'I–V', icon: '/silver_5.webp', from: 75_000, to: 180_000, perks: 3, reward: 75 },
+  { key: 'gold', name: 'Gold', levels: 'I–V', icon: '/gold_5.webp', from: 250_000, to: 550_000, perks: 4, reward: 180 },
+  { key: 'platinum', name: 'Platinum', levels: 'I–V', icon: '/platinum_5.webp', from: 700_000, to: 1_300_000, perks: 6, reward: 400 },
+  { key: 'titanium', name: 'Titanium', levels: 'I–V', icon: '/titanium_5.webp', from: 1_500_000, to: 3_500_000, perks: 8, reward: 1_000 },
+  { key: 'pearl', name: 'Pearl', levels: 'I–V', icon: '/pearl_5.webp', from: 5_000_000, to: 12_000_000, perks: 8, reward: 2_500 },
+  { key: 'diamond', name: 'Diamond', levels: 'I–V', icon: '/diamond_5.webp', from: 15_000_000, to: 100_000_000, perks: 9, reward: 7_000 },
 ]
 
 export const milestoneTotal = milestones.reduce((sum, m) => sum + m.reward, 0)
@@ -139,18 +163,18 @@ export const bonuses = [
   },
   {
     img: '/gold_pot.png',
-    title: 'MILESTONES',
+    title: 'RANK REWARDS',
     subtitle: 'From me personally',
     accent: 'gold',
     rows: [
-      { group: 'Wager rewards' },
-      '$500K, $1M and $5M wager tiers',
-      'Up to $5,000 per milestone',
+      { group: 'Every BetBolt VIP rank' },
+      '$25 at Bronze up to $7,000 at Diamond',
+      '$11,180 across all seven ranks',
       { group: 'Plus' },
       'Bi-weekly lossback up to 10%',
       'Claimed instantly via Discord',
     ],
-    cta: 'VIEW MILESTONES',
+    cta: 'VIEW RANK REWARDS',
     to: '/milestones',
   },
 ]

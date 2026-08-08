@@ -34,8 +34,8 @@ const ROUTE_META = {
     description: 'Every $100 wagered on BetBolt under code NSB earns a raffle ticket. 5 winners share $250 every week — provably fair draws.',
   },
   '/milestones': {
-    title: 'NSBROOKLYN — Wager Milestone Rewards',
-    description: 'Earn up to $5,000 per milestone wagering on BetBolt under code NSB. Tiers at $500K, $1M and $5M wagered.',
+    title: 'NSBROOKLYN — BetBolt Rank Milestone Rewards',
+    description: 'Reach a BetBolt VIP rank under code NSB and get paid on top — $25 at Bronze up to $7,000 at Diamond, $11,180 across every rank.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',

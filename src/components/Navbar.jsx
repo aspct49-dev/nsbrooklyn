@@ -12,7 +12,7 @@ const nav = [
   { label: 'Leaderboard', icon: <IconTrophy />, to: '/leaderboard', badge: `$${(config.prizePool / 1000)}K` },
   { label: 'Giveaways', icon: <IconGift />, to: '/giveaways' },
   { label: 'Raffle', icon: <IconTicket />, to: '/raffles' },
-  { label: 'Milestones', icon: <IconBolt />, to: '/milestones' },
+  { label: 'Ranks', icon: <IconBolt />, to: '/milestones' },
   { label: 'Winners', icon: <IconMedal />, to: '/winners' },
 ]
 

@@ -26,7 +26,7 @@ export default function Footer() {
             <Link to="/leaderboard">Leaderboard</Link>
             <Link to="/giveaways">Giveaways</Link>
             <Link to="/raffles">Wager Raffle</Link>
-            <Link to="/milestones">Milestones</Link>
+            <Link to="/milestones">Rank Rewards</Link>
             {casinos.map((c) => (
               <a key={c.id} href={c.url} target="_blank" rel="noreferrer">Play on {c.name}</a>
             ))}
