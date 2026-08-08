@@ -189,7 +189,7 @@ export const bonuses = [
 export const pastWinners = [
   {
     id: '2026-07',
-    label: 'June 24 — July 31, 2026',
+    label: 'July 1 — July 31, 2026',
     prizePool: 2500,
     // Optional — rendered as a badge on /winners. Omit if a period's prizes
     // haven't gone out yet.
