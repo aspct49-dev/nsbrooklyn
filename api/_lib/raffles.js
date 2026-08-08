@@ -124,6 +124,69 @@ export function drawWinners({ entries, prizeCount, prizeAmount, seed }) {
   }))
 }
 
+/**
+ * Replace ONE winner slot, leaving the rest of the board alone — for when a
+ * single winner is disqualified, unreachable, or refuses the prize.
+ *
+ * Deliberately drawn from the raffle's own frozen `entriesSnapshot` rather
+ * than refetching: the standings have moved on since the draw, and replaying
+ * against the published snapshot is what keeps the result checkable. It also
+ * means a redraw works while the casino API is rate-limited.
+ *
+ * Ineligible for the replacement:
+ *   - the player being removed from this place
+ *   - anyone removed by an earlier redraw on this raffle (they were taken off
+ *     for a reason; a later redraw shouldn't hand them a different prize)
+ *   - anyone already holding MAX_WINS_PER_PLAYER of the remaining places
+ *
+ * The raffle's original seed is NOT touched — it still proves every place
+ * that wasn't redrawn. Each redraw carries its own seed instead, recorded in
+ * `redraws` so the swap is auditable on its own terms.
+ */
+export function redrawPlace({ raffle, place, seed }) {
+  const winners = raffle.winners || []
+  const target = winners.find((w) => w.place === place)
+  if (!target) throw bad(`No winner at place ${place}`)
+
+  const entries = raffle.entriesSnapshot || []
+  if (!entries.length) throw bad('This raffle has no entry snapshot to redraw from')
+
+  const kept = winners.filter((w) => w.place !== place)
+  const winsByName = kept.reduce((m, w) => ({ ...m, [w.name]: (m[w.name] || 0) + 1 }), {})
+  const previouslyRemoved = new Set((raffle.redraws || []).map((r) => r.removed))
+
+  const eligible = entries.filter((e) =>
+    e.name !== target.name &&
+    !previouslyRemoved.has(e.name) &&
+    (winsByName[e.name] || 0) < MAX_WINS_PER_PLAYER)
+
+  if (!eligible.length) {
+    throw bad('No eligible entrants left — everyone else has already won or been removed')
+  }
+
+  const [replacement] = pickWeighted({
+    items: eligible,
+    count: 1,
+    seed,
+    weight: (e) => e.tickets,
+  })
+
+  return {
+    winners: winners.map((w) =>
+      w.place === place
+        ? { ...w, name: replacement.name, tickets: replacement.tickets, wagered: replacement.wagered }
+        : w),
+    record: {
+      place,
+      removed: target.name,
+      replacedWith: replacement.name,
+      seed,
+      seedHash: hashSeed(seed),
+      at: new Date().toISOString(),
+    },
+  }
+}
+
 // --------------------------------------------------------------- validation
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
@@ -167,5 +230,6 @@ export function normalizeRaffle(input, existing) {
     drawnBy: existing?.drawnBy ?? null,
     winners: existing?.winners ?? null,
     entriesSnapshot: existing?.entriesSnapshot ?? null,
+    redraws: existing?.redraws ?? [],
   }
 }

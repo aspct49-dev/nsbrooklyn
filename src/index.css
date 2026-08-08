@@ -1865,6 +1865,29 @@ img { display: block; max-width: 100%; }
   line-height: 1.9;
 }
 .gw-winner-list b { color: #ffd977; }
+.gw-winner-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+.gw-reroll {
+  flex: none;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 4px 10px;
+  transition: all 0.15s ease;
+}
+.gw-reroll:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 77, 87, 0.18);
+  border-color: rgba(255, 77, 87, 0.5);
+}
+.gw-reroll:disabled { opacity: 0.5; cursor: default; }
 
 .admin-section { margin-bottom: 52px; }
 .admin-section-head {

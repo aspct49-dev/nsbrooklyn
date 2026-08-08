@@ -80,6 +80,27 @@ function Winners({ raffle }) {
           <div className="gw-fair-row">
             <span>Drawn</span><code>{new Date(raffle.drawnAt).toLocaleString()}</code>
           </div>
+
+          {/* Any single place replaced after the fact, stated openly — the
+              seed above proves every place that was not redrawn. */}
+          {raffle.redraws?.length > 0 && (
+            <>
+              <p>
+                {raffle.redraws.length === 1 ? 'One place was' : `${raffle.redraws.length} places were`}{' '}
+                redrawn after the original draw, because the winner was
+                ineligible or unreachable. Each replacement was drawn from the same
+                entry list under its own seed, shown below.
+              </p>
+              {raffle.redraws.map((r) => (
+                <div className="gw-fair-row" key={`${r.place}-${r.at}`}>
+                  <span>Place #{r.place}</span>
+                  <code>
+                    {maskName(r.removed)} → {maskName(r.replacedWith)} · {new Date(r.at).toLocaleString()} · seed {r.seed}
+                  </code>
+                </div>
+              ))}
+            </>
+          )}
         </details>
       )}
     </div>

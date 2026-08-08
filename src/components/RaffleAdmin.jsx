@@ -119,7 +119,7 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
   )
 }
 
-function GiveawayRow({ raffle, onEdit, onDraw, onStatus, onDelete, busy }) {
+function GiveawayRow({ raffle, onEdit, onDraw, onRedrawPlace, onStatus, onDelete, busy }) {
   const phase = rafflePhase(raffle)
   const st = PHASE_LABEL[phase] || PHASE_LABEL.draft
   const drawn = Boolean(raffle.drawnAt)
@@ -142,10 +142,29 @@ function GiveawayRow({ raffle, onEdit, onDraw, onStatus, onDelete, busy }) {
       {drawn && (
         <div className="gw-winner-list">
           {raffle.winners.map((w) => (
-            <div key={w.place}>
-              <b>#{w.place}</b> {w.name} — {w.tickets.toLocaleString()} tickets · {fmtMoney(w.prize)}
+            <div className="gw-winner-row" key={w.place}>
+              <span>
+                <b>#{w.place}</b> {w.name} — {w.tickets.toLocaleString()} tickets · {fmtMoney(w.prize)}
+              </span>
+              <button
+                className="gw-reroll"
+                onClick={() => onRedrawPlace(raffle, w)}
+                disabled={busy}
+                title={`Replace the winner of place ${w.place}`}
+              >
+                Redraw
+              </button>
             </div>
           ))}
+          {raffle.redraws?.length > 0 && (
+            <p className="admin-utc" style={{ marginTop: 10 }}>
+              {raffle.redraws.map((r) => (
+                <span key={`${r.place}-${r.at}`} style={{ display: 'block' }}>
+                  #{r.place}: {r.removed} → {r.replacedWith} · {new Date(r.at).toLocaleString()} by {r.by}
+                </span>
+              ))}
+            </p>
+          )}
           <p className="admin-utc" style={{ marginTop: 8 }}>
             Drawn {new Date(raffle.drawnAt).toLocaleString()} by {raffle.drawnBy}
           </p>
@@ -171,7 +190,7 @@ function GiveawayRow({ raffle, onEdit, onDraw, onStatus, onDelete, busy }) {
 
         {drawn && (
           <button className="btn btn-ghost admin-save" onClick={() => onDraw(raffle, true)} disabled={busy}>
-            Redraw
+            Redraw all
           </button>
         )}
 
@@ -231,10 +250,26 @@ export default function GiveawayAdmin() {
   const draw = async (raffle, redraw) => {
     const label = redraw ? 'Redraw' : 'Draw'
     const warning = redraw
-      ? `Redraw "${raffle.title}"? The current winners will be replaced and a new seed committed.`
+      ? `Redraw ALL winners for "${raffle.title}"? Every current winner is replaced and a new seed committed. To swap just one, use the Redraw button on that winner instead.`
       : `Draw ${raffle.prizeCount} winners for "${raffle.title}"? Entries are frozen at this moment and the result is final.`
     if (!window.confirm(warning)) return
     await post({ action: 'draw', id: raffle.id, redraw }, `${label} complete ✓`)
+  }
+
+  // Swap one winner out. Only that place changes; every other winner keeps
+  // the result the original committed seed already proved.
+  const redrawPlace = async (raffle, winner) => {
+    const warning =
+      `Replace ${winner.name} at place #${winner.place}?
+
+` +
+      'A new winner is drawn for that place only, from the same frozen entry ' +
+      `list. ${winner.name} cannot be drawn again for this raffle.`
+    if (!window.confirm(warning)) return
+    await post(
+      { action: 'redraw-place', id: raffle.id, place: winner.place },
+      `Place #${winner.place} redrawn ✓`,
+    )
   }
 
   const setStatus = (raffle, status) =>
@@ -290,6 +325,7 @@ export default function GiveawayAdmin() {
               busy={busy}
               onEdit={setEditing}
               onDraw={draw}
+              onRedrawPlace={redrawPlace}
               onStatus={setStatus}
               onDelete={remove}
             />

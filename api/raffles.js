@@ -10,7 +10,7 @@ import { readSession, isAdmin as sessionIsAdmin, requireAdmin } from './_lib/ses
 import { getLeaderboard } from './_lib/leaderboard.js'
 import {
   listRaffles, saveRaffles, normalizeRaffle, publicRaffle,
-  toEntries, countTickets, drawWinners, ensureSeed, STATUSES,
+  toEntries, countTickets, drawWinners, ensureSeed, redrawPlace, makeSeed, STATUSES,
 } from './_lib/raffles.js'
 
 const notFound = (id) => Object.assign(new Error(`Unknown raffle "${id}"`), { status: 404 })
@@ -177,6 +177,30 @@ async function handlePost(req, res) {
       entriesSnapshot: entries,
       drawnAt: new Date().toISOString(),
       drawnBy: session.name,
+    }
+    const list = raffles.map((g) => (g.id === next.id ? next : g))
+    await saveRaffles(list, session.name)
+    return sendJson(res, 200, { raffle: publicRaffle(next), all: list.map(publicRaffle) })
+  }
+
+  // Swap out a single winner without disturbing the rest of the board.
+  if (action === 'redraw-place') {
+    const existing = raffles.find((g) => g.id === body?.id)
+    if (!existing) throw notFound(body?.id)
+    if (!existing.drawnAt || !existing.winners?.length) {
+      throw Object.assign(new Error('Draw the raffle before redrawing a place'), { status: 409 })
+    }
+
+    const place = Number(body?.place)
+    if (!Number.isInteger(place)) {
+      throw Object.assign(new Error('A place number is required'), { status: 400 })
+    }
+
+    const { winners, record } = redrawPlace({ raffle: existing, place, seed: makeSeed() })
+    const next = {
+      ...existing,
+      winners,
+      redraws: [...(existing.redraws || []), { ...record, by: session.name }],
     }
     const list = raffles.map((g) => (g.id === next.id ? next : g))
     await saveRaffles(list, session.name)
