@@ -35,12 +35,58 @@ export function loadSettings() {
   return settingsPromise
 }
 
-function getMonthRange(date) {
-  const year = date.getUTCFullYear()
-  const month = date.getUTCMonth()
-  const start = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0))
-  const end = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999))
-  return { from: start.toISOString(), to: end.toISOString() }
+const TZ = 'America/New_York'
+
+/**
+ * The UTC instant for a wall-clock time in New York, EST/EDT handled for us:
+ * render the same instant in both zones and the gap is the offset.
+ */
+function etToUtc(year, monthIndex, day, hour, minute, second) {
+  const guess = Date.UTC(year, monthIndex, day, hour, minute, second)
+  const at = new Date(guess)
+  const etWall = new Date(at.toLocaleString('en-US', { timeZone: TZ }))
+  const utcWall = new Date(at.toLocaleString('en-US', { timeZone: 'UTC' }))
+  return new Date(guess + (utcWall.getTime() - etWall.getTime()))
+}
+
+/** Last calendar day of a month (monthIndex may be -1 for the prior Dec). */
+const lastDayOf = (year, monthIndex) => new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate()
+
+/** Period bounds for a given ET month: 11:00 PM ET the previous month-end
+ *  through 10:59:59 PM ET this month-end. */
+function monthBounds(year, monthIndex) {
+  return {
+    from: etToUtc(year, monthIndex - 1, lastDayOf(year, monthIndex - 1), 23, 0, 0),
+    to: etToUtc(year, monthIndex, lastDayOf(year, monthIndex), 22, 59, 59),
+  }
+}
+
+/**
+ * The BetBolt board runs on Eastern time: it closes at 10:59:59 PM ET on the
+ * last day of the month, and the next period opens a minute later at 11:00 PM
+ * ET. Because that boundary sits an hour before ET midnight, the final hour of
+ * a month already belongs to the next period — hence the nudge below.
+ */
+function getMonthRange(now = new Date()) {
+  const [m, , y] = new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ, year: 'numeric', month: 'numeric', day: 'numeric',
+  }).format(now).split('/').map(Number)
+
+  let year = y
+  let month = m - 1 // Intl months are 1-based
+  let bounds = monthBounds(year, month)
+
+  if (now >= bounds.to) {
+    month += 1
+    if (month > 11) { month = 0; year += 1 }
+    bounds = monthBounds(year, month)
+  } else if (now < bounds.from) {
+    month -= 1
+    if (month < 0) { month = 11; year -= 1 }
+    bounds = monthBounds(year, month)
+  }
+
+  return { from: bounds.from.toISOString(), to: bounds.to.toISOString() }
 }
 
 // Exported so the page countdown can tick to the same period end the API
@@ -52,13 +98,7 @@ export function getCasinoRange(casinoId) {
     return { from: configured.startAt, to: configured.endAt }
   }
 
-  const now = new Date()
-  const monthRange = getMonthRange(now)
-  if (casinoId === 'betbolt') {
-    const start = new Date(Date.UTC(now.getUTCFullYear(), 5, 23, 0, 0, 0, 0))
-    return { from: start.toISOString(), to: monthRange.to }
-  }
-  return monthRange
+  return getMonthRange(new Date())
 }
 
 function cacheKeyFor(casinoId, range) {

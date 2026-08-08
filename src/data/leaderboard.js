@@ -157,9 +157,26 @@ export const bonuses = [
 
 // Past leaderboard periods for the /winners page. Add an entry after each
 // period ends and it will render automatically (newest first).
-// Example:
-// {
-//   id: '2026-06', label: 'June 2026', prizePool: 5000,
-//   winners: [{ rank: 1, name: 'stackedbagg', wagered: 210500, prize: 2200 }, …],
-// }
-export const pastWinners = []
+//
+// NOTE: `prize` is whatever that period actually paid — the July board ran on
+// the old $2,500 ladder, before the pool doubled to $5,000. Don't restate old
+// periods at current rates.
+export const pastWinners = [
+  {
+    id: '2026-07',
+    label: 'June 24 — July 31, 2026',
+    prizePool: 2500,
+    winners: [
+      { rank: 1, name: 'nspswitch', wagered: 207891.34, prize: 1100 },
+      { rank: 2, name: 'NSBbastard', wagered: 181516.80, prize: 600 },
+      { rank: 3, name: 'HardR', wagered: 19346.09, prize: 300 },
+      { rank: 4, name: 'Beboy03', wagered: 13548.02, prize: 150 },
+      { rank: 5, name: 'Maccyb', wagered: 5533.59, prize: 100 },
+      { rank: 6, name: 'Boofydoo', wagered: 4424.70, prize: 80 },
+      { rank: 7, name: 'jasonthefather', wagered: 4000.08, prize: 60 },
+      { rank: 8, name: 'valerie', wagered: 3171.33, prize: 50 },
+      { rank: 9, name: 'Relaxwithgeebee', wagered: 1739.47, prize: 40 },
+      { rank: 10, name: 'J2E2F7', wagered: 1692.86, prize: 20 },
+    ],
+  },
+]
