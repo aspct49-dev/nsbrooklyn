@@ -35,7 +35,7 @@ const ROUTE_META = {
   },
   '/milestones': {
     title: 'NSBROOKLYN — BetBolt Rank Milestone Rewards',
-    description: 'Reach a BetBolt VIP rank under code NSB and get paid on top — $25 at Bronze up to $7,000 at Diamond, $11,180 across every rank.',
+    description: 'Reach a BetBolt VIP rank under code NSB and get paid on top — $10 at Rock up to $7,000 at Diamond, $11,190 across every rank.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',

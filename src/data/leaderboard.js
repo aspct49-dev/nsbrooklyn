@@ -98,7 +98,7 @@ export const rankPerks = [
 ]
 
 export const milestones = [
-  { key: 'rock', name: 'Rock', levels: '', icon: '/rock_0.webp', from: 0, to: 10_000, perks: 3, reward: 0 },
+  { key: 'rock', name: 'Rock', levels: '', icon: '/rock_0.webp', from: 1_000, to: 10_000, perks: 3, reward: 10 },
   { key: 'bronze', name: 'Bronze', levels: 'I–V', icon: '/bronze_5.webp', from: 10_000, to: 50_000, perks: 3, reward: 25 },
   { key: 'silver', name: 'Silver', levels: 'I–V', icon: '/silver_5.webp', from: 75_000, to: 180_000, perks: 3, reward: 75 },
   { key: 'gold', name: 'Gold', levels: 'I–V', icon: '/gold_5.webp', from: 250_000, to: 550_000, perks: 4, reward: 180 },
@@ -168,8 +168,8 @@ export const bonuses = [
     accent: 'gold',
     rows: [
       { group: 'Every BetBolt VIP rank' },
-      '$25 at Bronze up to $7,000 at Diamond',
-      '$11,180 across all seven ranks',
+      '$10 at Rock up to $7,000 at Diamond',
+      '$11,190 across all eight ranks',
       { group: 'Plus' },
       'Bi-weekly lossback up to 10%',
       'Claimed instantly via Discord',
