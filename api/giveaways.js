@@ -11,7 +11,7 @@ import { readSession, isAdmin as sessionIsAdmin, requireAdmin } from './_lib/ses
 import {
   listGiveaways, saveGiveaways, normalizeGiveaway, publicGiveaway,
   addEntry, listEntries, countEntries, clearEntries, hasEntered,
-  drawWinners, ensureSeed, phaseOf, isOpen, STATUSES,
+  drawWinners, ensureSeed, redrawPlace, makeSeed, phaseOf, isOpen, STATUSES,
 } from './_lib/giveaways.js'
 
 const notFound = (id) => Object.assign(new Error(`Unknown giveaway "${id}"`), { status: 404 })
@@ -164,6 +164,27 @@ async function handleAdmin(req, res, body, action) {
       entrantsAtDraw: entries.length,
       drawnAt: new Date().toISOString(),
       drawnBy: session.name,
+    })
+  }
+
+  // Swap out a single winner without disturbing the rest of the board.
+  if (action === 'redraw-place') {
+    const existing = find()
+    if (!existing.drawnAt || !existing.winners?.length) {
+      throw Object.assign(new Error('Draw the giveaway before redrawing a place'), { status: 409 })
+    }
+
+    const place = Number(body?.place)
+    if (!Number.isInteger(place)) {
+      throw Object.assign(new Error('A place number is required'), { status: 400 })
+    }
+
+    const entries = await listEntries(existing.id)
+    const { winners, record } = redrawPlace({ giveaway: existing, entries, place, seed: makeSeed() })
+    return persist({
+      ...existing,
+      winners,
+      redraws: [...(existing.redraws || []), { ...record, by: session.name }],
     })
   }
 

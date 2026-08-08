@@ -8,9 +8,9 @@
 // the dedupe is atomic and the giveaway record itself stays small.
 import { getSettings, saveSettings } from './settingsStore.js'
 import { hashSet, hashGetAll, hashCount, hashHas, del } from './store.js'
-import { pickWeighted, ensureSeed } from './fairdraw.js'
+import { pickWeighted, ensureSeed, makeSeed, hashSeed } from './fairdraw.js'
 
-export { ensureSeed }
+export { ensureSeed, makeSeed, hashSeed }
 
 export const STATUSES = ['draft', 'live', 'ended']
 
@@ -97,6 +97,58 @@ export function drawWinners({ entries, winnerCount, seed }) {
   }))
 }
 
+/**
+ * Replace ONE winner slot, leaving the rest alone — for when a winner is
+ * disqualified, unreachable, or turns the prize down.
+ *
+ * Entries are read live rather than from a snapshot, which is safe because a
+ * drawn giveaway is `ended`, and `isOpen` rejects entries once it is: the
+ * hash can no longer change, so it is the frozen list.
+ *
+ * Ineligible: the player being removed, anyone removed by an earlier redraw,
+ * and anyone already holding one of the remaining places (a giveaway is one
+ * entry per person, so nobody may hold two).
+ *
+ * The giveaway's original seed is NOT touched — it still proves every place
+ * that wasn't redrawn. Each redraw carries its own seed instead.
+ */
+export function redrawPlace({ giveaway, entries, place, seed }) {
+  const winners = giveaway.winners || []
+  const target = winners.find((w) => w.place === place)
+  if (!target) throw bad(`No winner at place ${place}`)
+  if (!entries?.length) throw bad('This giveaway has no recorded entries')
+
+  const kept = winners.filter((w) => w.place !== place)
+  const holding = new Set(kept.map((w) => w.id))
+  const previouslyRemoved = new Set((giveaway.redraws || []).map((r) => r.removedId))
+
+  const eligible = entries.filter((e) =>
+    e.id !== target.id && !holding.has(e.id) && !previouslyRemoved.has(e.id))
+
+  if (!eligible.length) {
+    throw bad('No eligible entrants left — everyone else has already won or been removed')
+  }
+
+  const [replacement] = pickWeighted({ items: eligible, count: 1, seed })
+
+  return {
+    winners: winners.map((w) =>
+      w.place === place
+        ? { ...w, id: replacement.id, name: replacement.name, avatar: replacement.avatar || null }
+        : w),
+    record: {
+      place,
+      removed: target.name,
+      removedId: target.id,
+      replacedWith: replacement.name,
+      replacedWithId: replacement.id,
+      seed,
+      seedHash: hashSeed(seed),
+      at: new Date().toISOString(),
+    },
+  }
+}
+
 // --------------------------------------------------------------- lifecycle
 
 /** draft | upcoming | live | awaiting-draw | ended */
@@ -161,5 +213,6 @@ export function normalizeGiveaway(input, existing) {
     drawnBy: existing?.drawnBy ?? null,
     winners: existing?.winners ?? null,
     entrantsAtDraw: existing?.entrantsAtDraw ?? null,
+    redraws: existing?.redraws ?? [],
   }
 }

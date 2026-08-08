@@ -91,6 +91,25 @@ function WinnerList({ giveaway, user }) {
           </p>
           <div className="gw-fair-row"><span>Seed hash</span><code>{giveaway.seedHash}</code></div>
           <div className="gw-fair-row"><span>Seed</span><code>{giveaway.seed}</code></div>
+
+          {/* Any place replaced after the fact, stated openly — the seed above
+              still proves every place that wasn't redrawn. */}
+          {giveaway.redraws?.length > 0 && (
+            <>
+              <p>
+                {giveaway.redraws.length === 1 ? 'One place was' : `${giveaway.redraws.length} places were`}{' '}
+                redrawn after the original draw, because the winner was ineligible
+                or unreachable. Each replacement was drawn from the same entrant
+                list under its own seed.
+              </p>
+              {giveaway.redraws.map((r) => (
+                <div className="gw-fair-row" key={`${r.place}-${r.at}`}>
+                  <span>Place #{r.place}</span>
+                  <code>{r.removed} → {r.replacedWith} · {new Date(r.at).toLocaleString()} · seed {r.seed}</code>
+                </div>
+              ))}
+            </>
+          )}
         </details>
       )}
     </div>

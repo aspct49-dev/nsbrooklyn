@@ -125,7 +125,7 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
   )
 }
 
-function GiveawayRow({ giveaway, onEdit, onDraw, onStatus, onDelete, onEntries, busy }) {
+function GiveawayRow({ giveaway, onEdit, onDraw, onRedrawPlace, onStatus, onDelete, onEntries, busy }) {
   const st = PHASE_LABEL[giveaway.phase] || PHASE_LABEL.draft
   const drawn = Boolean(giveaway.drawnAt)
 
@@ -146,10 +146,29 @@ function GiveawayRow({ giveaway, onEdit, onDraw, onStatus, onDelete, onEntries, 
       {drawn ? (
         <div className="gw-winner-list">
           {giveaway.winners.map((w) => (
-            <div key={w.place}>
-              <b>#{w.place}</b> {w.name} <span className="admin-utc">({w.id})</span>
+            <div className="gw-winner-row" key={w.place}>
+              <span>
+                <b>#{w.place}</b> {w.name} <span className="admin-utc">({w.id})</span>
+              </span>
+              <button
+                className="gw-reroll"
+                onClick={() => onRedrawPlace(giveaway, w)}
+                disabled={busy}
+                title={`Replace the winner of place ${w.place}`}
+              >
+                Redraw
+              </button>
             </div>
           ))}
+          {giveaway.redraws?.length > 0 && (
+            <p className="admin-utc" style={{ marginTop: 10 }}>
+              {giveaway.redraws.map((r) => (
+                <span key={`${r.place}-${r.at}`} style={{ display: 'block' }}>
+                  #{r.place}: {r.removed} → {r.replacedWith} · {new Date(r.at).toLocaleString()} by {r.by}
+                </span>
+              ))}
+            </p>
+          )}
           <p className="admin-utc" style={{ marginTop: 8 }}>
             Drawn {new Date(giveaway.drawnAt).toLocaleString()} by {giveaway.drawnBy} from{' '}
             {giveaway.entrantsAtDraw} entrants
@@ -179,7 +198,7 @@ function GiveawayRow({ giveaway, onEdit, onDraw, onStatus, onDelete, onEntries, 
 
         {drawn && (
           <button className="btn btn-ghost admin-save" onClick={() => onDraw(giveaway, true)} disabled={busy}>
-            Redraw
+            Redraw all
           </button>
         )}
 
@@ -239,10 +258,26 @@ export default function GiveawayAdmin() {
   const draw = async (giveaway, redraw) => {
     const what = giveaway.winnerCount > 1 ? `${giveaway.winnerCount} winners` : 'the winner'
     const warning = redraw
-      ? `Redraw "${giveaway.title}"? The current winner(s) will be replaced and a new seed committed.`
+      ? `Redraw ALL winners for "${giveaway.title}"? Every current winner is replaced and a new seed committed. To swap just one, use the Redraw button on that winner instead.`
       : `Draw ${what} for "${giveaway.title}"? Entries close immediately and the result is final.`
     if (!window.confirm(warning)) return
     await post({ action: 'draw', id: giveaway.id, redraw }, redraw ? 'Redraw complete ✓' : 'Winner drawn ✓')
+  }
+
+  // Swap one winner out. Only that place changes; every other winner keeps
+  // the result the original committed seed already proved.
+  const redrawPlace = async (giveaway, winner) => {
+    const warning =
+      `Replace ${winner.name} at place #${winner.place}?
+
+` +
+      'A new winner is drawn for that place only, from the same entrant list. ' +
+      `${winner.name} cannot be drawn again for this giveaway.`
+    if (!window.confirm(warning)) return
+    await post(
+      { action: 'redraw-place', id: giveaway.id, place: winner.place },
+      `Place #${winner.place} redrawn ✓`,
+    )
   }
 
   const setStatus = (giveaway, status) =>
@@ -325,6 +360,7 @@ export default function GiveawayAdmin() {
               busy={busy}
               onEdit={setEditing}
               onDraw={draw}
+              onRedrawPlace={redrawPlace}
               onStatus={setStatus}
               onDelete={remove}
               onEntries={showEntrants}
