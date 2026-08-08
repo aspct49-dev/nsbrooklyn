@@ -57,8 +57,9 @@ export const casinos = [
     periodLabel: 'Monthly',
     prizePool: 5000,
     prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
-    // Placeholder standings — swap for real API data later. Names are masked
-    // on render ("BlazeKing" -> "B*******g"), so full names are fine here.
+    // Dev scaffolding only — NOT rendered. The site shows live API standings
+    // or an explicit loading/unavailable state; showing these fictional names
+    // next to real prize amounts would misrepresent the board.
     players: [
       { name: 'stackedbagg', wagered: 184200 },
       { name: 'luckyshoes', wagered: 152750 },

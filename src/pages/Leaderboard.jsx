@@ -12,8 +12,18 @@ import { IconExternal } from '../components/icons'
 
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
-  const { players, allPlayers, casino, error, updatedAt } = useLeaderboard(activeId)
+  const { players, allPlayers, casino, error, updatedAt, loading } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
+  const hasStandings = players.length > 0
+
+  // Why the board is empty, in the visitor's terms. An upstream hiccup is
+  // temporary and self-healing, so it shouldn't read like something is broken
+  // or like wagers have stopped counting.
+  const emptyMessage = loading
+    ? 'Loading live standings…'
+    : error
+      ? "Live standings are temporarily unavailable — they'll come back on their own shortly. Your wagers are still being tracked as normal."
+      : `No one has wagered under code ${config.referralCode} this period yet — be the first.`
   const periodLabel = casino.periodLabel || 'Monthly'
   // Countdown ticks to the end of the same period the API is queried with.
   const periodEnd = getCasinoRange(casino.id).to
@@ -48,21 +58,24 @@ export default function Leaderboard() {
               Visit {casino.name} <IconExternal />
             </a>
           </div>
-          {error ? (
-            <div style={{ display: 'none' }} data-leaderboard-error={error}>
-              Live leaderboard unavailable: {error}
-            </div>
-          ) : null}
         </div>
 
-        <Podium top3={top3} />
+        {hasStandings && <Podium top3={top3} />}
 
         <div className="lb-ends-lbl">Leaderboard ends in</div>
         <Countdown endDate={periodEnd} />
 
-        <LeaderboardStats allPlayers={allPlayers} casino={casino} updatedAt={updatedAt} />
-
-        <LeaderboardTable rows={players} startRank={1} />
+        {hasStandings ? (
+          <>
+            <LeaderboardStats allPlayers={allPlayers} casino={casino} updatedAt={updatedAt} />
+            <LeaderboardTable rows={players} startRank={1} />
+          </>
+        ) : (
+          // the raw upstream error stays as an attribute for debugging only
+          <div className="lb-status" style={{ marginTop: 34 }} data-leaderboard-error={error || undefined}>
+            {emptyMessage}
+          </div>
+        )}
 
         <p className="section-sub" style={{ textAlign: 'center', marginTop: 22, fontSize: 13 }}>
           Usernames are masked for privacy. Standings update as wagers are processed.

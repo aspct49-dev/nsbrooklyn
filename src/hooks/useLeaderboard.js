@@ -169,7 +169,11 @@ export function useLeaderboard(casinoId = casinos[0].id) {
   }, [cacheKey, casino.id])
 
   const live = cache.get(cacheKey)
-  const source = live?.players?.length ? live.players : error ? [] : casino.players
+  // Live standings only. The `players` list in src/data/leaderboard.js is dev
+  // scaffolding — it used to render while the first fetch was in flight, which
+  // showed real visitors fictional usernames next to real prize amounts. The
+  // page renders a loading/unavailable state instead.
+  const source = live?.players ?? []
 
   const players = useMemo(
     () => rank(source, casino.prizes),
