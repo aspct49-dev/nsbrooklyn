@@ -1939,7 +1939,10 @@ img { display: block; max-width: 100%; }
 .rk-tier.titanium { --tier: #3fd0e0; }
 .rk-tier.pearl    { --tier: #c77dff; }
 .rk-tier.diamond  { --tier: #4fb8f5; }
-.rk-tier.base { opacity: 0.72; }
+/* NOTE: don't fade the base-rank card with `opacity` — the page background is
+   bright red and shows straight through, turning the card pink instead of the
+   dark maroon every other card uses. The muted reward slot below is enough to
+   signal that Rock doesn't pay. */
 
 .rk-tier-head { text-align: center; }
 .rk-tier-icon {
@@ -2001,7 +2004,7 @@ img { display: block; max-width: 100%; }
   background: color-mix(in srgb, var(--tier) 10%, transparent);
 }
 .rk-perk-lbl { font-weight: 700; font-size: 13px; color: var(--text); }
-.rk-perk.locked { opacity: 0.45; }
+.rk-perk.locked { opacity: 0.55; }
 .rk-perk.locked .rk-perk-ic {
   color: var(--text-muted);
   border-color: var(--border-strong);
