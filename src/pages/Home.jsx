@@ -23,7 +23,7 @@ export default function Home() {
             <p>
               Climb to the top of the {betbolt.name} leaderboard under
               code <strong>{config.referralCode}</strong> and win your share of crazy prizes —
-              plus weekly giveaways and wager milestones on top.
+              plus daily giveaways and wager milestones on top.
             </p>
             <div className="code-row">
               <div className="code-chip">
@@ -36,7 +36,7 @@ export default function Home() {
                 Play on {betbolt.name} <IconExternal />
               </a>
               <Link className="btn btn-ghost" to="/giveaways">
-                <IconGift /> Weekly giveaway
+                <IconGift /> Daily giveaway
               </Link>
             </div>
           </div>

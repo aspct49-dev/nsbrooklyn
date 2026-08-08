@@ -1856,11 +1856,14 @@ img { display: block; max-width: 100%; }
 .admin-grid.one { grid-template-columns: minmax(0, 1fr); max-width: 620px; }
 
 /* ============================================================ milestones */
+/* Capped width so a short ladder stays a tidy row of cards instead of
+   stretching each one across the full container. */
 .ms-ladder {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  margin: 12px 0 34px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 860px;
+  margin: 12px auto 40px;
 }
 .ms-card {
   position: relative;
@@ -1892,7 +1895,7 @@ img { display: block; max-width: 100%; }
 .ms-card.top .ms-tier { color: #ffd977; border-color: rgba(255, 200, 60, 0.4); }
 .ms-wager {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 700;
   color: #fff;
   line-height: 1;
@@ -1908,7 +1911,7 @@ img { display: block; max-width: 100%; }
 .ms-arrow { color: var(--blue-2); font-size: 18px; margin: 10px 0 6px; }
 .ms-reward {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 700;
   color: #ffd977;
   line-height: 1;

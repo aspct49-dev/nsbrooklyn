@@ -19,15 +19,15 @@ import Admin from './pages/Admin'
 const ROUTE_META = {
   '/': {
     title: 'NSBROOKLYN — $5,000 BetBolt Leaderboard (Code NSB)',
-    description: 'Wager on BetBolt under code NSB and climb the $5,000 wager leaderboard. Weekly giveaways, wager milestones, rakeback and deposit bonuses.',
+    description: 'Wager on BetBolt under code NSB and climb the $5,000 wager leaderboard. Daily giveaways, wager milestones, rakeback and deposit bonuses.',
   },
   '/leaderboard': {
     title: 'NSBROOKLYN — $5,000 Wager Leaderboard (Code NSB)',
     description: 'Live BetBolt wager leaderboard for code NSB. Climb the ranks and win your share of the $5,000 prize pool.',
   },
   '/giveaways': {
-    title: 'NSBROOKLYN — Discord Giveaways',
-    description: 'Free giveaways hosted by NSBROOKLYN. Log in with Discord and enter with one click — no wagering required, winners drawn live.',
+    title: 'NSBROOKLYN — Daily Discord Giveaways',
+    description: 'Free daily giveaways hosted by NSBROOKLYN. Log in with Discord and enter with one click — no wagering required, winners drawn live.',
   },
   '/raffles': {
     title: 'NSBROOKLYN — Weekly $250 Wager Raffle',
@@ -35,7 +35,7 @@ const ROUTE_META = {
   },
   '/milestones': {
     title: 'NSBROOKLYN — Wager Milestone Rewards',
-    description: 'Earn up to $1,000 per milestone wagering on BetBolt under code NSB. Seven tiers from $1K to $5M wagered.',
+    description: 'Earn up to $5,000 per milestone wagering on BetBolt under code NSB. Tiers at $500K, $1M and $5M wagered.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',

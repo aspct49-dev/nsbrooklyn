@@ -171,7 +171,7 @@ export default function Giveaways() {
     <section className="section" id="giveaways">
       <div className="container">
         <div className="section-head">
-          <h2 className="bonus-heading">GIVEAWAYS</h2>
+          <h2 className="bonus-heading">DAILY GIVEAWAYS</h2>
           <p className="bonus-heading-sub">
             Hosted by <span>{config.brandName}</span> · log in with Discord to enter
           </p>
@@ -183,8 +183,9 @@ export default function Giveaways() {
           <div className="lb-status">Giveaways are temporarily unavailable — check back shortly.</div>
         ) : active.length === 0 && past.length === 0 ? (
           <div className="lb-status">
-            No giveaways running right now — new ones get posted here and announced in
-            the <a href={config.socials.discord} target="_blank" rel="noreferrer">Discord</a>.
+            No giveaways running right now — a new one is posted most days here and
+            announced in the{' '}
+            <a href={config.socials.discord} target="_blank" rel="noreferrer">Discord</a>.
           </div>
         ) : (
           <>
@@ -205,7 +206,8 @@ export default function Giveaways() {
 
             {active.length === 0 && (
               <div className="lb-status">
-                No giveaway is open right now — the next one will show up here.
+                No giveaway is open right now — the next one goes up shortly, so check
+                back tomorrow.
               </div>
             )}
 

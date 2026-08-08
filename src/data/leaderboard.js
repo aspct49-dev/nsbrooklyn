@@ -79,13 +79,9 @@ export const casinos = [
 //  each tier while wagering on BetBolt under code NSB. Claimed via Discord.
 // ============================================================================
 export const milestones = [
-  { wager: 1_000, reward: 10 },
-  { wager: 10_000, reward: 20 },
-  { wager: 25_000, reward: 50 },
-  { wager: 100_000, reward: 100 },
-  { wager: 500_000, reward: 200 },
-  { wager: 1_000_000, reward: 500 },
-  { wager: 5_000_000, reward: 1_000 },
+  { wager: 500_000, reward: 500 },
+  { wager: 1_000_000, reward: 1_000 },
+  { wager: 5_000_000, reward: 5_000 },
 ]
 
 export const milestoneTotal = milestones.reduce((sum, m) => sum + m.reward, 0)
@@ -127,10 +123,11 @@ export const bonuses = [
   {
     img: '/giftbox.png',
     title: 'GIVEAWAYS',
-    subtitle: 'Free to enter',
+    subtitle: 'Daily & free to enter',
     accent: 'gold',
     rows: [
-      { group: 'Discord giveaways' },
+      { group: 'Daily giveaways' },
+      'New giveaway every day',
       'Log in with Discord & click enter',
       'No wagering needed — totally free',
       { group: 'Weekly wager raffle' },
@@ -147,8 +144,8 @@ export const bonuses = [
     accent: 'gold',
     rows: [
       { group: 'Wager rewards' },
-      '7 tiers from $1K up to $5M wagered',
-      'Up to $1,000 per milestone',
+      '$500K, $1M and $5M wager tiers',
+      'Up to $5,000 per milestone',
       { group: 'Plus' },
       'Bi-weekly lossback up to 10%',
       'Claimed instantly via Discord',
