@@ -3,8 +3,8 @@
 // already in session. Errors come back as a query string so the page can show
 // them, rather than dumping raw JSON at someone mid-flow.
 import { redirect, getOrigin, getQuery, parseCookies, setCookie, sendJson } from '../_lib/http.js'
-import { readSession } from '../_lib/session.js'
-import { exchangeCode, fetchKickUser } from '../_lib/kick.js'
+import { readSession, isAdmin } from '../_lib/session.js'
+import { exchangeCode, fetchKickUser, subscribeToChat } from '../_lib/kick.js'
 import { createLink } from '../_lib/links.js'
 import { OAUTH_COOKIE } from './index.js'
 
@@ -36,6 +36,22 @@ export default async function handler(req, res) {
       kickId: kick.id,
       kickName: kick.name,
     })
+
+    // An admin linking is the broadcaster, so use their fresh token to turn
+    // on chat delivery. Setting a webhook URL alone delivers nothing — Kick
+    // only sends events you have explicitly subscribed to.
+    if (isAdmin(session)) {
+      const sub = await subscribeToChat(token.access_token, kick.id)
+      if (!sub.ok) {
+        console.error('kick chat subscription failed', sub)
+        return back(res, {
+          kick: 'linked',
+          name: kick.name,
+          warn: `Linked, but chat delivery could not be switched on (${sub.status || 'error'}). Check the app's webhook URL.`,
+        })
+      }
+      return back(res, { kick: 'linked', name: kick.name, chat: 'on' })
+    }
 
     return back(res, { kick: 'linked', name: kick.name })
   } catch (err) {

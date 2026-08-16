@@ -37,13 +37,18 @@ export function makePkce() {
   return { verifier, challenge }
 }
 
-export function authorizeUrl(origin, { state, challenge }) {
+/**
+ * @param scopes only the broadcaster needs `events:subscribe` — viewers are
+ * asked for `user:read` alone, so they aren't prompted to grant something
+ * that has nothing to do with linking their account.
+ */
+export function authorizeUrl(origin, { state, challenge, scopes = 'user:read' }) {
   const { id } = creds()
   const u = new URL(AUTHORIZE_URL)
   u.searchParams.set('client_id', id)
   u.searchParams.set('response_type', 'code')
   u.searchParams.set('redirect_uri', redirectUri(origin))
-  u.searchParams.set('scope', 'user:read')
+  u.searchParams.set('scope', scopes)
   u.searchParams.set('state', state)
   u.searchParams.set('code_challenge', challenge)
   u.searchParams.set('code_challenge_method', 'S256')
@@ -81,6 +86,69 @@ export async function fetchKickUser(accessToken) {
   const me = Array.isArray(body?.data) ? body.data[0] : body?.data
   if (!me?.user_id) throw Object.assign(new Error('Kick returned no user'), { status: 502 })
   return { id: String(me.user_id), name: me.name || me.username || `kick-${me.user_id}` }
+}
+
+// ------------------------------------------------ event subscriptions
+//
+// Setting a webhook URL on the Kick app is not enough on its own: Kick only
+// delivers events you have explicitly subscribed to, and the subscription is
+// created through the API rather than the dashboard. Chat belongs to the
+// broadcaster, so it has to be created with THEIR user token — an app token
+// is anonymous and has no channel to subscribe to.
+
+const SUBSCRIPTIONS = `${API}/events/subscriptions`
+export const CHAT_EVENT = 'chat.message.sent'
+
+/** App-level token (client_credentials) — enough to read subscriptions. */
+async function appToken() {
+  const { id, secret } = creds()
+  const res = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: id,
+      client_secret: secret,
+    }),
+  })
+  if (!res.ok) throw Object.assign(new Error(`Kick app token failed (${res.status})`), { status: 502 })
+  return (await res.json()).access_token
+}
+
+export async function listSubscriptions(token) {
+  const res = await fetch(SUBSCRIPTIONS, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) throw Object.assign(new Error(`Kick subscriptions read failed (${res.status})`), { status: 502 })
+  const body = await res.json()
+  return Array.isArray(body?.data) ? body.data : []
+}
+
+/** Is chat delivery actually switched on? Surfaced in the admin panel so a
+ *  missing subscription is visible instead of looking like "nobody entered". */
+export async function chatSubscriptionStatus() {
+  try {
+    const subs = await listSubscriptions(await appToken())
+    const chat = subs.filter((s) => s.event === CHAT_EVENT)
+    return { ok: chat.length > 0, count: chat.length, total: subs.length }
+  } catch (err) {
+    return { ok: false, error: err.message }
+  }
+}
+
+/** Subscribe this channel's chat to our webhook. Needs the broadcaster's own token. */
+export async function subscribeToChat(userToken, broadcasterUserId) {
+  const res = await fetch(SUBSCRIPTIONS, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${userToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      events: [{ name: CHAT_EVENT, version: 1 }],
+      method: 'webhook',
+      broadcaster_user_id: Number(broadcasterUserId),
+    }),
+  })
+  // 204 on success; 409-ish responses mean it already exists, which is fine
+  if (res.status === 204 || res.ok) return { ok: true }
+  const text = await res.text()
+  return { ok: false, status: res.status, error: text.slice(0, 200) }
 }
 
 // ------------------------------------------------- webhook verification

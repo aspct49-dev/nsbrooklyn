@@ -142,6 +142,31 @@ export default function KickGiveaway() {
         </div>
 
         {msg && <p className={`admin-msg ${msg.err ? 'err' : ''}`}>{msg.text}</p>}
+
+        {/* A missing subscription looks exactly like "nobody entered", so it
+            gets stated plainly rather than left to be discovered on stream. */}
+        {data?.subscription && !data.subscription.ok && (
+          <div className="kgw-alert">
+            <b>Kick chat delivery is OFF</b>
+            <p>
+              Kick isn't sending chat to the site, so nothing can be collected. Setting
+              the webhook URL isn't enough on its own — a subscription has to be created
+              with your broadcaster account.
+            </p>
+            <p>
+              Fix: go to <a href="/giveaways">/giveaways</a>, unlink Kick if it's already
+              linked, then link it again while signed in as an admin. That switches
+              delivery on automatically.
+              {data.subscription.error && <><br /><small>({data.subscription.error})</small></>}
+            </p>
+          </div>
+        )}
+        {data?.subscription?.ok && (
+          <p className="kgw-subok">
+            ✓ Kick chat delivery is live ({data.subscription.count} subscription
+            {data.subscription.count === 1 ? '' : 's'})
+          </p>
+        )}
         {data && !data.roleGate && requireRole && (
           <p className="admin-msg err">
             Role checking isn't configured on the server — nobody could pass it. Set the

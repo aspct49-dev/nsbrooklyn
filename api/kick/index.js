@@ -9,8 +9,8 @@
 //        redraw-place                  (admin)
 import crypto from 'node:crypto'
 import { sendJson, redirect, getQuery, getOrigin, setCookie, readBody } from '../_lib/http.js'
-import { readSession, requireAdmin } from '../_lib/session.js'
-import { authorizeUrl, makePkce } from '../_lib/kick.js'
+import { readSession, requireAdmin, isAdmin } from '../_lib/session.js'
+import { authorizeUrl, makePkce, chatSubscriptionStatus } from '../_lib/kick.js'
 import { linkForDiscord, removeLink } from '../_lib/links.js'
 import { hasRequiredRole, roleGateConfigured } from '../_lib/discord.js'
 import {
@@ -45,8 +45,8 @@ async function linkStatus(req, res, session) {
 
 async function adminView(res, extra = {}) {
   const session = await getSession()
-  const [entries, misses, entrants, messages] = await Promise.all([
-    listEntries(), listMisses(), countEntries(), winnerMessages(),
+  const [entries, misses, entrants, messages, subscription] = await Promise.all([
+    listEntries(), listMisses(), countEntries(), winnerMessages(), chatSubscriptionStatus(),
   ])
   res.setHeader('Cache-Control', 'private, no-store')
   return sendJson(res, 200, {
@@ -55,6 +55,7 @@ async function adminView(res, extra = {}) {
     misses,
     entrants,
     messages,
+    subscription,
     roleGate: roleGateConfigured(),
     ...extra,
   })
@@ -156,7 +157,10 @@ export default async function handler(req, res) {
         // state + verifier ride in one short-lived cookie; the callback needs
         // both and neither is worth persisting server-side
         setCookie(res, OAUTH_COOKIE, `${state}.${verifier}`, { maxAge: 600 })
-        return redirect(res, authorizeUrl(getOrigin(req), { state, challenge }))
+        // the broadcaster additionally grants events:subscribe so the callback
+        // can switch on chat delivery; viewers are never asked for it
+        const scopes = isAdmin(session) ? 'user:read events:subscribe' : 'user:read'
+        return redirect(res, authorizeUrl(getOrigin(req), { state, challenge, scopes }))
       }
 
       if (q.admin) {
