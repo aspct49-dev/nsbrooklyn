@@ -15,7 +15,7 @@ import { linkForDiscord, removeLink } from '../_lib/links.js'
 import { hasRequiredRole, roleGateConfigured } from '../_lib/discord.js'
 import {
   getSession, saveSession, publicSession, listEntries, countEntries, listMisses,
-  clearEntries, drawWinners, redrawPlace, ensureSeed, makeSeed,
+  clearEntries, drawWinners, redrawPlace, ensureSeed, makeSeed, winnerMessages,
   normalizeKeyword, normalizeWinnerCount, BLANK,
 } from '../_lib/kickgw.js'
 
@@ -45,8 +45,8 @@ async function linkStatus(req, res, session) {
 
 async function adminView(res, extra = {}) {
   const session = await getSession()
-  const [entries, misses, entrants] = await Promise.all([
-    listEntries(), listMisses(), countEntries(),
+  const [entries, misses, entrants, messages] = await Promise.all([
+    listEntries(), listMisses(), countEntries(), winnerMessages(),
   ])
   res.setHeader('Cache-Control', 'private, no-store')
   return sendJson(res, 200, {
@@ -54,6 +54,7 @@ async function adminView(res, extra = {}) {
     entries,
     misses,
     entrants,
+    messages,
     roleGate: roleGateConfigured(),
     ...extra,
   })

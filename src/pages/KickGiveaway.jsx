@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth, loginUrl } from '../hooks/useAuth'
-import { IconDiscord, IconKick, IconTrophy } from '../components/icons'
+import { IconDiscord, IconKick, IconExternal } from '../components/icons'
+import SpinReel, { EntrantTile } from '../components/SpinReel'
 
-const POLL_MS = 4000
+const POLL_MS = 3000
+const CHANNEL = 'nsbrooklyntv'
 
 const MISS_LABEL = {
   'not-linked': 'Kick not linked to Discord',
@@ -12,24 +14,27 @@ const MISS_LABEL = {
   'role-gate-not-configured': 'role gate not configured',
 }
 
-const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })
+const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 
-/** Admin-only live picker: open a keyword, watch entries land, draw. */
+/** Admin-only live picker: open a keyword, watch entries land, spin. */
 export default function KickGiveaway() {
   const { loading: authLoading, user, isAdmin } = useAuth()
 
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
-  const [form, setForm] = useState({ keyword: '!enter', winnerCount: 1, prize: '', requireRole: true })
+  const [keyword, setKeyword] = useState('!enter')
+  const [winnerCount, setWinnerCount] = useState(1)
+  const [requireRole, setRequireRole] = useState(true)
+  const [spinning, setSpinning] = useState(false)
+  const [revealed, setRevealed] = useState(false)
   const pollRef = useRef(null)
 
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/kick?admin=1')
-      if (!res.ok) return
-      setData(await res.json())
-    } catch { /* transient — the poll will retry */ }
+      if (res.ok) setData(await res.json())
+    } catch { /* transient — the poll retries */ }
   }, [])
 
   const post = async (body, okText) => {
@@ -54,259 +59,251 @@ export default function KickGiveaway() {
     }
   }
 
-  useEffect(() => {
-    if (!isAdmin) return undefined
-    load()
-    return () => clearInterval(pollRef.current)
-  }, [isAdmin, load])
-
-  // Poll only while entries can actually arrive — no point hammering it
-  // once the round is closed.
-  const open = Boolean(data?.session?.open)
-  useEffect(() => {
-    clearInterval(pollRef.current)
-    if (open) pollRef.current = setInterval(load, POLL_MS)
-    return () => clearInterval(pollRef.current)
-  }, [open, load])
-
-  if (authLoading) return <section className="section"><div className="container admin-gate">Loading…</div></section>
-  if (!user) {
-    return (
-      <section className="section">
-        <div className="container admin-gate">
-          <h1 className="section-title">Kick Giveaway</h1>
-          <p className="section-sub">Log in with Discord to continue.</p>
-          <a className="btn btn-primary admin-login" href={loginUrl}><IconDiscord /> Login with Discord</a>
-        </div>
-      </section>
-    )
-  }
-  if (!isAdmin) {
-    return (
-      <section className="section">
-        <div className="container admin-gate">
-          <h1 className="section-title">Kick Giveaway</h1>
-          <p className="section-sub">Logged in as <b>{user.name}</b> — this account is not an admin.</p>
-        </div>
-      </section>
-    )
-  }
+  useEffect(() => { if (isAdmin) load() }, [isAdmin, load])
 
   const s = data?.session
   const entries = data?.entries || []
   const misses = data?.misses || []
+  const messages = data?.messages || {}
+  const collecting = Boolean(s?.open)
   const drawn = Boolean(s?.drawnAt)
 
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  // Poll while entries can still arrive, and briefly after a draw so the
+  // winner's chat shows up.
+  useEffect(() => {
+    clearInterval(pollRef.current)
+    if (collecting || (drawn && revealed)) pollRef.current = setInterval(load, POLL_MS)
+    return () => clearInterval(pollRef.current)
+  }, [collecting, drawn, revealed, load])
 
-  const start = () => post({
-    action: 'open',
-    keyword: form.keyword,
-    winnerCount: Number(form.winnerCount),
-    prize: form.prize,
-    requireRole: form.requireRole,
-  }, 'Giveaway open — entries are being collected')
+  useEffect(() => { if (s?.keyword) setKeyword(s.keyword) }, [s?.keyword])
+
+  if (authLoading) return <section className="section"><div className="container admin-gate">Loading…</div></section>
+  if (!user) {
+    return (
+      <section className="section"><div className="container admin-gate">
+        <h1 className="section-title">Kick Giveaway</h1>
+        <p className="section-sub">Log in with Discord to continue.</p>
+        <a className="btn btn-primary admin-login" href={loginUrl}><IconDiscord /> Login with Discord</a>
+      </div></section>
+    )
+  }
+  if (!isAdmin) {
+    return (
+      <section className="section"><div className="container admin-gate">
+        <h1 className="section-title">Kick Giveaway</h1>
+        <p className="section-sub">Logged in as <b>{user.name}</b> — this account is not an admin.</p>
+      </div></section>
+    )
+  }
+
+  const start = () => {
+    setRevealed(false)
+    post({ action: 'open', keyword, winnerCount: Number(winnerCount), requireRole }, 'Collecting entries')
+  }
+
+  const spin = async () => {
+    const res = await post({ action: 'draw', winnerCount: Number(winnerCount) })
+    if (!res) return
+    setRevealed(false)
+    setSpinning(true)
+  }
+
+  const clearAll = () => {
+    if (!window.confirm('Clear all entries and the current result?')) return
+    setSpinning(false)
+    setRevealed(false)
+    post({ action: 'clear' }, 'Cleared')
+  }
+
+  const winner = s?.winners?.[0] || null
+  const winnerChat = winner ? messages[String(winner.kickId)]?.messages || [] : []
 
   return (
-    <section className="section" id="kick-giveaway">
+    <section className="section kgw" id="kick-giveaway">
       <div className="container">
-        <div className="admin-head">
-          <h1 className="section-title">Kick Giveaway</h1>
-          <p className="section-sub">
-            Open a keyword and viewers who type it in your Kick chat are entered
-            automatically — as long as they've linked Kick to Discord on the site.
-          </p>
+        {/* ------------------------------------------------------- header */}
+        <div className="kgw-bar">
+          <div className="kgw-bar-brand">
+            <span className="kgw-bar-logo"><IconKick /></span>
+            <span className="kgw-bar-url">kick.com/ <b>{CHANNEL}</b></span>
+          </div>
+          <div className="kgw-bar-right">
+            <span className={`kgw-state ${collecting ? 'on' : ''}`}>
+              <span className="dot" />
+              {collecting ? `COLLECTING · ${s.keyword}` : 'IDLE'}
+            </span>
+            {collecting && (
+              <button className="kgw-btn ghost" onClick={() => post({ action: 'close' }, 'Entries closed')} disabled={busy}>
+                STOP
+              </button>
+            )}
+          </div>
         </div>
 
         {msg && <p className={`admin-msg ${msg.err ? 'err' : ''}`}>{msg.text}</p>}
-
-        {data && !data.roleGate && s?.requireRole && (
+        {data && !data.roleGate && requireRole && (
           <p className="admin-msg err">
-            Role checking isn't configured on the server, so nobody can pass the role
-            requirement. Set DISCORD_BOT_TOKEN, DISCORD_GUILD_ID and
-            DISCORD_REQUIRED_ROLE_IDS, or turn the requirement off.
+            Role checking isn't configured on the server — nobody could pass it. Set the
+            Discord bot env vars, or untick the role requirement.
           </p>
         )}
 
-        <div className="kgw-grid">
-          {/* ---------------------------------------------- control panel */}
-          <div className="admin-card">
-            <div className="admin-card-head">
-              <h3>{s?.open ? 'Collecting entries' : 'Set up a round'}</h3>
-              <span className={`admin-status ${s?.open ? 'live' : drawn ? 'ended' : 'off'}`}>
-                {s?.open ? 'Open' : drawn ? 'Drawn' : 'Closed'}
-              </span>
-            </div>
+        <div className="kgw-layout">
+          {/* ----------------------------------------------------- controls */}
+          <aside className="kgw-side">
+            <div className="kgw-panel">
+              <h4 className="kgw-panel-title">Controls</h4>
 
-            {s?.open ? (
-              <>
-                <div className="kgw-live">
-                  <div className="kgw-keyword"><IconKick /> <code>{s.keyword}</code></div>
-                  <p className="admin-utc">
-                    Opened {time(s.openedAt)} by {s.openedBy}
-                    {s.requireRole ? ' · Discord role required' : ' · no role required'}
-                    {s.prize ? ` · ${s.prize}` : ''}
-                  </p>
+              <label className="kgw-label">Entry keyword</label>
+              <input
+                className="kgw-input"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="!enter"
+                maxLength={40}
+                disabled={collecting}
+              />
+
+              <div className="kgw-two">
+                <div>
+                  <label className="kgw-label">Winners</label>
+                  <input
+                    className="kgw-input"
+                    type="number" min="1" max="100"
+                    value={winnerCount}
+                    onChange={(e) => setWinnerCount(e.target.value)}
+                    disabled={collecting}
+                  />
                 </div>
-                <div className="gw-actions">
-                  <button className="btn btn-ghost admin-save" onClick={() => post({ action: 'close' }, 'Entries closed')} disabled={busy}>
-                    Close entries
-                  </button>
-                  <button
-                    className="btn btn-primary admin-save"
-                    onClick={() => post({ action: 'draw', winnerCount: s.winnerCount }, 'Winners drawn ✓')}
-                    disabled={busy || !entries.length}
-                  >
-                    Draw {s.winnerCount > 1 ? `${s.winnerCount} winners` : 'winner'}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <label className="admin-label">
-                  Chat keyword
-                  <input className="admin-input" value={form.keyword} onChange={set('keyword')} placeholder="!enter" maxLength={40} />
-                </label>
-                <div className="gw-form-row">
-                  <label className="admin-label">
-                    Winners
-                    <input className="admin-input" type="number" min="1" max="100" value={form.winnerCount} onChange={set('winnerCount')} />
-                  </label>
-                  <label className="admin-label">
-                    Prize (optional)
-                    <input className="admin-input" value={form.prize} onChange={set('prize')} placeholder="$50 Cash" maxLength={120} />
-                  </label>
-                </div>
-                <label className="admin-check">
+                <label className="kgw-toggle">
                   <input
                     type="checkbox"
-                    checked={form.requireRole}
-                    onChange={(e) => setForm((f) => ({ ...f, requireRole: e.target.checked }))}
+                    checked={requireRole}
+                    onChange={(e) => setRequireRole(e.target.checked)}
+                    disabled={collecting}
                   />
-                  <span>
-                    Require the Discord role
-                    <small>
-                      Off means anyone with Kick linked to Discord can enter. On also
-                      requires the role set in DISCORD_REQUIRED_ROLE_IDS.
-                    </small>
-                  </span>
+                  <span>Certified<br /><small>role required</small></span>
                 </label>
+              </div>
+
+              <button className="kgw-btn" onClick={start} disabled={busy || collecting}>
+                <span className="dot" /> START COLLECTING
+              </button>
+
+              <button className="kgw-btn go" onClick={spin} disabled={busy || spinning || !entries.length}>
+                {spinning ? 'SPINNING…' : `SPIN (${entries.length} ${entries.length === 1 ? 'ENTRY' : 'ENTRIES'})`}
+              </button>
+
+              <button className="kgw-btn ghost" onClick={clearAll} disabled={busy}>CLEAR ALL</button>
+            </div>
+
+            <div className="kgw-panel">
+              <h4 className="kgw-panel-title">
+                Entries <span className="kgw-count-badge">{entries.length}</span>
+              </h4>
+              {entries.length === 0 ? (
+                <p className="kgw-empty">
+                  {collecting ? `Waiting for ${s.keyword}…` : 'Start collecting to gather entries.'}
+                </p>
+              ) : (
+                <div className="kgw-entries">
+                  {entries.map((e) => (
+                    <div className="kgw-entry" key={e.discordId} title={`Discord: ${e.discordName}`}>
+                      <EntrantTile entrant={e} size={26} />
+                      <span>{e.kickName}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {misses.length > 0 && (
+                <details className="kgw-misses">
+                  <summary>{misses.length} not eligible</summary>
+                  {misses.map((m) => (
+                    <div key={m.kickName + m.at}>
+                      {m.kickName} <small>{MISS_LABEL[m.reason] || m.reason}</small>
+                    </div>
+                  ))}
+                </details>
+              )}
+            </div>
+          </aside>
+
+          {/* -------------------------------------------------------- stage */}
+          <div className="kgw-stage">
+            <div className="kgw-panel reel-panel">
+              <SpinReel
+                entrants={entries}
+                winner={winner}
+                spinning={spinning}
+                onDone={() => { setSpinning(false); setRevealed(true); load() }}
+              />
+            </div>
+
+            {drawn && revealed && winner && (
+              <div className="kgw-panel winner-panel">
+                <div className="kgw-winner">
+                  <EntrantTile entrant={winner} size={62} />
+                  <div className="kgw-winner-text">
+                    <span className="kgw-winner-lbl">🏆 Winner</span>
+                    <span className="kgw-winner-name">{winner.kickName}</span>
+                    <span className="kgw-winner-sub">Discord: {winner.discordName}</span>
+                  </div>
+                  <a
+                    className="kgw-btn ghost view"
+                    href={`https://kick.com/${winner.kickName}`}
+                    target="_blank" rel="noreferrer"
+                  >
+                    VIEW PROFILE <IconExternal />
+                  </a>
+                </div>
+
+                {s.winners.length > 1 && (
+                  <div className="kgw-others">
+                    {s.winners.slice(1).map((w) => (
+                      <span key={w.place}><b>#{w.place}</b> {w.kickName}</span>
+                    ))}
+                  </div>
+                )}
 
                 <div className="gw-actions">
-                  <button className="btn btn-primary admin-save" onClick={start} disabled={busy}>
-                    Open giveaway
-                  </button>
-                  {(entries.length > 0 || drawn) && (
+                  {s.winners.map((w) => (
                     <button
-                      className="btn btn-ghost admin-save danger"
+                      key={w.place}
+                      className="gw-reroll"
                       disabled={busy}
-                      onClick={() => window.confirm('Clear all entries and results?') && post({ action: 'clear' }, 'Cleared')}
+                      onClick={() => window.confirm(`Replace ${w.kickName} at #${w.place}?`) &&
+                        post({ action: 'redraw-place', place: w.place }, `#${w.place} redrawn`)}
                     >
-                      Clear
+                      Redraw #{w.place}
                     </button>
-                  )}
+                  ))}
                 </div>
-                <p className="admin-utc" style={{ marginTop: 10 }}>
-                  Opening a round clears the previous entries, so nobody carries over
-                  from the last keyword.
-                </p>
-              </>
-            )}
-          </div>
-
-          {/* ------------------------------------------------------ stats */}
-          <div className="admin-card kgw-stats">
-            <div className="kgw-count">
-              <span className="n">{data ? entries.length : '—'}</span>
-              <span className="l">Entries</span>
-            </div>
-            {misses.length > 0 && (
-              <div className="kgw-count muted">
-                <span className="n">{misses.length}</span>
-                <span className="l">Not eligible</span>
               </div>
             )}
-            {s?.open && <p className="admin-utc">Updating every {POLL_MS / 1000}s…</p>}
-          </div>
-        </div>
 
-        {/* -------------------------------------------------------- winners */}
-        {drawn && s.winners?.length > 0 && (
-          <div className="admin-card kgw-winners">
-            <div className="admin-card-head">
-              <h3><IconTrophy /> {s.winners.length > 1 ? 'Winners' : 'Winner'}</h3>
-              <span className="admin-status ended">from {s.entrantsAtDraw} entries</span>
-            </div>
-            {s.winners.map((w) => (
-              <div className="gw-winner-row" key={w.place}>
-                <span>
-                  <b>#{w.place}</b> {w.discordName}
-                  <span className="admin-utc"> · Kick: {w.kickName}</span>
-                </span>
-                <button
-                  className="gw-reroll"
-                  disabled={busy}
-                  onClick={() => window.confirm(`Replace ${w.discordName} at #${w.place}?`) &&
-                    post({ action: 'redraw-place', place: w.place }, `Place #${w.place} redrawn ✓`)}
-                >
-                  Redraw
-                </button>
-              </div>
-            ))}
-            {s.redraws?.length > 0 && (
-              <p className="admin-utc" style={{ marginTop: 10 }}>
-                {s.redraws.map((r) => (
-                  <span key={`${r.place}-${r.at}`} style={{ display: 'block' }}>
-                    #{r.place}: {r.removed} → {r.replacedWith} · {time(r.at)} by {r.by}
-                  </span>
-                ))}
-              </p>
-            )}
-            <p className="admin-utc" style={{ marginTop: 8 }}>
-              Drawn {new Date(s.drawnAt).toLocaleString()} by {s.drawnBy} · seed{' '}
-              <code className="kgw-seed">{s.seed}</code>
-            </p>
-          </div>
-        )}
-
-        {/* -------------------------------------------------------- entries */}
-        <div className="admin-card kgw-list">
-          <div className="admin-card-head">
-            <h3>Entries</h3>
-            {s?.keyword && <span className="admin-status off">{s.keyword}</span>}
-          </div>
-          {entries.length === 0 ? (
-            <p className="admin-utc">
-              {s?.open
-                ? `Nobody has typed ${s.keyword} yet.`
-                : 'No entries — open a round to start collecting.'}
-            </p>
-          ) : (
-            <div className="gw-winner-list">
-              {entries.map((e) => (
-                <div key={e.discordId}>
-                  <b>{e.kickName}</b>
-                  <span className="admin-utc"> → {e.discordName} · {time(e.at)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {misses.length > 0 && (
-            <>
-              <p className="admin-utc" style={{ marginTop: 14 }}>
-                <b>{misses.length}</b> typed the keyword but couldn't be entered:
-              </p>
-              <div className="gw-winner-list">
-                {misses.map((m) => (
-                  <div key={m.kickName + m.at}>
-                    {m.kickName}
-                    <span className="admin-utc"> · {MISS_LABEL[m.reason] || m.reason} · {time(m.at)}</span>
+            {drawn && revealed && winner && (
+              <div className="kgw-panel">
+                <h4 className="kgw-panel-title">{winner.kickName}'s recent messages</h4>
+                {winnerChat.length === 0 ? (
+                  <p className="kgw-empty">Waiting for {winner.kickName} to chat…</p>
+                ) : (
+                  <div className="kgw-chat">
+                    {winnerChat.map((m, i) => (
+                      <div key={i}><span className="t">{time(m.at)}</span> {m.text}</div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            </>
-          )}
+            )}
+
+            {drawn && revealed && s.seed && (
+              <p className="kgw-fair">
+                Provably fair — winner decided server-side before the spin.
+                Seed <code>{s.seed.slice(0, 24)}…</code> · drawn from {s.entrantsAtDraw} entries
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>

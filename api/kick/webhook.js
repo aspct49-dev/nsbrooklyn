@@ -9,7 +9,7 @@ import { sendJson, readRawBody } from '../_lib/http.js'
 import { verifyWebhook } from '../_lib/kick.js'
 import { linkForKick } from '../_lib/links.js'
 import { hasRequiredRole } from '../_lib/discord.js'
-import { getSession, messageMatches, addEntry, recordMiss } from '../_lib/kickgw.js'
+import { getSession, messageMatches, addEntry, recordMiss, recordWinnerMessage } from '../_lib/kickgw.js'
 
 // Vercel's Node runtime parses JSON bodies by default, which drains the
 // stream — and a re-serialized body would not match Kick's signature.
@@ -26,20 +26,33 @@ export default async function handler(req, res) {
     if (type !== 'chat.message.sent') return sendJson(res, 200, { ignored: type || 'unknown' })
 
     const gw = await getSession()
-    if (!gw.open || !gw.keyword) return sendJson(res, 200, { ignored: 'no-open-giveaway' })
-
     const payload = JSON.parse(rawBody.toString('utf8'))
     const sender = payload?.sender
     if (!sender?.user_id || sender.is_anonymous) return sendJson(res, 200, { ignored: 'anonymous' })
-    if (!messageMatches(payload?.content, gw.keyword)) return sendJson(res, 200, { matched: false })
 
     // Only our own channel, when configured — the same app could in
-    // principle receive events for another broadcaster.
+    // principle receive events for another broadcaster. Checked before
+    // anything is recorded, so a winner chatting elsewhere isn't logged here.
     const channel = process.env.KICK_CHANNEL_SLUG
     if (channel && payload?.broadcaster?.channel_slug &&
         payload.broadcaster.channel_slug.toLowerCase() !== channel.toLowerCase()) {
       return sendJson(res, 200, { ignored: 'other-channel' })
     }
+
+    // Once drawn, keep a short log of what the winners say so the picker can
+    // show them reacting. Matched on the Kick id already in the payload, so
+    // this costs no extra lookup for the other 99% of chat. This never
+    // creates an entry — the round is closed by then.
+    if (gw.drawnAt && gw.winners?.length) {
+      const isWinner = gw.winners.some((w) => String(w.kickId) === String(sender.user_id))
+      if (isWinner) {
+        await recordWinnerMessage(sender.user_id, sender.username, payload?.content ?? '')
+        return sendJson(res, 200, { winnerMessage: true })
+      }
+    }
+
+    if (!gw.open || !gw.keyword) return sendJson(res, 200, { ignored: 'no-open-giveaway' })
+    if (!messageMatches(payload?.content, gw.keyword)) return sendJson(res, 200, { matched: false })
 
     const kickName = sender.username || `kick-${sender.user_id}`
     const link = await linkForKick(sender.user_id)
@@ -61,6 +74,7 @@ export default async function handler(req, res) {
       discordName: link.discordName,
       kickId: String(sender.user_id),
       kickName: link.kickName || kickName,
+      kickAvatar: sender.profile_picture || null,
     })
     return sendJson(res, 200, { matched: true, entered: true })
   } catch (err) {

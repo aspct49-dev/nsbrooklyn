@@ -15,6 +15,7 @@ export { ensureSeed, makeSeed, hashSeed }
 const KEY = 'nsb:kickgw'
 const ENTRIES = 'nsb:kickgw:entries'
 const MISSES = 'nsb:kickgw:misses'
+const MSGS = 'nsb:kickgw:msgs'
 
 const bad = (msg) => Object.assign(new Error(msg), { status: 400 })
 
@@ -80,6 +81,7 @@ export const addEntry = (user) =>
     discordName: user.discordName,
     kickId: user.kickId,
     kickName: user.kickName,
+    kickAvatar: user.kickAvatar || null,
     at: new Date().toISOString(),
   })
 
@@ -103,7 +105,26 @@ export async function listMisses() {
   return Object.values(map).sort((a, b) => new Date(b.at) - new Date(a.at))
 }
 
-export const clearEntries = () => Promise.all([del(ENTRIES), del(MISSES)])
+export const clearEntries = () => Promise.all([del(ENTRIES), del(MISSES), del(MSGS)])
+
+// ------------------------------------------------------- winner chatter
+// After a draw the picker shows what the winner says next, so you can see
+// them react on stream. Only winners are recorded, and matching is on the
+// Kick id already in the webhook payload — no extra lookup per message.
+
+const MAX_MSGS = 6
+
+export async function recordWinnerMessage(kickId, kickName, text) {
+  const all = await hashGetAll(MSGS)
+  const prev = all[String(kickId)]?.messages || []
+  await hashSet(MSGS, String(kickId), {
+    kickName,
+    messages: [...prev, { text: String(text).slice(0, 300), at: new Date().toISOString() }].slice(-MAX_MSGS),
+  })
+}
+
+/** { kickId: { kickName, messages[] } } */
+export const winnerMessages = () => hashGetAll(MSGS)
 
 // --------------------------------------------------------------- the draw
 
@@ -113,7 +134,9 @@ export function drawWinners({ entries, winnerCount, seed }) {
     place: i + 1,
     discordId: w.discordId,
     discordName: w.discordName,
+    kickId: w.kickId,
     kickName: w.kickName,
+    kickAvatar: w.kickAvatar || null,
   }))
 }
 
@@ -142,7 +165,14 @@ export function redrawPlace({ session, entries, place, seed }) {
   return {
     winners: winners.map((w) =>
       w.place === place
-        ? { ...w, discordId: replacement.discordId, discordName: replacement.discordName, kickName: replacement.kickName }
+        ? {
+            ...w,
+            discordId: replacement.discordId,
+            discordName: replacement.discordName,
+            kickId: replacement.kickId,
+            kickName: replacement.kickName,
+            kickAvatar: replacement.kickAvatar || null,
+          }
         : w),
     record: {
       place,

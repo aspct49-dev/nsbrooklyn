@@ -2285,56 +2285,201 @@ img { display: block; max-width: 100%; }
 .kick-panel-actions .gv-enter { width: auto; padding: 11px 18px; }
 .gv-enter.kick { background: #53fc18; color: #0b1a05; box-shadow: none; }
 
-/* ------------------------------------------- admin Kick giveaway picker */
+/* ------------------------------------------- admin Kick giveaway picker
+   Deliberately its own dark-slate look rather than the site's red: it is a
+   staff tool driven live on stream, and needs to read at a glance. */
 .nav-item.admin-only { border: 1px dashed rgba(83, 252, 24, 0.45); }
 .nav-item.admin-only .ico { color: #53fc18; }
 
-.kgw-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 22px;
-  align-items: start;
-  margin-bottom: 22px;
-}
-.kgw-live { margin-bottom: 16px; }
-.kgw-keyword {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: rgba(83, 252, 24, 0.09);
-  border: 1px solid rgba(83, 252, 24, 0.4);
-  margin-bottom: 10px;
-}
-.kgw-keyword svg { width: 20px; height: 20px; color: #53fc18; flex: none; }
-.kgw-keyword code {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 22px; font-weight: 700; color: #53fc18;
-}
+.kgw { --kick: #53fc18; --slate: #1b2233; --slate-2: #141a28; --edge: rgba(255, 255, 255, 0.09); }
+.kgw .container { max-width: 1320px; }
 
-.kgw-stats {
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-  text-align: center;
+.kgw-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  background: var(--slate-2);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
 }
-.kgw-count { display: flex; flex-direction: column; }
-.kgw-count .n {
+.kgw-bar-brand { display: flex; align-items: center; gap: 12px; }
+.kgw-bar-logo {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center;
+  background: var(--kick); color: #0b1a05;
+}
+.kgw-bar-logo svg { width: 18px; height: 18px; }
+.kgw-bar-url { font-family: 'Chakra Petch', sans-serif; font-size: 15px; color: var(--text-muted); }
+.kgw-bar-url b { color: #fff; }
+.kgw-bar-right { display: flex; align-items: center; gap: 10px; }
+.kgw-state {
+  display: inline-flex; align-items: center; gap: 8px;
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 52px; font-weight: 700; color: #fff; line-height: 1;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--text-muted);
+  border: 1px solid var(--edge);
+  border-radius: 999px; padding: 6px 14px;
 }
-.kgw-count .l {
-  font-size: 10.5px; font-weight: 700;
+.kgw-state .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.kgw-state.on { color: var(--kick); border-color: rgba(83, 252, 24, 0.45); }
+.kgw-state.on .dot { background: var(--kick); animation: kgwPulse 1.4s ease-in-out infinite; }
+@keyframes kgwPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.kgw-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }
+.kgw-side { display: flex; flex-direction: column; gap: 18px; }
+.kgw-stage { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.kgw-panel {
+  background: var(--slate);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: 16px;
+}
+.kgw-panel-title {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px; font-weight: 700;
   letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-muted); margin-top: 6px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
 }
-.kgw-count.muted .n { font-size: 30px; color: var(--text-muted); }
+.kgw-count-badge { color: var(--kick); font-size: 14px; }
 
-.kgw-winners { margin-bottom: 22px; }
-.kgw-winners .admin-card-head h3 { display: flex; align-items: center; gap: 9px; }
-.kgw-winners .admin-card-head svg { width: 18px; height: 18px; color: #ffd977; }
-.kgw-seed { word-break: break-all; font-size: 11px; }
-.kgw-list .gw-winner-list { max-height: 380px; overflow-y: auto; }
+.kgw-label {
+  display: block;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 6px;
+}
+.kgw-input {
+  width: 100%;
+  background: #0d121c;
+  border: 1px solid var(--edge);
+  border-radius: 9px;
+  padding: 11px 13px;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.kgw-input:focus { outline: none; border-color: var(--kick); }
+.kgw-input:disabled { opacity: 0.55; }
+.kgw-two { display: flex; gap: 10px; align-items: flex-start; }
+.kgw-two > div { flex: 0 0 84px; }
+.kgw-toggle { display: flex; align-items: flex-start; gap: 8px; padding-top: 18px; cursor: pointer; }
+.kgw-toggle input { margin-top: 2px; accent-color: var(--kick); }
+.kgw-toggle span { font-size: 12px; color: var(--text-soft); font-weight: 600; line-height: 1.35; }
+.kgw-toggle small { color: var(--text-muted); font-weight: 400; }
 
-@media (max-width: 860px) {
-  .kgw-grid { grid-template-columns: 1fr; }
+.kgw-btn {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 9px;
+  border-radius: 10px;
+  background: #0d121c;
+  border: 1px solid var(--edge);
+  color: var(--text);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  transition: all 0.15s ease;
+}
+.kgw-btn:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.28); color: #fff; }
+.kgw-btn:disabled { opacity: 0.4; cursor: default; }
+.kgw-btn .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.kgw-btn.go { background: var(--kick); border-color: var(--kick); color: #0b1a05; }
+.kgw-btn.go:hover:not(:disabled) { filter: brightness(1.08); }
+.kgw-btn.ghost { background: transparent; }
+.kgw-btn.view { width: auto; margin: 0; padding: 9px 14px; font-size: 11px; }
+.kgw-btn.view svg { width: 13px; height: 13px; }
+
+.kgw-empty { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; }
+
+.kgw-entries { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+.kgw-entry {
+  display: flex; align-items: center; gap: 9px;
+  background: #0d121c;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 13px; color: var(--text);
+}
+.kgw-misses { margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+.kgw-misses summary { cursor: pointer; color: #ffd977; }
+.kgw-misses div { padding: 4px 0; }
+.kgw-misses small { opacity: 0.7; }
+
+/* avatar tile, shared by the entry list, the reel and the winner card */
+.kgw-tile { border-radius: 7px; object-fit: cover; flex: none; display: block; }
+.kgw-tile.letter {
+  display: grid; place-items: center;
+  color: #fff; font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+}
+
+/* ------------------------------------------------------------- the reel */
+.reel-panel { padding: 0; overflow: hidden; }
+.kgw-reel { position: relative; overflow: hidden; padding: 22px 0; min-height: 118px; }
+.kgw-reel.empty {
+  display: grid; place-items: center;
+  color: var(--text-muted); font-size: 13px; padding: 46px 20px;
+}
+.kgw-strip { display: flex; gap: 12px; will-change: transform; }
+.kgw-reel-card {
+  flex: none;
+  width: 92px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: #0d121c;
+  border: 1px solid var(--edge);
+  border-radius: 11px;
+  padding: 12px 8px;
+}
+.kgw-reel-card.won { border-color: var(--kick); box-shadow: 0 0 26px -6px rgba(83, 252, 24, 0.7); }
+.kgw-reel-name {
+  font-size: 11px; color: var(--text-soft);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* the centre markers the reel lands between */
+.kgw-marker {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0; z-index: 3;
+  border-left: 7px solid transparent; border-right: 7px solid transparent;
+}
+.kgw-marker.top { top: 2px; border-top: 9px solid var(--kick); }
+.kgw-marker.bottom { bottom: 2px; border-bottom: 9px solid var(--kick); }
+
+/* ----------------------------------------------------------- the winner */
+.winner-panel {
+  background: linear-gradient(135deg, rgba(83, 252, 24, 0.13), var(--slate) 60%);
+  border-color: rgba(83, 252, 24, 0.45);
+}
+.kgw-winner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.kgw-winner-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.kgw-winner-lbl {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+}
+.kgw-winner-name {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: clamp(26px, 4vw, 40px); font-weight: 700;
+  color: var(--kick); line-height: 1.05; overflow-wrap: anywhere;
+}
+.kgw-winner-sub { font-size: 12.5px; color: var(--text-muted); }
+.kgw-others {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--edge);
+  font-size: 13px; color: var(--text-soft);
+}
+.kgw-others b { color: var(--kick); }
+
+.kgw-chat { display: flex; flex-direction: column; gap: 7px; font-size: 13px; color: var(--text); }
+.kgw-chat .t { color: var(--text-muted); font-size: 11px; margin-right: 6px; }
+.kgw-fair { font-size: 11.5px; color: var(--text-muted); text-align: center; }
+.kgw-fair code { font-size: 11px; color: var(--text-soft); }
+
+@media (max-width: 900px) {
+  .kgw-layout { grid-template-columns: 1fr; }
 }
 
 /* admin: checkbox with helper text */
