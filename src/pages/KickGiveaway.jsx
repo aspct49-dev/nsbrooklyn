@@ -162,94 +162,40 @@ export default function KickGiveaway() {
 
         {msg && <p className={`admin-msg ${msg.err ? 'err' : ''}`}>{msg.text}</p>}
 
-        {/* Delivery problems look exactly like "nobody entered", so they are
-            stated plainly — including WHICH channel is subscribed, since a
-            subscription for the wrong channel is the failure that otherwise
-            looks perfectly healthy. */}
-        {data?.subscription && !data.subscription.ok && (
-          <div className="kgw-alert">
-            {data.subscription.reason === 'wrong-channel' ? (
-              <>
-                <b>Chat is connected to the WRONG channel</b>
-                <p>
-                  Kick is delivering chat for broadcaster{' '}
-                  <code>{(data.subscription.subscribedTo || []).join(', ')}</code>, but this
-                  picker watches <b>{data.subscription.channel}</b> (id{' '}
-                  <code>{data.subscription.broadcasterId}</code>). A subscription belongs to
-                  whichever Kick account authorised it, so it has to be granted by the{' '}
-                  <b>{data.subscription.channel}</b> account itself.
-                </p>
-                <p>
-                  <a href="/api/kick?start=1&broadcaster=1">Connect chat as {data.subscription.channel}</a>
-                  {' · '}
-                  <button className="kgw-linkbtn" onClick={() => post({ action: 'clear-subscriptions' }, 'Stale subscriptions removed')}>
-                    remove the wrong subscription
-                  </button>
-                </p>
-              </>
-            ) : (
-              <>
-                <b>Kick chat delivery is OFF</b>
-                <p>
-                  Kick isn't sending chat here, so nothing can be collected. Setting a
-                  webhook URL isn't enough on its own — a subscription has to be granted
-                  by the channel owner.
-                </p>
-                <p>
-                  <a href="/api/kick?start=1&broadcaster=1">Connect chat as the broadcaster</a>
-                  {' — sign in to Kick as '}
-                  <b>{data.subscription.channel || 'your channel'}</b> when it asks.
-                  {data.subscription.error && <><br /><small>({data.subscription.error})</small></>}
-                </p>
-              </>
+        {/* The webhook path is no longer how chat gets here — the picker reads
+            the socket directly. Its status is kept for reference but tucked
+            away: left prominent it reports a scary failure about a mechanism
+            nothing depends on any more. */}
+        {(data?.subscription || data?.hits) && (
+          <details className="kgw-webhook">
+            <summary>
+              Webhook status (not used — chat is read directly)
+            </summary>
+            {data?.subscription && (
+              <div>
+                Subscription:{' '}
+                {data.subscription.ok
+                  ? `live for ${data.subscription.channel}`
+                  : data.subscription.reason === 'wrong-channel'
+                    ? `pointing at ${(data.subscription.subscribedTo || []).join(', ')}, not ${data.subscription.channel}`
+                    : 'none'}
+                {(data.subscription.stale || []).length > 0 && (
+                  <>
+                    {' · '}
+                    <button className="kgw-linkbtn" onClick={() => post({ action: 'clear-subscriptions' }, 'Removed')}>
+                      remove stale
+                    </button>
+                  </>
+                )}
+              </div>
             )}
-          </div>
-        )}
-        {data?.subscription?.ok && (
-          <p className="kgw-subok">
-            ✓ Kick chat delivery is live for <b>{data.subscription.channel || 'this app'}</b>
-            {data.subscription.warn && <> — {data.subscription.warn}</>}
-          </p>
-        )}
-
-        {/* Whether Kick is talking to us at all. "No chat events yet" versus
-            "arriving but rejected" are completely different problems, and
-            without this they look identical from here. */}
-        {collecting && connected && chatSeen === 0 && (
-          <div className="kgw-hits none">
-            Connected to <b>chatrooms.{chatroomId}</b> but no chat has come through yet.
-            If your chat is active and this stays at zero, the chatroom id is wrong —
-            check <code>KICK_CHATROOM_ID</code>.
-          </div>
-        )}
-        {chatErr && <div className="kgw-alert"><b>Can't reach the chat room</b><p>{chatErr}</p></div>}
-
-        {data?.hits && (
-          <div className={`kgw-hits ${data.hits.count ? '' : 'none'}`}>
-            {data.hits.count ? (
-              <>
-                <b>{data.hits.count}</b> chat events received · last{' '}
-                {new Date(data.hits.lastAt).toLocaleTimeString()}
-                <details>
-                  <summary>recent</summary>
-                  {data.hits.recent.map((h, i) => (
-                    <div key={i}>
-                      {time(h.at)} · <b>{h.outcome}</b>
-                      {h.from ? ` · ${h.from}` : ''}{h.detail ? ` · ${h.detail}` : ''}
-                    </div>
-                  ))}
-                </details>
-              </>
-            ) : (
-              <>
-                <b>No chat events have ever reached the site.</b> Kick isn't delivering,
-                so the problem is on the Kick side rather than here — check the app's
-                webhook URL is exactly{' '}
-                <code>https://www.usecodensb.gg/api/kick/webhook</code> and that webhooks
-                are enabled.
-              </>
+            {data?.hits && (
+              <div>
+                Events received: {data.hits.count}
+                {data.hits.lastAt && ` · last ${time(data.hits.lastAt)}`}
+              </div>
             )}
-          </div>
+          </details>
         )}
 
         {data && !data.roleGate && requireRole && (
