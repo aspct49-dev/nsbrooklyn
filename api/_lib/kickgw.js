@@ -16,6 +16,7 @@ const KEY = 'nsb:kickgw'
 const ENTRIES = 'nsb:kickgw:entries'
 const MISSES = 'nsb:kickgw:misses'
 const MSGS = 'nsb:kickgw:msgs'
+const HITS = 'nsb:kickgw:hits'
 
 const bad = (msg) => Object.assign(new Error(msg), { status: 400 })
 
@@ -125,6 +126,28 @@ export async function recordWinnerMessage(kickId, kickName, text) {
 
 /** { kickId: { kickName, messages[] } } */
 export const winnerMessages = () => hashGetAll(MSGS)
+
+// ------------------------------------------------------------ diagnostics
+// A record of what actually reached the webhook. Without it, "Kick isn't
+// sending" and "Kick is sending and we're rejecting it" look identical from
+// the admin panel — which is a miserable thing to debug mid-stream.
+
+const MAX_HITS = 12
+
+export async function recordHit(info) {
+  try {
+    const prev = (await getJson(HITS, null)) || { count: 0, recent: [] }
+    await setJson(HITS, {
+      count: (prev.count || 0) + 1,
+      lastAt: new Date().toISOString(),
+      recent: [{ at: new Date().toISOString(), ...info }, ...(prev.recent || [])].slice(0, MAX_HITS),
+    })
+  } catch {
+    // diagnostics must never break delivery
+  }
+}
+
+export const getHits = () => getJson(HITS, { count: 0, lastAt: null, recent: [] })
 
 // --------------------------------------------------------------- the draw
 

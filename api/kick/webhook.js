@@ -9,7 +9,7 @@ import { sendJson, readRawBody } from '../_lib/http.js'
 import { verifyWebhook } from '../_lib/kick.js'
 import { linkForKick } from '../_lib/links.js'
 import { hasRequiredRole } from '../_lib/discord.js'
-import { getSession, messageMatches, addEntry, recordMiss, recordWinnerMessage } from '../_lib/kickgw.js'
+import { getSession, messageMatches, addEntry, recordMiss, recordWinnerMessage, recordHit } from '../_lib/kickgw.js'
 
 // Vercel's Node runtime parses JSON bodies by default, which drains the
 // stream — and a re-serialized body would not match Kick's signature.
@@ -20,7 +20,12 @@ export default async function handler(req, res) {
 
   try {
     const rawBody = await readRawBody(req)
-    await verifyWebhook({ headers: req.headers, rawBody })
+    try {
+      await verifyWebhook({ headers: req.headers, rawBody })
+    } catch (err) {
+      await recordHit({ outcome: 'rejected', detail: err.message })
+      throw err
+    }
 
     const type = req.headers['kick-event-type']
     if (type !== 'chat.message.sent') return sendJson(res, 200, { ignored: type || 'unknown' })
@@ -36,6 +41,7 @@ export default async function handler(req, res) {
     const channel = process.env.KICK_CHANNEL_SLUG
     if (channel && payload?.broadcaster?.channel_slug &&
         payload.broadcaster.channel_slug.toLowerCase() !== channel.toLowerCase()) {
+      await recordHit({ outcome: 'ignored', detail: `other channel: ${payload?.broadcaster?.channel_slug}` })
       return sendJson(res, 200, { ignored: 'other-channel' })
     }
 
@@ -51,13 +57,20 @@ export default async function handler(req, res) {
       }
     }
 
-    if (!gw.open || !gw.keyword) return sendJson(res, 200, { ignored: 'no-open-giveaway' })
-    if (!messageMatches(payload?.content, gw.keyword)) return sendJson(res, 200, { matched: false })
+    if (!gw.open || !gw.keyword) {
+      await recordHit({ outcome: 'seen', detail: 'no round open', from: sender.username })
+      return sendJson(res, 200, { ignored: 'no-open-giveaway' })
+    }
+    if (!messageMatches(payload?.content, gw.keyword)) {
+      await recordHit({ outcome: 'seen', detail: 'keyword not matched', from: sender.username })
+      return sendJson(res, 200, { matched: false })
+    }
 
     const kickName = sender.username || `kick-${sender.user_id}`
     const link = await linkForKick(sender.user_id)
     if (!link) {
       await recordMiss(sender.user_id, kickName, 'not-linked')
+      await recordHit({ outcome: 'miss', detail: 'not linked', from: kickName })
       return sendJson(res, 200, { matched: true, entered: false, reason: 'not-linked' })
     }
 
@@ -65,6 +78,7 @@ export default async function handler(req, res) {
       const role = await hasRequiredRole(link.discordId)
       if (!role.ok) {
         await recordMiss(sender.user_id, kickName, role.reason)
+        await recordHit({ outcome: 'miss', detail: role.reason, from: kickName })
         return sendJson(res, 200, { matched: true, entered: false, reason: role.reason })
       }
     }
@@ -76,6 +90,7 @@ export default async function handler(req, res) {
       kickName: link.kickName || kickName,
       kickAvatar: sender.profile_picture || null,
     })
+    await recordHit({ outcome: 'entered', from: kickName })
     return sendJson(res, 200, { matched: true, entered: true })
   } catch (err) {
     // 401 means the signature failed — likely noise, so log quietly.

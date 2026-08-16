@@ -157,6 +157,37 @@ export default function KickGiveaway() {
           </p>
         )}
 
+        {/* Whether Kick is talking to us at all. "No chat events yet" versus
+            "arriving but rejected" are completely different problems, and
+            without this they look identical from here. */}
+        {data?.hits && (
+          <div className={`kgw-hits ${data.hits.count ? '' : 'none'}`}>
+            {data.hits.count ? (
+              <>
+                <b>{data.hits.count}</b> chat events received · last{' '}
+                {new Date(data.hits.lastAt).toLocaleTimeString()}
+                <details>
+                  <summary>recent</summary>
+                  {data.hits.recent.map((h, i) => (
+                    <div key={i}>
+                      {time(h.at)} · <b>{h.outcome}</b>
+                      {h.from ? ` · ${h.from}` : ''}{h.detail ? ` · ${h.detail}` : ''}
+                    </div>
+                  ))}
+                </details>
+              </>
+            ) : (
+              <>
+                <b>No chat events have ever reached the site.</b> Kick isn't delivering,
+                so the problem is on the Kick side rather than here — check the app's
+                webhook URL is exactly{' '}
+                <code>https://www.usecodensb.gg/api/kick/webhook</code> and that webhooks
+                are enabled.
+              </>
+            )}
+          </div>
+        )}
+
         {data && !data.roleGate && requireRole && (
           <p className="admin-msg err">
             Role checking isn't configured on the server — nobody could pass it. Set the
