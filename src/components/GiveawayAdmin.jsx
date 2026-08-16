@@ -21,6 +21,7 @@ function blankGiveaway() {
     startAt: null,
     endAt: end.toISOString(),
     winnerCount: 1,
+    requireRole: false,
     status: 'live',
   }
 }
@@ -43,6 +44,7 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
       startAt: form.startAt ? localToIso(form.startAt) : null,
       endAt: localToIso(form.endAt),
       winnerCount: Number(form.winnerCount),
+      requireRole: Boolean(form.requireRole),
       status: form.status,
     })
   }
@@ -103,6 +105,21 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
         </label>
       </div>
 
+      <label className="admin-check">
+        <input
+          type="checkbox"
+          checked={Boolean(form.requireRole)}
+          onChange={(e) => setForm((f) => ({ ...f, requireRole: e.target.checked }))}
+        />
+        <span>
+          Certified role required
+          <small>
+            Only members of the Discord server holding the required role can enter.
+            Checked on the server for every entry.
+          </small>
+        </span>
+      </label>
+
       <label className="admin-label">
         Status
         <select className="admin-input" value={form.status} onChange={set('status')}>
@@ -136,7 +153,10 @@ function GiveawayRow({ giveaway, onEdit, onDraw, onRedrawPlace, onStatus, onDele
         <span className={`admin-status ${st.cls}`}>{st.label}</span>
       </div>
 
-      <p className="admin-utc"><b>{giveaway.prize}</b>{giveaway.winnerCount > 1 && ` × ${giveaway.winnerCount} winners`}</p>
+      <p className="admin-utc">
+        <b>{giveaway.prize}</b>{giveaway.winnerCount > 1 && ` × ${giveaway.winnerCount} winners`}
+        {giveaway.requireRole && ' · Certified role required'}
+      </p>
       {giveaway.description && <p className="admin-utc">{giveaway.description}</p>}
       <p className="admin-utc">
         {giveaway.startAt ? `${new Date(giveaway.startAt).toLocaleString()} → ` : 'Open now → '}

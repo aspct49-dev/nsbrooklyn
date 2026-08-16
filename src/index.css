@@ -2165,6 +2165,28 @@ img { display: block; max-width: 100%; }
 .gv-enter.discord { background: #5865f2; box-shadow: none; }
 .gv-enter svg { width: 18px; height: 18px; }
 
+.gv-req {
+  align-self: flex-end;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #ffd977;
+  background: rgba(255, 200, 60, 0.12);
+  border: 1px solid rgba(255, 200, 60, 0.4);
+  border-radius: 999px;
+  padding: 2px 9px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+}
+.gv-locked {
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(255, 200, 60, 0.09);
+  border: 1px solid rgba(255, 200, 60, 0.38);
+  color: #ffd977;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
 .gv-entered {
   padding: 14px 20px;
   border-radius: 12px;

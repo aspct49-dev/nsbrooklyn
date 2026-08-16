@@ -21,7 +21,7 @@ function Avatar({ user, size }) {
 }
 
 /** The button (or explanation) in the entry slot, per phase and login state. */
-function EntryControl({ giveaway, user, onEnter, busy, error }) {
+function EntryControl({ giveaway, user, onEnter, busy, error, discordUrl }) {
   if (giveaway.phase === 'upcoming') {
     return <div className="gv-note">Entries open {fmtDate(giveaway.startAt)}</div>
   }
@@ -38,6 +38,25 @@ function EntryControl({ giveaway, user, onEnter, busy, error }) {
       </>
     )
   }
+  // Say up front that they can't enter, rather than letting them click and
+  // bounce off a refusal.
+  if (giveaway.requireRole && user.hasRole === false) {
+    return (
+      <>
+        <div className="gv-locked">🔒 Certified role required</div>
+        <div className="gv-note">
+          This one is for Certified members of the Discord. Join the server and pick
+          up the role, then come back — your entry will work straight away.
+        </div>
+        {discordUrl && (
+          <a className="gv-enter discord" href={discordUrl} target="_blank" rel="noreferrer" style={{ marginTop: 10 }}>
+            <IconDiscord /> Open Discord
+          </a>
+        )}
+      </>
+    )
+  }
+
   if (giveaway.entered) {
     return (
       <>
@@ -118,7 +137,7 @@ function WinnerList({ giveaway, user }) {
   )
 }
 
-function GiveawayCard({ giveaway, user, onEnter, busy, error, past }) {
+function GiveawayCard({ giveaway, user, onEnter, busy, error, past, discordUrl }) {
   return (
     <div className={`gv-card ${past ? 'past' : ''} ${giveaway.entered ? 'is-entered' : ''}`}>
       <div className="gv-card-head">
@@ -127,6 +146,7 @@ function GiveawayCard({ giveaway, user, onEnter, busy, error, past }) {
           {giveaway.description && <p className="gv-desc">{giveaway.description}</p>}
         </div>
         <div className="gv-prize">
+          {giveaway.requireRole && <span className="gv-req">Certified only</span>}
           <span className="gv-prize-lbl">Prize</span>
           <span className="gv-prize-val">{giveaway.prize}</span>
           {giveaway.winnerCount > 1 && (
@@ -163,6 +183,7 @@ function GiveawayCard({ giveaway, user, onEnter, busy, error, past }) {
               onEnter={onEnter}
               busy={busy}
               error={error}
+              discordUrl={discordUrl}
             />
           </div>
         </>
@@ -236,6 +257,7 @@ export default function Giveaways() {
                     onEnter={onEnter}
                     busy={busyId === g.id}
                     error={busyId === null && enterError ? enterError : null}
+                    discordUrl={config.socials.discord}
                   />
                 ))}
               </div>

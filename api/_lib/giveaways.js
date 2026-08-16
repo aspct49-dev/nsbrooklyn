@@ -207,6 +207,7 @@ export function normalizeGiveaway(input, existing) {
     startAt: input?.startAt || null,
     endAt: input.endAt,
     winnerCount,
+    requireRole: Boolean(input?.requireRole),
     status: STATUSES.includes(input?.status) ? input.status : 'draft',
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     // draw results are never client-supplied — they only ever come from the

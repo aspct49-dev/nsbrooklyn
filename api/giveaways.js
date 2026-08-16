@@ -13,6 +13,15 @@ import {
   addEntry, listEntries, countEntries, clearEntries, hasEntered,
   drawWinners, ensureSeed, redrawPlace, makeSeed, phaseOf, isOpen, STATUSES,
 } from './_lib/giveaways.js'
+import { hasRequiredRole, roleGateConfigured } from './_lib/discord.js'
+
+// Why an entry was refused, in the entrant's words rather than the code's.
+const ROLE_REFUSALS = {
+  'not-in-server': 'You need to be in the Discord server to enter this one.',
+  'missing-role': "You don't have the required Discord role for this giveaway.",
+  'role-gate-not-configured': 'Role checking is not set up yet — ask an admin.',
+  default: 'Could not verify your Discord role right now. Please try again shortly.',
+}
 
 const notFound = (id) => Object.assign(new Error(`Unknown giveaway "${id}"`), { status: 404 })
 
@@ -60,10 +69,20 @@ async function handleGet(req, res) {
   const active = withCounts.filter((g) => g.phase !== 'ended').sort((a, b) => +new Date(a.endAt) - +new Date(b.endAt))
   const past = withCounts.filter((g) => g.phase === 'ended').sort(byNewest)
 
+  // Only ask Discord about roles when a visible giveaway actually needs it —
+  // no reason to hit their API on every page load otherwise.
+  let hasRole = null
+  if (session && roleGateConfigured() && withCounts.some((g) => g.requireRole)) {
+    hasRole = (await hasRequiredRole(session.id)).ok
+  }
+
   const payload = {
     active,
     past,
-    user: session ? { id: session.id, name: session.name, avatar: session.avatar } : null,
+    roleGate: roleGateConfigured(),
+    user: session
+      ? { id: session.id, name: session.name, avatar: session.avatar, hasRole }
+      : null,
   }
   if (admin) payload.all = giveaways.map((g) => publicGiveaway(g, { phase: phaseOf(g) }))
 
@@ -89,6 +108,15 @@ async function handleEnter(req, res, body) {
       new Error(phase === 'upcoming' ? 'This giveaway has not started yet' : 'Entries for this giveaway are closed'),
       { status: 409 },
     )
+  }
+
+  // Checked server-side on every entry, so the button can't be used to
+  // sidestep the requirement.
+  if (giveaway.requireRole) {
+    const role = await hasRequiredRole(session.id)
+    if (!role.ok) {
+      throw Object.assign(new Error(ROLE_REFUSALS[role.reason] || ROLE_REFUSALS.default), { status: 403 })
+    }
   }
 
   let isNew
