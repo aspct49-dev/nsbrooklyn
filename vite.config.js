@@ -13,9 +13,12 @@ const API_ROUTES = {
   '/api/auth/callback': './api/auth/callback.js',
   '/api/auth/me': './api/auth/me.js',
   '/api/auth/logout': './api/auth/logout.js',
-  '/api/kick/link': './api/kick/link.js',
+  // NOTE: order matters here — Vite's middleware matches on prefix, so the
+  // specific Kick routes must be registered before the bare /api/kick or it
+  // would swallow them. (Vercel routes exactly, so this only bites in dev.)
   '/api/kick/callback': './api/kick/callback.js',
   '/api/kick/webhook': './api/kick/webhook.js',
+  '/api/kick': './api/kick/index.js',
 }
 
 function devApi(env) {

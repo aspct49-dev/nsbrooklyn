@@ -6,7 +6,7 @@ import { redirect, getOrigin, getQuery, parseCookies, setCookie, sendJson } from
 import { readSession } from '../_lib/session.js'
 import { exchangeCode, fetchKickUser } from '../_lib/kick.js'
 import { createLink } from '../_lib/links.js'
-import { OAUTH_COOKIE } from './link.js'
+import { OAUTH_COOKIE } from './index.js'
 
 const back = (res, params) =>
   redirect(res, `/giveaways?${new URLSearchParams(params)}`)

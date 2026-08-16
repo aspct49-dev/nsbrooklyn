@@ -2285,31 +2285,56 @@ img { display: block; max-width: 100%; }
 .kick-panel-actions .gv-enter { width: auto; padding: 11px 18px; }
 .gv-enter.kick { background: #53fc18; color: #0b1a05; box-shadow: none; }
 
-.gv-keyword {
-  display: flex; align-items: center; justify-content: center;
-  gap: 9px; flex-wrap: wrap;
-  padding: 13px 16px;
+/* ------------------------------------------- admin Kick giveaway picker */
+.nav-item.admin-only { border: 1px dashed rgba(83, 252, 24, 0.45); }
+.nav-item.admin-only .ico { color: #53fc18; }
+
+.kgw-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 22px;
+  align-items: start;
+  margin-bottom: 22px;
+}
+.kgw-live { margin-bottom: 16px; }
+.kgw-keyword {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
   border-radius: 12px;
   background: rgba(83, 252, 24, 0.09);
-  border: 1px solid rgba(83, 252, 24, 0.38);
-  color: #fff;
-  font-size: 14.5px;
-  font-weight: 600;
+  border: 1px solid rgba(83, 252, 24, 0.4);
+  margin-bottom: 10px;
 }
-.gv-keyword svg { width: 17px; height: 17px; color: #53fc18; flex: none; }
-.gv-keyword code {
+.kgw-keyword svg { width: 20px; height: 20px; color: #53fc18; flex: none; }
+.kgw-keyword code {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 16px; font-weight: 700;
-  color: #53fc18;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 6px;
-  padding: 2px 9px;
+  font-size: 22px; font-weight: 700; color: #53fc18;
 }
-.gv-keyword.alt {
-  margin-top: 10px;
-  background: rgba(0, 0, 0, 0.22);
-  border-color: var(--border);
-  font-size: 13px;
+
+.kgw-stats {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+}
+.kgw-count { display: flex; flex-direction: column; }
+.kgw-count .n {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 52px; font-weight: 700; color: #fff; line-height: 1;
+}
+.kgw-count .l {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-muted); margin-top: 6px;
+}
+.kgw-count.muted .n { font-size: 30px; color: var(--text-muted); }
+
+.kgw-winners { margin-bottom: 22px; }
+.kgw-winners .admin-card-head h3 { display: flex; align-items: center; gap: 9px; }
+.kgw-winners .admin-card-head svg { width: 18px; height: 18px; color: #ffd977; }
+.kgw-seed { word-break: break-all; font-size: 11px; }
+.kgw-list .gw-winner-list { max-height: 380px; overflow-y: auto; }
+
+@media (max-width: 860px) {
+  .kgw-grid { grid-template-columns: 1fr; }
 }
 
 /* admin: checkbox with helper text */
@@ -2345,4 +2370,13 @@ img { display: block; max-width: 100%; }
   .gv-list { grid-template-columns: 1fr; }
   .gv-card-head { flex-direction: column; }
   .gv-prize { text-align: left; max-width: 100%; }
+}
+
+.kick-kw {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700;
+  color: #53fc18;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 5px;
+  padding: 1px 7px;
 }

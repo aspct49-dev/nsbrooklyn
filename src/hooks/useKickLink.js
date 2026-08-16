@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 /**
- * Kick↔Discord link status for the logged-in user, from /api/kick/link.
+ * Kick↔Discord link status for the logged-in user, from /api/kick.
  * Returns nulls (not an error) when logged out — the page just shows the
  * Discord login prompt in that case.
  */
@@ -12,7 +12,7 @@ export function useKickLink(enabled = true) {
   const reload = useCallback(async () => {
     if (!enabled) return
     try {
-      const res = await fetch('/api/kick/link')
+      const res = await fetch('/api/kick')
       setState(res.ok ? await res.json() : null)
     } catch {
       setState(null)
@@ -24,7 +24,7 @@ export function useKickLink(enabled = true) {
   useEffect(() => { reload() }, [reload])
 
   const unlink = useCallback(async () => {
-    await fetch('/api/kick/link', {
+    await fetch('/api/kick', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'unlink' }),
@@ -39,9 +39,10 @@ export function useKickLink(enabled = true) {
     roleGate: state?.roleGate ?? false,
     hasRole: state?.hasRole ?? null,
     roleReason: state?.roleReason ?? null,
+    live: state?.live ?? null,
     reload,
     unlink,
   }
 }
 
-export const kickLinkUrl = '/api/kick/link?start=1'
+export const kickLinkUrl = '/api/kick?start=1'

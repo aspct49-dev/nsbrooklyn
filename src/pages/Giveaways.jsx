@@ -5,7 +5,7 @@ import { useGiveaways } from '../hooks/useGiveaways'
 import { loginUrl } from '../hooks/useAuth'
 import { initials } from '../utils'
 import Countdown from '../components/Countdown'
-import { IconGift, IconDiscord, IconTrophy, IconKick } from '../components/icons'
+import { IconGift, IconDiscord, IconTrophy } from '../components/icons'
 import KickLinkPanel from '../components/KickLinkPanel'
 
 const fmtDate = (iso) =>
@@ -38,20 +38,6 @@ function EntryControl({ giveaway, user, onEnter, busy, error }) {
       </>
     )
   }
-  if (giveaway.entryMode === 'kick') {
-    return (
-      <>
-        <div className="gv-keyword">
-          <IconKick /> Type <code>{giveaway.keyword}</code> in the stream chat
-        </div>
-        <div className="gv-note">
-          {giveaway.entered
-            ? "You're in — good luck!"
-            : 'Your Kick account must be linked below for chat entries to count.'}
-        </div>
-      </>
-    )
-  }
   if (giveaway.entered) {
     return (
       <>
@@ -65,11 +51,6 @@ function EntryControl({ giveaway, user, onEnter, busy, error }) {
       <button className="gv-enter" onClick={() => onEnter(giveaway.id)} disabled={busy}>
         <IconGift /> {busy ? 'Entering…' : 'Enter giveaway'}
       </button>
-      {giveaway.entryMode === 'both' && giveaway.keyword && (
-        <div className="gv-keyword alt">
-          <IconKick /> …or type <code>{giveaway.keyword}</code> in the stream chat
-        </div>
-      )}
       <div className="gv-note">
         Entering as <b>{user.name}</b> · one entry per account
       </div>
@@ -201,8 +182,6 @@ export default function Giveaways() {
   const kickName = params.get('name')
   const kickReason = params.get('reason')
 
-  // Only worth showing the link panel if a chat keyword is actually in play.
-  const anyKeyword = active.some((g) => g.entryMode === 'kick' || g.entryMode === 'both')
 
   const onEnter = async (id) => {
     setBusyId(id)
@@ -233,7 +212,7 @@ export default function Giveaways() {
           <div className="kick-flash err">{kickReason || 'Could not link your Kick account.'}</div>
         )}
 
-        {anyKeyword && <KickLinkPanel user={user} discordUrl={config.socials.discord} />}
+        <KickLinkPanel user={user} discordUrl={config.socials.discord} />
 
         {loading ? (
           <div className="lb-status">Loading giveaways…</div>

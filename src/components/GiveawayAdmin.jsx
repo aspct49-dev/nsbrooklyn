@@ -1,15 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isoToLocal, localToIso } from '../utils'
 
-// Why a chat entry bounced, in words the admin can relay to a viewer.
-const MISS_LABEL = {
-  'not-linked': 'Kick not linked to Discord',
-  'not-in-server': 'not in the Discord server',
-  'missing-role': 'missing the required role',
-  'bot-forbidden': 'role check failed (bot permissions)',
-  'role-gate-not-configured': 'role gate not configured',
-}
-
 const PHASE_LABEL = {
   draft: { label: 'Draft', cls: 'off' },
   upcoming: { label: 'Scheduled', cls: 'soon' },
@@ -30,9 +21,6 @@ function blankGiveaway() {
     startAt: null,
     endAt: end.toISOString(),
     winnerCount: 1,
-    entryMode: 'site',
-    keyword: '',
-    requireRole: false,
     status: 'live',
   }
 }
@@ -55,9 +43,6 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
       startAt: form.startAt ? localToIso(form.startAt) : null,
       endAt: localToIso(form.endAt),
       winnerCount: Number(form.winnerCount),
-      entryMode: form.entryMode,
-      keyword: form.keyword,
-      requireRole: Boolean(form.requireRole),
       status: form.status,
     })
   }
@@ -118,52 +103,6 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
         </label>
       </div>
 
-      <div className="gw-form-row">
-        <label className="admin-label">
-          How people enter
-          <select className="admin-input" value={form.entryMode} onChange={set('entryMode')}>
-            <option value="site">Site button only</option>
-            <option value="kick">Kick chat keyword only</option>
-            <option value="both">Either — button or keyword</option>
-          </select>
-        </label>
-        {form.entryMode !== 'site' && (
-          <label className="admin-label">
-            Chat keyword
-            <input
-              className="admin-input"
-              value={form.keyword}
-              onChange={set('keyword')}
-              placeholder="!enter"
-              maxLength={40}
-              required
-            />
-          </label>
-        )}
-      </div>
-
-      <label className="admin-check">
-        <input
-          type="checkbox"
-          checked={Boolean(form.requireRole)}
-          onChange={(e) => setForm((f) => ({ ...f, requireRole: e.target.checked }))}
-        />
-        <span>
-          Require the Discord role
-          <small>
-            Checked on every entry, from the site button and from chat alike. Needs
-            DISCORD_BOT_TOKEN, DISCORD_GUILD_ID and DISCORD_REQUIRED_ROLE_IDS set.
-          </small>
-        </span>
-      </label>
-
-      {form.entryMode !== 'site' && (
-        <p className="admin-utc">
-          Viewers must link Kick on /giveaways first — chat entries are matched to a
-          Discord account, so an unlinked chatter is recorded as a miss instead.
-        </p>
-      )}
-
       <label className="admin-label">
         Status
         <select className="admin-input" value={form.status} onChange={set('status')}>
@@ -198,16 +137,6 @@ function GiveawayRow({ giveaway, onEdit, onDraw, onRedrawPlace, onStatus, onDele
       </div>
 
       <p className="admin-utc"><b>{giveaway.prize}</b>{giveaway.winnerCount > 1 && ` × ${giveaway.winnerCount} winners`}</p>
-      {giveaway.entryMode !== 'site' && (
-        <p className="admin-utc">
-          Chat keyword <b>{giveaway.keyword}</b>
-          {giveaway.entryMode === 'both' ? ' (or the site button)' : ' (chat only)'}
-          {giveaway.requireRole && ' · Discord role required'}
-        </p>
-      )}
-      {giveaway.entryMode === 'site' && giveaway.requireRole && (
-        <p className="admin-utc">Discord role required</p>
-      )}
       {giveaway.description && <p className="admin-utc">{giveaway.description}</p>}
       <p className="admin-utc">
         {giveaway.startAt ? `${new Date(giveaway.startAt).toLocaleString()} → ` : 'Open now → '}
@@ -361,7 +290,7 @@ export default function GiveawayAdmin() {
 
   const showEntrants = async (giveaway) => {
     const data = await post({ action: 'entries', id: giveaway.id })
-    if (data) setEntrants({ title: giveaway.title, list: data.entries, misses: data.misses || [] })
+    if (data) setEntrants({ title: giveaway.title, list: data.entries })
   }
 
   return (
@@ -410,30 +339,12 @@ export default function GiveawayAdmin() {
             <div className="gw-winner-list">
               {entrants.list.map((e) => (
                 <div key={e.id}>
-                  {e.name} <span className="admin-utc">
-                    ({e.id}){e.via === 'kick' && ` · via Kick as ${e.kickName}`} · {new Date(e.at).toLocaleString()}
-                  </span>
+                  {e.name} <span className="admin-utc">({e.id}) · {new Date(e.at).toLocaleString()}</span>
                 </div>
               ))}
             </div>
           )}
 
-          {entrants.misses.length > 0 && (
-            <>
-              <p className="admin-utc" style={{ marginTop: 14 }}>
-                <b>{entrants.misses.length}</b> typed the keyword but weren't eligible:
-              </p>
-              <div className="gw-winner-list">
-                {entrants.misses.map((m) => (
-                  <div key={m.kickName + m.at}>
-                    {m.kickName} <span className="admin-utc">
-                      · {MISS_LABEL[m.reason] || m.reason} · {new Date(m.at).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       )}
 

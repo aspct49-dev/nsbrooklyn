@@ -10,10 +10,11 @@ const ROLE_HELP = {
 
 /**
  * Link your Kick account so typing the keyword in the stream chat enters you.
- * Only shown when there's actually a keyword giveaway to enter.
+ * Always shown on /giveaways: linking is a one-off, so people can do it
+ * before a round opens rather than scrambling mid-stream.
  */
 export default function KickLinkPanel({ user, discordUrl }) {
-  const { loading, linked, kickName, roleGate, hasRole, roleReason } = useKickLink(Boolean(user))
+  const { loading, linked, kickName, roleGate, hasRole, roleReason, live } = useKickLink(Boolean(user))
 
   if (!user) return null
   if (loading) return null
@@ -27,7 +28,9 @@ export default function KickLinkPanel({ user, discordUrl }) {
           <>
             <h4>Kick linked — <span className="kick-name">{kickName}</span></h4>
             <p>
-              Typing the keyword in the stream chat enters you automatically.
+              {live
+                ? <>A chat giveaway is live — type <code className="kick-kw">{live.keyword}</code> in the stream chat to enter. </>
+                : 'When a chat giveaway is running, typing the keyword in the stream enters you automatically. '}
               {roleGate && hasRole === true && ' Your Discord role checks out.'}
               {roleGate && hasRole === false && (
                 <> <span className="warn">{ROLE_HELP[roleReason] || 'Your Discord role could not be verified.'}</span></>
@@ -38,8 +41,9 @@ export default function KickLinkPanel({ user, discordUrl }) {
           <>
             <h4>Link your Kick account</h4>
             <p>
-              Chat entries are matched to your Discord account, so link Kick once and
-              typing the keyword in the stream enters you.
+              {live
+                ? <>A chat giveaway is live — link Kick to enter with <code className="kick-kw">{live.keyword}</code>. </>
+                : 'Chat giveaways are matched to your Discord account, so link Kick once and typing the keyword in the stream enters you. '}
               {roleGate && ' The required Discord role is checked when you enter.'}
             </p>
           </>

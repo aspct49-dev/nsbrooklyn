@@ -16,8 +16,12 @@ const nav = [
   { label: 'Winners', icon: <IconMedal />, to: '/winners' },
 ]
 
-function NavItems({ onClose }) {
-  return nav.map((n) => {
+function NavItems({ onClose, isAdmin }) {
+  // the Kick tab is a staff tool — never rendered for anyone else
+  const items = isAdmin
+    ? [...nav, { label: 'Kick GW', icon: <IconKick />, to: '/kick-giveaway', admin: true }]
+    : nav
+  return items.map((n) => {
     if (n.soon) {
       return (
         <span key={n.label} className="nav-item" style={{ cursor: 'default' }}>
@@ -32,7 +36,7 @@ function NavItems({ onClose }) {
         key={n.label}
         to={n.hash ? n.to + n.hash : n.to}
         end={n.end}
-        className={({ isActive }) => `nav-item ${isActive && !n.hash ? 'active' : ''}`}
+        className={({ isActive }) => `nav-item ${isActive && !n.hash ? 'active' : ''} ${n.admin ? 'admin-only' : ''}`}
         onClick={onClose}
       >
         <span className="ico">{n.icon}</span>
@@ -103,6 +107,7 @@ function AuthArea() {
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
+  const { isAdmin } = useAuth()
 
   return (
     <>
@@ -114,7 +119,7 @@ export default function Navbar() {
           </Link>
 
           <nav className="nb-links">
-            <NavItems onClose={close} />
+            <NavItems onClose={close} isAdmin={isAdmin} />
           </nav>
 
           <div className="nb-right">
@@ -136,7 +141,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="nav">
-          <NavItems onClose={close} />
+          <NavItems onClose={close} isAdmin={isAdmin} />
         </nav>
 
         <div className="sidebar-spacer" />
