@@ -40,7 +40,6 @@ export default function KickGiveaway() {
   const [requireRole, setRequireRole] = useState(true)
   const [subLuck, setSubLuck] = useState(false)
   const [spinning, setSpinning] = useState(false)
-  const [revealed, setRevealed] = useState(false)
   const [chatroomId, setChatroomId] = useState(null)
   const [chatErr, setChatErr] = useState(null)
   const seenRef = useRef(new Set())
@@ -61,11 +60,16 @@ export default function KickGiveaway() {
   const collecting = Boolean(s?.open)
   const drawn = Boolean(s?.drawnAt)
 
+  // Derived, not stored: a drawn round shows its winner whenever we aren't
+  // mid-spin. Keeping this in state meant a reload left the result hidden
+  // until you spun again — which would have drawn a second time.
+  const showWinner = drawn && !spinning
+
   // Poll while entries can still arrive, and after a draw so the winner's
   // chat shows up.
   useEffect(() => {
-    startPolling(collecting || (drawn && revealed))
-  }, [collecting, drawn, revealed, startPolling])
+    startPolling(collecting || showWinner)
+  }, [collecting, showWinner, startPolling])
 
   useEffect(() => { if (s?.keyword) setKeyword(s.keyword) }, [s?.keyword])
 
@@ -93,6 +97,8 @@ export default function KickGiveaway() {
   // a fresh round means a fresh set of who we've already sent
   useEffect(() => { seenRef.current = new Set() }, [s?.openedAt])
 
+
+
   if (authLoading) return <section className="section"><div className="container admin-gate">Loading…</div></section>
   if (!user) {
     return (
@@ -113,21 +119,20 @@ export default function KickGiveaway() {
   }
 
   const start = () => {
-    setRevealed(false)
     post({ action: 'open', keyword, winnerCount: Number(winnerCount), requireRole, subLuck }, 'Collecting entries')
   }
 
   const spin = async () => {
-    const res = await post({ action: 'draw', winnerCount: Number(winnerCount) })
-    if (!res) return
-    setRevealed(false)
+    // Spin first, then draw: if the result landed before `spinning` were set,
+    // showWinner would be true for a frame and skip the animation.
     setSpinning(true)
+    const res = await post({ action: 'draw', winnerCount: Number(winnerCount) })
+    if (!res) setSpinning(false)
   }
 
   const clearAll = () => {
     if (!window.confirm('Clear all entries and the current result?')) return
     setSpinning(false)
-    setRevealed(false)
     post({ action: 'clear' }, 'Cleared')
   }
 
@@ -283,7 +288,7 @@ export default function KickGiveaway() {
                     <div className="kgw-entry" key={e.discordId} title={`Discord: ${e.discordName}`}>
                       <EntrantTile entrant={e} size={26} />
                       <span>{e.kickName}</span>
-                      {e.isSub && <span className="kgw-sub" title="Subscriber">SUB</span>}
+                      {e.isSub && <span className="kgw-star" title="Subscriber">★</span>}
                       {s?.subLuck && (
                         <span className="kgw-odds">
                           {((weightOf(e) / totalWeight) * 100).toFixed(0)}%
@@ -313,17 +318,20 @@ export default function KickGiveaway() {
                 entrants={entries}
                 winner={winner}
                 spinning={spinning}
-                onDone={() => { setSpinning(false); setRevealed(true); load() }}
+                onDone={() => { setSpinning(false); load() }}
               />
             </div>
 
-            {drawn && revealed && winner && (
+            {showWinner && winner && (
               <div className="kgw-panel winner-panel">
                 <div className="kgw-winner">
                   <EntrantTile entrant={winner} size={62} />
                   <div className="kgw-winner-text">
                     <span className="kgw-winner-lbl">🏆 Winner</span>
-                    <span className="kgw-winner-name">{winner.kickName}</span>
+                    <span className="kgw-winner-name">
+                      {winner.kickName}
+                      {winner.isSub && <span className="kgw-star big" title="Subscriber">★</span>}
+                    </span>
                     <span className="kgw-winner-sub">Discord: {winner.discordName}</span>
                   </div>
                   <a
@@ -359,7 +367,7 @@ export default function KickGiveaway() {
               </div>
             )}
 
-            {drawn && revealed && winner && (
+            {showWinner && winner && (
               <div className="kgw-panel">
                 <h4 className="kgw-panel-title">{winner.kickName}'s recent messages</h4>
                 {winnerChat.length === 0 ? (
@@ -374,7 +382,7 @@ export default function KickGiveaway() {
               </div>
             )}
 
-            {drawn && revealed && s.seed && (
+            {showWinner && s.seed && (
               <p className="kgw-fair">
                 Provably fair — winner decided server-side before the spin.
                 Seed <code>{s.seed.slice(0, 24)}…</code> · drawn from {s.entrantsAtDraw} entries
