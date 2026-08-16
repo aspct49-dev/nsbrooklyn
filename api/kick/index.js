@@ -10,12 +10,13 @@
 import crypto from 'node:crypto'
 import { sendJson, redirect, getQuery, getOrigin, setCookie, readBody } from '../_lib/http.js'
 import { readSession, requireAdmin, isAdmin } from '../_lib/session.js'
-import { authorizeUrl, makePkce, chatSubscriptionStatus, deleteSubscription } from '../_lib/kick.js'
-import { linkForDiscord, removeLink } from '../_lib/links.js'
+import { authorizeUrl, makePkce, chatSubscriptionStatus, deleteSubscription, resolveChatroomId } from '../_lib/kick.js'
+import { linkForDiscord, removeLink, linkForKick } from '../_lib/links.js'
 import { hasRequiredRole, roleGateConfigured } from '../_lib/discord.js'
 import {
   getSession, saveSession, publicSession, listEntries, countEntries, listMisses,
   clearEntries, drawWinners, redrawPlace, ensureSeed, makeSeed, winnerMessages, getHits,
+  addEntry, recordMiss, messageMatches,
   normalizeKeyword, normalizeWinnerCount, BLANK,
 } from '../_lib/kickgw.js'
 
@@ -121,6 +122,43 @@ async function handleAdminAction(req, res, body) {
     return adminView(res)
   }
 
+  // An entry spotted by the picker's own chat socket. The browser filters on
+  // the keyword to avoid posting every message, but the keyword, the link and
+  // the role are all re-checked here — the client is never the authority on
+  // who is eligible.
+  if (action === 'chat-entry') {
+    const gw = current
+    if (!gw.open || !gw.keyword) return sendJson(res, 200, { entered: false, reason: 'no-round' })
+
+    const kickId = String(body?.kickUserId || '')
+    const kickName = String(body?.kickUsername || '').slice(0, 80)
+    if (!kickId) throw Object.assign(new Error('kickUserId is required'), { status: 400 })
+    if (!messageMatches(body?.content, gw.keyword)) {
+      return sendJson(res, 200, { entered: false, reason: 'no-match' })
+    }
+
+    const link = await linkForKick(kickId)
+    if (!link) {
+      await recordMiss(kickId, kickName, 'not-linked')
+      return sendJson(res, 200, { entered: false, reason: 'not-linked' })
+    }
+    if (gw.requireRole) {
+      const role = await hasRequiredRole(link.discordId)
+      if (!role.ok) {
+        await recordMiss(kickId, kickName, role.reason)
+        return sendJson(res, 200, { entered: false, reason: role.reason })
+      }
+    }
+    const isNew = await addEntry({
+      discordId: link.discordId,
+      discordName: link.discordName,
+      kickId,
+      kickName: link.kickName || kickName,
+      kickAvatar: body?.kickAvatar || null,
+    })
+    return sendJson(res, 200, { entered: true, isNew })
+  }
+
   // Remove chat subscriptions pointing at the wrong channel, so a stale one
   // can't sit there looking healthy.
   if (action === 'clear-subscriptions') {
@@ -178,6 +216,17 @@ export default async function handler(req, res) {
         setCookie(res, OAUTH_COOKIE, `${state}.${verifier}.${broadcaster ? 'b' : 'u'}`, { maxAge: 600 })
         const scopes = broadcaster ? 'user:read events:subscribe' : 'user:read'
         return redirect(res, authorizeUrl(getOrigin(req), { state, challenge, scopes }))
+      }
+
+      // What the picker needs to open the chat socket itself.
+      if (q.chatroom) {
+        requireAdmin(req)
+        const slug = process.env.KICK_CHANNEL_SLUG || 'nsbrooklyntv'
+        try {
+          return sendJson(res, 200, { slug, chatroomId: await resolveChatroomId(slug) })
+        } catch (err) {
+          return sendJson(res, err.status || 502, { error: err.message, slug })
+        }
       }
 
       if (q.admin) {

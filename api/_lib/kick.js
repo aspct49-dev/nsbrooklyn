@@ -198,6 +198,39 @@ export async function subscribeToChat(userToken, broadcasterUserId) {
   return { ok: false, status: res.status, error: text.slice(0, 200) }
 }
 
+// --------------------------------------------------------- chat room id
+//
+// The picker reads chat straight from Kick's public socket, which is keyed by
+// CHATROOM id — a different number from the broadcaster id, and one the
+// official API does not expose. It comes from the public v2 endpoint, which
+// sits behind Cloudflare and often refuses datacenter IPs, so the value can be
+// pinned with KICK_CHATROOM_ID instead. It never changes for a channel.
+
+let cachedRoom = null
+
+export async function resolveChatroomId(slug) {
+  if (process.env.KICK_CHATROOM_ID) return String(process.env.KICK_CHATROOM_ID)
+  if (cachedRoom) return cachedRoom
+
+  const res = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36',
+      Accept: 'application/json',
+    },
+  })
+  if (!res.ok) {
+    throw Object.assign(
+      new Error(`Could not look up the chatroom for "${slug}" (HTTP ${res.status}). Set KICK_CHATROOM_ID to pin it.`),
+      { status: 502 },
+    )
+  }
+  const body = await res.json()
+  const id = body?.chatroom?.id
+  if (!id) throw Object.assign(new Error(`No chatroom on channel "${slug}"`), { status: 404 })
+  cachedRoom = String(id)
+  return cachedRoom
+}
+
 // ------------------------------------------------- webhook verification
 
 // Kick's signing key. Fetched once per instance and cached; the value is

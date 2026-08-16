@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth, loginUrl } from '../hooks/useAuth'
 import { useKickAdmin } from '../hooks/useKickAdmin'
+import { useKickChat } from '../hooks/useKickChat'
 import { IconDiscord, IconKick, IconExternal } from '../components/icons'
 import SpinReel, { EntrantTile } from '../components/SpinReel'
 
@@ -16,6 +17,19 @@ const MISS_LABEL = {
 
 const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 
+/**
+ * Whole-word keyword match, mirroring the server's rule so the browser only
+ * posts messages that stand a chance. The server re-checks it regardless —
+ * this is a filter, not a decision.
+ */
+function matchesKeyword(content, keyword) {
+  const needle = String(keyword || '').trim().toLowerCase()
+  if (!needle) return false
+  const text = String(content || '').replace(/\[emote:\d+:[^\]]*\]/gi, ' ').toLowerCase()
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`(^|\\s)${escaped}(\\s|$)`).test(text)
+}
+
 /** Admin-only live picker: open a keyword, watch entries land, spin. */
 export default function KickGiveaway() {
   const { loading: authLoading, user, isAdmin } = useAuth()
@@ -26,6 +40,18 @@ export default function KickGiveaway() {
   const [requireRole, setRequireRole] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [revealed, setRevealed] = useState(false)
+  const [chatroomId, setChatroomId] = useState(null)
+  const [chatErr, setChatErr] = useState(null)
+  const seenRef = useRef(new Set())
+
+  // The picker reads chat itself, so it needs the chatroom id up front.
+  useEffect(() => {
+    if (!isAdmin) return
+    fetch('/api/kick?chatroom=1')
+      .then((r) => r.json())
+      .then((j) => (j.chatroomId ? setChatroomId(j.chatroomId) : setChatErr(j.error)))
+      .catch((e) => setChatErr(e.message))
+  }, [isAdmin])
 
   const s = data?.session
   const entries = data?.entries || []
@@ -41,6 +67,30 @@ export default function KickGiveaway() {
   }, [collecting, drawn, revealed, startPolling])
 
   useEffect(() => { if (s?.keyword) setKeyword(s.keyword) }, [s?.keyword])
+
+  // Filter in the browser so we aren't posting every message, but the server
+  // re-checks the keyword and eligibility — the client decides nothing.
+  const onChat = useCallback(async (m) => {
+    if (!s?.open || !s.keyword) return
+    if (!matchesKeyword(m.content, s.keyword)) return
+    if (seenRef.current.has(m.kickUserId)) return
+    seenRef.current.add(m.kickUserId)
+    try {
+      await fetch('/api/kick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'chat-entry', ...m }),
+      })
+      load()
+    } catch {
+      seenRef.current.delete(m.kickUserId) // let them try again
+    }
+  }, [s?.open, s?.keyword, load])
+
+  const { connected } = useKickChat({ chatroomId, active: collecting, onMessage: onChat })
+
+  // a fresh round means a fresh set of who we've already sent
+  useEffect(() => { seenRef.current = new Set() }, [s?.openedAt])
 
   if (authLoading) return <section className="section"><div className="container admin-gate">Loading…</div></section>
   if (!user) {
@@ -93,9 +143,9 @@ export default function KickGiveaway() {
             <span className="kgw-bar-url">kick.com/ <b>{CHANNEL}</b></span>
           </div>
           <div className="kgw-bar-right">
-            <span className={`kgw-state ${collecting ? 'on' : ''}`}>
+            <span className={`kgw-state ${collecting && connected ? 'on' : ''}`}>
               <span className="dot" />
-              {collecting ? `COLLECTING · ${s.keyword}` : 'IDLE'}
+              {!collecting ? 'IDLE' : connected ? `COLLECTING · ${s.keyword}` : 'CONNECTING…'}
             </span>
             {collecting && (
               <button className="kgw-btn ghost" onClick={() => post({ action: 'close' }, 'Entries closed')} disabled={busy}>
