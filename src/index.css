@@ -2337,6 +2337,7 @@ img { display: block; max-width: 100%; }
 .kgw-state .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
 .kgw-state.on { color: var(--kick); border-color: rgba(83, 252, 24, 0.45); }
 .kgw-state.on .dot { background: var(--kick); animation: kgwPulse 1.4s ease-in-out infinite; }
+.kgw-seen { font-size: 11px; color: var(--text-muted); font-family: 'Chakra Petch', sans-serif; }
 @keyframes kgwPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
 .kgw-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }

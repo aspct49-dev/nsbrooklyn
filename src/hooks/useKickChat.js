@@ -20,6 +20,11 @@ const RECONNECT_MS = 3000
 export function useKickChat({ chatroomId, active, onMessage }) {
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState(null)
+  // Counting everything we hear, not just keyword hits: a wrong chatroom id
+  // still connects happily, so "connected but zero messages ever" is the only
+  // way to tell a bad id from a quiet chat.
+  const [seen, setSeen] = useState(0)
+  const [lastAt, setLastAt] = useState(null)
   const socketRef = useRef(null)
   const retryRef = useRef(null)
   const handlerRef = useRef(onMessage)
@@ -71,6 +76,8 @@ export function useKickChat({ chatroomId, active, onMessage }) {
 
       const sender = msg?.sender
       if (!sender?.id) return
+      setSeen((n) => n + 1)
+      setLastAt(new Date().toISOString())
       handlerRef.current?.({
         kickUserId: String(sender.id),
         kickUsername: sender.username || sender.slug || '',
@@ -107,5 +114,5 @@ export function useKickChat({ chatroomId, active, onMessage }) {
     }
   }, [active, chatroomId, connect])
 
-  return { connected, error }
+  return { connected, error, seen, lastAt }
 }

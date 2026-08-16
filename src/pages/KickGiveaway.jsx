@@ -87,7 +87,7 @@ export default function KickGiveaway() {
     }
   }, [s?.open, s?.keyword, load])
 
-  const { connected } = useKickChat({ chatroomId, active: collecting, onMessage: onChat })
+  const { connected, seen: chatSeen } = useKickChat({ chatroomId, active: collecting, onMessage: onChat })
 
   // a fresh round means a fresh set of who we've already sent
   useEffect(() => { seenRef.current = new Set() }, [s?.openedAt])
@@ -147,6 +147,11 @@ export default function KickGiveaway() {
               <span className="dot" />
               {!collecting ? 'IDLE' : connected ? `COLLECTING · ${s.keyword}` : 'CONNECTING…'}
             </span>
+            {collecting && connected && (
+              <span className="kgw-seen" title="Chat messages seen on the socket">
+                {chatSeen} msg{chatSeen === 1 ? '' : 's'} seen
+              </span>
+            )}
             {collecting && (
               <button className="kgw-btn ghost" onClick={() => post({ action: 'close' }, 'Entries closed')} disabled={busy}>
                 STOP
@@ -210,6 +215,15 @@ export default function KickGiveaway() {
         {/* Whether Kick is talking to us at all. "No chat events yet" versus
             "arriving but rejected" are completely different problems, and
             without this they look identical from here. */}
+        {collecting && connected && chatSeen === 0 && (
+          <div className="kgw-hits none">
+            Connected to <b>chatrooms.{chatroomId}</b> but no chat has come through yet.
+            If your chat is active and this stays at zero, the chatroom id is wrong —
+            check <code>KICK_CHATROOM_ID</code>.
+          </div>
+        )}
+        {chatErr && <div className="kgw-alert"><b>Can't reach the chat room</b><p>{chatErr}</p></div>}
+
         {data?.hits && (
           <div className={`kgw-hits ${data.hits.count ? '' : 'none'}`}>
             {data.hits.count ? (
