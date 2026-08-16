@@ -1,5 +1,6 @@
 import { useKickLink, kickLinkUrl } from '../hooks/useKickLink'
-import { IconKick, IconExternal } from './icons'
+import { IconKick, IconExternal, IconDiscord } from './icons'
+import { loginUrl } from '../hooks/useAuth'
 
 const ROLE_HELP = {
   'not-in-server': 'Join the Discord server to be eligible.',
@@ -16,8 +17,31 @@ const ROLE_HELP = {
 export default function KickLinkPanel({ user, discordUrl }) {
   const { loading, linked, kickName, roleGate, hasRole, roleReason, live } = useKickLink(Boolean(user))
 
-  if (!user) return null
   if (loading) return null
+
+  // Logged out, the panel still shows — otherwise nothing on the site tells
+  // people that chat entries need a linked account, and they only find out
+  // by typing the keyword and never appearing.
+  if (!user) {
+    return (
+      <div className="kick-panel">
+        <div className="kick-panel-ic"><IconKick /></div>
+        <div className="kick-panel-text">
+          <h4>Enter giveaways from Kick chat</h4>
+          <p>
+            Link your Kick account to your Discord and typing the keyword in the
+            stream enters you automatically. Log in with Discord first — it takes
+            a few seconds and only has to be done once.
+          </p>
+        </div>
+        <div className="kick-panel-actions">
+          <a className="gv-enter discord" href={loginUrl}>
+            <IconDiscord /> Log in with Discord
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`kick-panel ${linked ? 'ok' : ''}`}>
