@@ -2284,6 +2284,19 @@ img { display: block; max-width: 100%; }
 .kick-panel-actions { flex: none; }
 .kick-panel-actions .gv-enter { width: auto; padding: 11px 18px; }
 .gv-enter.kick { background: #53fc18; color: #0b1a05; box-shadow: none; }
+.kick-panel-manage {
+  display: flex; gap: 12px; align-items: center; justify-content: center;
+  margin-top: 9px;
+  font-size: 12px;
+}
+.kick-panel-manage a,
+.kick-panel-manage button {
+  color: var(--text-muted);
+  text-decoration: underline;
+  font-size: 12px;
+  padding: 0;
+}
+.kick-panel-manage a:hover, .kick-panel-manage button:hover { color: #fff; }
 
 /* ------------------------------------------- admin Kick giveaway picker
    Deliberately its own dark-slate look rather than the site's red: it is a

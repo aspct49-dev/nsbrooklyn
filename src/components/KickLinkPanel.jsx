@@ -15,7 +15,7 @@ const ROLE_HELP = {
  * before a round opens rather than scrambling mid-stream.
  */
 export default function KickLinkPanel({ user, discordUrl }) {
-  const { loading, linked, kickName, roleGate, hasRole, roleReason, live } = useKickLink(Boolean(user))
+  const { loading, linked, kickName, roleGate, hasRole, roleReason, live, unlink } = useKickLink(Boolean(user))
 
   if (loading) return null
 
@@ -80,10 +80,21 @@ export default function KickLinkPanel({ user, discordUrl }) {
             <IconKick /> Link Kick
           </a>
         )}
+
         {linked && roleGate && hasRole === false && discordUrl && (
           <a className="gv-enter discord" href={discordUrl} target="_blank" rel="noreferrer">
             Join Discord <IconExternal />
           </a>
+        )}
+
+        {linked && (
+          <div className="kick-panel-manage">
+            {/* Re-running the flow re-authorises with the current scopes and,
+                for the broadcaster, switches chat delivery back on. Doing that
+                needs no unlink — the pairing is simply refreshed. */}
+            <a href={kickLinkUrl}>Reconnect</a>
+            <button type="button" onClick={unlink}>Unlink</button>
+          </div>
         )}
       </div>
     </div>
