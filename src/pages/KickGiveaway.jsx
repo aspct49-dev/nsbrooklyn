@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth, loginUrl } from '../hooks/useAuth'
+import { useKickAdmin } from '../hooks/useKickAdmin'
 import { IconDiscord, IconKick, IconExternal } from '../components/icons'
 import SpinReel, { EntrantTile } from '../components/SpinReel'
 
-const POLL_MS = 3000
 const CHANNEL = 'nsbrooklyntv'
 
 const MISS_LABEL = {
@@ -20,46 +20,12 @@ const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', mi
 export default function KickGiveaway() {
   const { loading: authLoading, user, isAdmin } = useAuth()
 
-  const [data, setData] = useState(null)
-  const [busy, setBusy] = useState(false)
-  const [msg, setMsg] = useState(null)
+  const { data, busy, msg, load, post, startPolling, pollMs } = useKickAdmin(isAdmin)
   const [keyword, setKeyword] = useState('!enter')
   const [winnerCount, setWinnerCount] = useState(1)
   const [requireRole, setRequireRole] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [revealed, setRevealed] = useState(false)
-  const pollRef = useRef(null)
-
-  const load = useCallback(async () => {
-    try {
-      const res = await fetch('/api/kick?admin=1')
-      if (res.ok) setData(await res.json())
-    } catch { /* transient — the poll retries */ }
-  }, [])
-
-  const post = async (body, okText) => {
-    setBusy(true)
-    setMsg(null)
-    try {
-      const res = await fetch('/api/kick', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || `request failed (${res.status})`)
-      setData(json)
-      if (okText) setMsg({ text: okText })
-      return json
-    } catch (err) {
-      setMsg({ err: true, text: err.message })
-      return null
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  useEffect(() => { if (isAdmin) load() }, [isAdmin, load])
 
   const s = data?.session
   const entries = data?.entries || []
@@ -68,13 +34,11 @@ export default function KickGiveaway() {
   const collecting = Boolean(s?.open)
   const drawn = Boolean(s?.drawnAt)
 
-  // Poll while entries can still arrive, and briefly after a draw so the
-  // winner's chat shows up.
+  // Poll while entries can still arrive, and after a draw so the winner's
+  // chat shows up.
   useEffect(() => {
-    clearInterval(pollRef.current)
-    if (collecting || (drawn && revealed)) pollRef.current = setInterval(load, POLL_MS)
-    return () => clearInterval(pollRef.current)
-  }, [collecting, drawn, revealed, load])
+    startPolling(collecting || (drawn && revealed))
+  }, [collecting, drawn, revealed, startPolling])
 
   useEffect(() => { if (s?.keyword) setKeyword(s.keyword) }, [s?.keyword])
 
@@ -143,30 +107,56 @@ export default function KickGiveaway() {
 
         {msg && <p className={`admin-msg ${msg.err ? 'err' : ''}`}>{msg.text}</p>}
 
-        {/* A missing subscription looks exactly like "nobody entered", so it
-            gets stated plainly rather than left to be discovered on stream. */}
+        {/* Delivery problems look exactly like "nobody entered", so they are
+            stated plainly — including WHICH channel is subscribed, since a
+            subscription for the wrong channel is the failure that otherwise
+            looks perfectly healthy. */}
         {data?.subscription && !data.subscription.ok && (
           <div className="kgw-alert">
-            <b>Kick chat delivery is OFF</b>
-            <p>
-              Kick isn't sending chat to the site, so nothing can be collected. Setting
-              the webhook URL isn't enough on its own — a subscription has to be created
-              with your broadcaster account.
-            </p>
-            <p>
-              Fix: go to <a href="/giveaways">/giveaways</a>, unlink Kick if it's already
-              linked, then link it again while signed in as an admin. That switches
-              delivery on automatically.
-              {data.subscription.error && <><br /><small>({data.subscription.error})</small></>}
-            </p>
+            {data.subscription.reason === 'wrong-channel' ? (
+              <>
+                <b>Chat is connected to the WRONG channel</b>
+                <p>
+                  Kick is delivering chat for broadcaster{' '}
+                  <code>{(data.subscription.subscribedTo || []).join(', ')}</code>, but this
+                  picker watches <b>{data.subscription.channel}</b> (id{' '}
+                  <code>{data.subscription.broadcasterId}</code>). A subscription belongs to
+                  whichever Kick account authorised it, so it has to be granted by the{' '}
+                  <b>{data.subscription.channel}</b> account itself.
+                </p>
+                <p>
+                  <a href="/api/kick?start=1&broadcaster=1">Connect chat as {data.subscription.channel}</a>
+                  {' · '}
+                  <button className="kgw-linkbtn" onClick={() => post({ action: 'clear-subscriptions' }, 'Stale subscriptions removed')}>
+                    remove the wrong subscription
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <b>Kick chat delivery is OFF</b>
+                <p>
+                  Kick isn't sending chat here, so nothing can be collected. Setting a
+                  webhook URL isn't enough on its own — a subscription has to be granted
+                  by the channel owner.
+                </p>
+                <p>
+                  <a href="/api/kick?start=1&broadcaster=1">Connect chat as the broadcaster</a>
+                  {' — sign in to Kick as '}
+                  <b>{data.subscription.channel || 'your channel'}</b> when it asks.
+                  {data.subscription.error && <><br /><small>({data.subscription.error})</small></>}
+                </p>
+              </>
+            )}
           </div>
         )}
         {data?.subscription?.ok && (
           <p className="kgw-subok">
-            ✓ Kick chat delivery is live ({data.subscription.count} subscription
-            {data.subscription.count === 1 ? '' : 's'})
+            ✓ Kick chat delivery is live for <b>{data.subscription.channel || 'this app'}</b>
+            {data.subscription.warn && <> — {data.subscription.warn}</>}
           </p>
         )}
+
         {data && !data.roleGate && requireRole && (
           <p className="admin-msg err">
             Role checking isn't configured on the server — nobody could pass it. Set the

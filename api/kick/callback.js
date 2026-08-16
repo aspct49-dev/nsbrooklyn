@@ -4,7 +4,7 @@
 // them, rather than dumping raw JSON at someone mid-flow.
 import { redirect, getOrigin, getQuery, parseCookies, setCookie, sendJson } from '../_lib/http.js'
 import { readSession, isAdmin } from '../_lib/session.js'
-import { exchangeCode, fetchKickUser, subscribeToChat } from '../_lib/kick.js'
+import { exchangeCode, fetchKickUser, subscribeToChat, resolveChannelId } from '../_lib/kick.js'
 import { createLink } from '../_lib/links.js'
 import { OAUTH_COOKIE } from './index.js'
 
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     if (error) return back(res, { kick: 'error', reason: 'Kick authorization was cancelled' })
 
     const cookie = parseCookies(req)[OAUTH_COOKIE] || ''
-    const [expectedState, verifier] = cookie.split('.')
+    const [expectedState, verifier, mode] = cookie.split('.')
     setCookie(res, OAUTH_COOKIE, '', { maxAge: 0 })
 
     if (!code || !state || !expectedState || state !== expectedState || !verifier) {
@@ -30,28 +30,41 @@ export default async function handler(req, res) {
     const token = await exchangeCode(getOrigin(req), code, verifier)
     const kick = await fetchKickUser(token.access_token)
 
+    // Broadcaster flow: switch on chat delivery for OUR channel. No personal
+    // link is created — this is about the channel, not about who is entering.
+    if (mode === 'b' && isAdmin(session)) {
+      const slug = process.env.KICK_CHANNEL_SLUG
+      if (slug) {
+        let wanted
+        try {
+          wanted = await resolveChannelId(slug)
+        } catch (err) {
+          return back(res, { kick: 'error', reason: `Could not look up channel "${slug}": ${err.message}` })
+        }
+        // Authorising with the wrong account is the failure that looks like
+        // success, so it is refused outright rather than silently subscribing
+        // someone else's chat.
+        if (String(kick.id) !== String(wanted)) {
+          return back(res, {
+            kick: 'error',
+            reason: `You authorised as "${kick.name}", but chat delivery has to be granted by the ${slug} account itself. Log out of Kick, sign in as ${slug}, and try again.`,
+          })
+        }
+      }
+      const sub = await subscribeToChat(token.access_token, kick.id)
+      if (!sub.ok) {
+        console.error('kick chat subscription failed', sub)
+        return back(res, { kick: 'error', reason: `Could not switch on chat delivery (${sub.status || 'error'}).` })
+      }
+      return back(res, { kick: 'chat-on', name: kick.name })
+    }
+
     await createLink({
       discordId: session.id,
       discordName: session.name,
       kickId: kick.id,
       kickName: kick.name,
     })
-
-    // An admin linking is the broadcaster, so use their fresh token to turn
-    // on chat delivery. Setting a webhook URL alone delivers nothing — Kick
-    // only sends events you have explicitly subscribed to.
-    if (isAdmin(session)) {
-      const sub = await subscribeToChat(token.access_token, kick.id)
-      if (!sub.ok) {
-        console.error('kick chat subscription failed', sub)
-        return back(res, {
-          kick: 'linked',
-          name: kick.name,
-          warn: `Linked, but chat delivery could not be switched on (${sub.status || 'error'}). Check the app's webhook URL.`,
-        })
-      }
-      return back(res, { kick: 'linked', name: kick.name, chat: 'on' })
-    }
 
     return back(res, { kick: 'linked', name: kick.name })
   } catch (err) {

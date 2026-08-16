@@ -122,15 +122,62 @@ export async function listSubscriptions(token) {
   return Array.isArray(body?.data) ? body.data : []
 }
 
-/** Is chat delivery actually switched on? Surfaced in the admin panel so a
- *  missing subscription is visible instead of looking like "nobody entered". */
+/** Resolve a channel slug to its broadcaster user id. */
+export async function resolveChannelId(slug, token) {
+  const t = token || (await appToken())
+  const res = await fetch(`${API}/channels?slug=${encodeURIComponent(slug)}`, {
+    headers: { Authorization: `Bearer ${t}` },
+  })
+  if (!res.ok) throw Object.assign(new Error(`Kick channel lookup failed (${res.status})`), { status: 502 })
+  const body = await res.json()
+  const ch = Array.isArray(body?.data) ? body.data[0] : null
+  if (!ch?.broadcaster_user_id) throw Object.assign(new Error(`No Kick channel "${slug}"`), { status: 404 })
+  return String(ch.broadcaster_user_id)
+}
+
+export async function deleteSubscription(id, token) {
+  const t = token || (await appToken())
+  const res = await fetch(`${SUBSCRIPTIONS}?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${t}` },
+  })
+  return { ok: res.ok || res.status === 204, status: res.status }
+}
+
+/**
+ * Is chat delivery on FOR OUR CHANNEL?
+ *
+ * Checking only that some chat subscription exists is not enough: a
+ * subscription belongs to whichever account authorised, so linking a personal
+ * account happily produces a healthy-looking subscription that delivers a
+ * completely different channel's chat. The broadcaster id is compared against
+ * the configured slug so that shows up as wrong rather than green.
+ */
 export async function chatSubscriptionStatus() {
+  const slug = process.env.KICK_CHANNEL_SLUG
   try {
-    const subs = await listSubscriptions(await appToken())
+    const token = await appToken()
+    const subs = await listSubscriptions(token)
     const chat = subs.filter((s) => s.event === CHAT_EVENT)
-    return { ok: chat.length > 0, count: chat.length, total: subs.length }
+
+    if (!chat.length) return { ok: false, reason: 'none', count: 0 }
+    if (!slug) return { ok: true, count: chat.length, warn: 'KICK_CHANNEL_SLUG not set — cannot confirm the channel' }
+
+    const wanted = await resolveChannelId(slug, token)
+    const mine = chat.filter((s) => String(s.broadcaster_user_id) === wanted)
+    if (mine.length) return { ok: true, count: mine.length, channel: slug, broadcasterId: wanted }
+
+    return {
+      ok: false,
+      reason: 'wrong-channel',
+      count: chat.length,
+      channel: slug,
+      broadcasterId: wanted,
+      subscribedTo: chat.map((s) => String(s.broadcaster_user_id)),
+      stale: chat.map((s) => s.id),
+    }
   } catch (err) {
-    return { ok: false, error: err.message }
+    return { ok: false, reason: 'error', error: err.message }
   }
 }
 

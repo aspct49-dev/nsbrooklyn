@@ -10,7 +10,7 @@
 import crypto from 'node:crypto'
 import { sendJson, redirect, getQuery, getOrigin, setCookie, readBody } from '../_lib/http.js'
 import { readSession, requireAdmin, isAdmin } from '../_lib/session.js'
-import { authorizeUrl, makePkce, chatSubscriptionStatus } from '../_lib/kick.js'
+import { authorizeUrl, makePkce, chatSubscriptionStatus, deleteSubscription } from '../_lib/kick.js'
 import { linkForDiscord, removeLink } from '../_lib/links.js'
 import { hasRequiredRole, roleGateConfigured } from '../_lib/discord.js'
 import {
@@ -120,6 +120,16 @@ async function handleAdminAction(req, res, body) {
     return adminView(res)
   }
 
+  // Remove chat subscriptions pointing at the wrong channel, so a stale one
+  // can't sit there looking healthy.
+  if (action === 'clear-subscriptions') {
+    const status = await chatSubscriptionStatus()
+    const ids = status.stale || []
+    const results = []
+    for (const id of ids) results.push({ id, ...(await deleteSubscription(id)) })
+    return adminView(res, { cleared: results })
+  }
+
   if (action === 'redraw-place') {
     if (!current.drawnAt || !current.winners?.length) {
       throw Object.assign(new Error('Draw before redrawing a place'), { status: 409 })
@@ -152,14 +162,20 @@ export default async function handler(req, res) {
       const q = getQuery(req)
 
       if (q.start) {
+        // Two different flows share this endpoint:
+        //   viewer      — pairing a personal Kick account, to enter giveaways
+        //   broadcaster — the CHANNEL OWNER authorising chat delivery
+        // They are separate because a chat subscription belongs to whichever
+        // account authorises it. An admin's personal Kick account is usually
+        // not the channel, so conflating the two silently subscribes to the
+        // wrong chat.
+        const broadcaster = Boolean(q.broadcaster) && isAdmin(session)
         const state = crypto.randomBytes(16).toString('hex')
         const { verifier, challenge } = makePkce()
-        // state + verifier ride in one short-lived cookie; the callback needs
-        // both and neither is worth persisting server-side
-        setCookie(res, OAUTH_COOKIE, `${state}.${verifier}`, { maxAge: 600 })
-        // the broadcaster additionally grants events:subscribe so the callback
-        // can switch on chat delivery; viewers are never asked for it
-        const scopes = isAdmin(session) ? 'user:read events:subscribe' : 'user:read'
+        // state + verifier + which flow, in one short-lived cookie; the
+        // callback needs all three and none is worth persisting server-side
+        setCookie(res, OAUTH_COOKIE, `${state}.${verifier}.${broadcaster ? 'b' : 'u'}`, { maxAge: 600 })
+        const scopes = broadcaster ? 'user:read events:subscribe' : 'user:read'
         return redirect(res, authorizeUrl(getOrigin(req), { state, challenge, scopes }))
       }
 

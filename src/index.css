@@ -2506,6 +2506,8 @@ img { display: block; max-width: 100%; }
 .kgw-alert a { color: #ffd977; text-decoration: underline; }
 .kgw-alert small { color: var(--text-muted); }
 .kgw-subok { color: #53fc18; font-size: 12.5px; margin-bottom: 14px; }
+.kgw-alert code { background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px; font-size: 11.5px; }
+.kgw-linkbtn { color: #ffd977; text-decoration: underline; font-size: inherit; padding: 0; }
 
 @media (max-width: 900px) {
   .kgw-layout { grid-template-columns: 1fr; }
