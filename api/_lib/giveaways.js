@@ -14,7 +14,35 @@ export { ensureSeed, makeSeed, hashSeed }
 
 export const STATUSES = ['draft', 'live', 'ended']
 
+/** How people can enter: the site button, the Kick chat keyword, or both. */
+export const ENTRY_MODES = ['site', 'kick', 'both']
+
 const entriesKey = (id) => `nsb:giveaway-entries:${id}`
+const missesKey = (id) => `nsb:giveaway-misses:${id}`
+
+export const acceptsSite = (g) => g.entryMode !== 'kick'
+export const acceptsKeyword = (g) => g.entryMode === 'kick' || g.entryMode === 'both'
+
+/**
+ * Does a chat message contain the keyword?
+ *
+ * Emote tokens are stripped first — Kick embeds them as `[emote:123:NAME]`,
+ * and a name could otherwise collide with the keyword. Matching is on whole
+ * words so "!enter" doesn't fire on "!entered", but a viewer who types the
+ * keyword alongside other words still counts.
+ */
+export function messageMatches(content, keyword) {
+  if (!keyword) return false
+  const text = String(content ?? '')
+    .replace(/\[emote:\d+:[^\]]*\]/gi, ' ')
+    .toLowerCase()
+  const needle = String(keyword).trim().toLowerCase()
+  if (!needle) return false
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // \b doesn't help around leading punctuation like "!enter", so bound on
+  // whitespace or string edges instead
+  return new RegExp(`(^|\\s)${escaped}(\\s|$)`).test(text)
+}
 
 /** Public view — never leaks an undrawn seed. */
 export function publicGiveaway(g, extra = {}) {
@@ -60,6 +88,10 @@ export function addEntry(giveawayId, user) {
     name: user.name,
     avatar: user.avatar || null,
     at: new Date().toISOString(),
+    // how they got in — only set for chat entries, so a mixed giveaway can
+    // be told apart in the admin entrant list
+    ...(user.via ? { via: user.via } : {}),
+    ...(user.kickName ? { kickName: user.kickName } : {}),
   })
 }
 
@@ -70,7 +102,23 @@ export async function listEntries(giveawayId) {
 
 export const countEntries = (giveawayId) => hashCount(entriesKey(giveawayId))
 
-export const clearEntries = (giveawayId) => del(entriesKey(giveawayId))
+export const clearEntries = (giveawayId) =>
+  Promise.all([del(entriesKey(giveawayId)), del(missesKey(giveawayId))])
+
+/**
+ * Someone typed the keyword but wasn't eligible. Recorded so the admin can
+ * answer "why am I not in the list?" without guesswork — and so it's visible
+ * when a lot of viewers are bouncing off the link/role requirement.
+ */
+export const recordMiss = (giveawayId, kickId, kickName, reason) =>
+  hashSet(missesKey(giveawayId), String(kickId), {
+    kickName, reason, at: new Date().toISOString(),
+  })
+
+export async function listMisses(giveawayId) {
+  const map = await hashGetAll(missesKey(giveawayId))
+  return Object.values(map).sort((a, b) => new Date(b.at) - new Date(a.at))
+}
 
 /**
  * Membership check only — deliberately not a full read. Every page view calls
@@ -194,6 +242,15 @@ export function normalizeGiveaway(input, existing) {
     throw bad('Number of winners must be between 1 and 100')
   }
 
+  const entryMode = ENTRY_MODES.includes(input?.entryMode) ? input.entryMode : 'site'
+  const keyword = String(input?.keyword || '').trim().slice(0, 40)
+  if (entryMode !== 'site' && !keyword) {
+    throw bad('A chat keyword is required for Kick entry')
+  }
+  if (keyword && /\s/.test(keyword)) {
+    throw bad('The keyword must be a single word with no spaces')
+  }
+
   return {
     // keep the id stable on edit so entries and results aren't orphaned
     id: existing?.id || `${slug(title)}-${Date.now().toString(36)}`,
@@ -203,6 +260,9 @@ export function normalizeGiveaway(input, existing) {
     startAt: input?.startAt || null,
     endAt: input.endAt,
     winnerCount,
+    entryMode,
+    keyword: keyword || null,
+    requireRole: Boolean(input?.requireRole),
     status: STATUSES.includes(input?.status) ? input.status : 'draft',
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     // draw results are never client-supplied — they only ever come from the

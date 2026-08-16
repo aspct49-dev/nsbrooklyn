@@ -2232,6 +2232,107 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
 }
 
+/* ---------------------------------------------- Kick chat entry + linking */
+.kick-flash {
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  font-size: 14.5px;
+  text-align: center;
+}
+.kick-flash.ok {
+  color: #3ddc84;
+  background: rgba(61, 220, 132, 0.1);
+  border: 1px solid rgba(61, 220, 132, 0.4);
+}
+.kick-flash.err {
+  color: var(--blue-2);
+  background: rgba(255, 77, 87, 0.1);
+  border: 1px solid rgba(255, 77, 87, 0.4);
+}
+
+.kick-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: linear-gradient(160deg, #231019 0%, #150a0f 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.kick-panel.ok { border-color: rgba(83, 252, 24, 0.35); }
+.kick-panel-ic {
+  flex: none;
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  border-radius: 13px;
+  background: rgba(83, 252, 24, 0.12);
+  border: 1px solid rgba(83, 252, 24, 0.4);
+  color: #53fc18; /* Kick green */
+}
+.kick-panel-ic svg { width: 22px; height: 22px; }
+.kick-panel-text { flex: 1; min-width: 0; }
+.kick-panel-text h4 {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 17px; color: #fff; margin-bottom: 4px;
+}
+.kick-panel-text .kick-name { color: #53fc18; }
+.kick-panel-text p { color: var(--text-soft); font-size: 13.5px; line-height: 1.55; }
+.kick-panel-text .warn { color: #ffd977; }
+.kick-panel-actions { flex: none; }
+.kick-panel-actions .gv-enter { width: auto; padding: 11px 18px; }
+.gv-enter.kick { background: #53fc18; color: #0b1a05; box-shadow: none; }
+
+.gv-keyword {
+  display: flex; align-items: center; justify-content: center;
+  gap: 9px; flex-wrap: wrap;
+  padding: 13px 16px;
+  border-radius: 12px;
+  background: rgba(83, 252, 24, 0.09);
+  border: 1px solid rgba(83, 252, 24, 0.38);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.gv-keyword svg { width: 17px; height: 17px; color: #53fc18; flex: none; }
+.gv-keyword code {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: #53fc18;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  padding: 2px 9px;
+}
+.gv-keyword.alt {
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border-color: var(--border);
+  font-size: 13px;
+}
+
+/* admin: checkbox with helper text */
+.admin-check {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.admin-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--blue); flex: none; }
+.admin-check span { font-size: 14px; color: var(--text); font-weight: 600; }
+.admin-check small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px; font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .kick-panel { flex-direction: column; text-align: center; }
+  .kick-panel-actions .gv-enter { width: 100%; }
+}
+
 .gv-entrants-panel { max-width: 620px; margin: 0 auto 22px; }
 .gv-entrants-panel .gw-winner-list { max-height: 320px; overflow-y: auto; margin-bottom: 0; }
 

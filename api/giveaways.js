@@ -10,9 +10,19 @@ import { sendJson, readBody } from './_lib/http.js'
 import { readSession, isAdmin as sessionIsAdmin, requireAdmin } from './_lib/session.js'
 import {
   listGiveaways, saveGiveaways, normalizeGiveaway, publicGiveaway,
-  addEntry, listEntries, countEntries, clearEntries, hasEntered,
-  drawWinners, ensureSeed, redrawPlace, makeSeed, phaseOf, isOpen, STATUSES,
+  addEntry, listEntries, countEntries, clearEntries, hasEntered, listMisses,
+  drawWinners, ensureSeed, redrawPlace, makeSeed, phaseOf, isOpen, acceptsSite, STATUSES,
 } from './_lib/giveaways.js'
+import { hasRequiredRole } from './_lib/discord.js'
+
+// Why an entry was refused, in the entrant's terms rather than the code's.
+const ROLE_REFUSALS = {
+  'not-in-server': 'You need to be in the Discord server to enter this one.',
+  'missing-role': "You don't have the required Discord role for this giveaway.",
+  'role-gate-not-configured': 'Role checking is not set up yet — ask an admin.',
+  'bot-forbidden': 'Could not verify your Discord role right now. Please try again shortly.',
+  default: 'Could not verify your Discord role right now. Please try again shortly.',
+}
 
 const notFound = (id) => Object.assign(new Error(`Unknown giveaway "${id}"`), { status: 404 })
 
@@ -89,6 +99,20 @@ async function handleEnter(req, res, body) {
       new Error(phase === 'upcoming' ? 'This giveaway has not started yet' : 'Entries for this giveaway are closed'),
       { status: 409 },
     )
+  }
+
+  if (!acceptsSite(giveaway)) {
+    throw Object.assign(
+      new Error(`This one is Kick-chat only — type "${giveaway.keyword}" in the stream chat to enter.`),
+      { status: 409 },
+    )
+  }
+
+  // The same gate the Kick webhook applies, so the button can't be used to
+  // sidestep a role requirement.
+  if (giveaway.requireRole) {
+    const role = await hasRequiredRole(session.id)
+    if (!role.ok) throw Object.assign(new Error(ROLE_REFUSALS[role.reason] || ROLE_REFUSALS.default), { status: 403 })
   }
 
   let isNew
@@ -197,7 +221,12 @@ async function handleAdmin(req, res, body, action) {
   }
 
   if (action === 'entries') {
-    return sendJson(res, 200, { entries: await listEntries(find().id) })
+    const g = find()
+    return sendJson(res, 200, {
+      entries: await listEntries(g.id),
+      // people who typed the keyword but weren't linked or lacked the role
+      misses: await listMisses(g.id),
+    })
   }
 
   throw Object.assign(new Error(`Unknown action "${action}"`), { status: 400 })

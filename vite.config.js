@@ -13,6 +13,9 @@ const API_ROUTES = {
   '/api/auth/callback': './api/auth/callback.js',
   '/api/auth/me': './api/auth/me.js',
   '/api/auth/logout': './api/auth/logout.js',
+  '/api/kick/link': './api/kick/link.js',
+  '/api/kick/callback': './api/kick/callback.js',
+  '/api/kick/webhook': './api/kick/webhook.js',
 }
 
 function devApi(env) {

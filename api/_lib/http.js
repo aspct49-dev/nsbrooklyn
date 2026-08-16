@@ -39,10 +39,38 @@ export function setCookie(res, name, value, { maxAge, httpOnly = true, path = '/
   res.setHeader('Set-Cookie', prev ? [].concat(prev, cookie) : cookie)
 }
 
-export async function readBody(req) {
+/**
+ * The request body as exact bytes. Signature checks must hash what was
+ * actually sent, so this never re-serializes: a re-encoded object would
+ * differ from the sender's bytes by key order or whitespace and every
+ * signature would fail. Some hosts pre-parse the body and drain the stream,
+ * so the already-read forms are honoured first.
+ */
+export async function readRawBody(req) {
+  if (Buffer.isBuffer(req.rawBody)) return req.rawBody
+  if (typeof req.rawBody === 'string') return Buffer.from(req.rawBody, 'utf8')
+  if (Buffer.isBuffer(req.body)) return req.body
+  if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8')
+
   const chunks = []
   for await (const c of req) chunks.push(c)
-  const raw = Buffer.concat(chunks).toString('utf8')
+  const raw = Buffer.concat(chunks)
+  if (raw.length) return raw
+
+  // Stream already drained and only a parsed object survives — unusable for
+  // signatures, so say so rather than silently failing verification.
+  if (req.body && typeof req.body === 'object') {
+    throw Object.assign(
+      new Error('Raw body unavailable (request was pre-parsed) — cannot verify signature'),
+      { status: 500 },
+    )
+  }
+  return raw
+}
+
+export async function readBody(req) {
+  if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body
+  const raw = (await readRawBody(req)).toString('utf8')
   try {
     return raw ? JSON.parse(raw) : {}
   } catch {
