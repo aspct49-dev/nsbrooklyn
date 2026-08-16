@@ -76,12 +76,18 @@ export function useKickChat({ chatroomId, active, onMessage }) {
 
       const sender = msg?.sender
       if (!sender?.id) return
+
+      // Kick tags chat with the sender's badges; a subscriber carries one of
+      // type "subscriber". That is how sub luck knows who to weight.
+      const badges = sender?.identity?.badges || []
+      const isSub = badges.some((b) => b?.type === 'subscriber' || b?.type === 'founder')
       setSeen((n) => n + 1)
       setLastAt(new Date().toISOString())
       handlerRef.current?.({
         kickUserId: String(sender.id),
         kickUsername: sender.username || sender.slug || '',
         kickAvatar: sender.profile_pic || null,
+        isSub,
         content: String(msg.content ?? ''),
       })
     }

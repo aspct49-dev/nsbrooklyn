@@ -2410,6 +2410,16 @@ img { display: block; max-width: 100%; }
 .kgw-toggle input { margin-top: 2px; accent-color: var(--kick); }
 .kgw-toggle span { font-size: 12px; color: var(--text-soft); font-weight: 600; line-height: 1.35; }
 .kgw-toggle small { color: var(--text-muted); font-weight: 400; }
+.kgw-toggle.wide { padding-top: 4px; margin-bottom: 4px; }
+.kgw-sub {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  color: #53fc18;
+  border: 1px solid rgba(83,252,24,0.5);
+  border-radius: 4px;
+  padding: 1px 4px;
+  flex: none;
+}
+.kgw-entry .kgw-odds { margin-left: auto; font-size: 11px; color: var(--text-muted); flex: none; }
 
 .kgw-btn {
   display: flex; align-items: center; justify-content: center; gap: 9px;

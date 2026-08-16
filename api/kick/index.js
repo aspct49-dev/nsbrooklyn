@@ -81,6 +81,7 @@ async function handleAdminAction(req, res, body) {
       winnerCount,
       prize: String(body?.prize || '').trim().slice(0, 120),
       requireRole: body?.requireRole !== false,
+      subLuck: Boolean(body?.subLuck),
       open: true,
       openedAt: new Date().toISOString(),
       openedBy: admin.name,
@@ -114,7 +115,7 @@ async function handleAdminAction(req, res, body) {
       open: false,
       closedAt: current.closedAt || new Date().toISOString(),
       winnerCount,
-      winners: drawWinners({ entries, winnerCount, seed: seeded.seed }),
+      winners: drawWinners({ entries, winnerCount, seed: seeded.seed, subLuck: seeded.subLuck }),
       entrantsAtDraw: entries.length,
       drawnAt: new Date().toISOString(),
       drawnBy: admin.name,
@@ -155,6 +156,7 @@ async function handleAdminAction(req, res, body) {
       kickId,
       kickName: link.kickName || kickName,
       kickAvatar: body?.kickAvatar || null,
+      isSub: Boolean(body?.isSub),
     })
     return sendJson(res, 200, { entered: true, isNew })
   }

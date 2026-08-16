@@ -20,10 +20,14 @@ const HITS = 'nsb:kickgw:hits'
 
 const bad = (msg) => Object.assign(new Error(msg), { status: 400 })
 
+/** How many times a subscriber's entry counts when sub luck is on. */
+export const SUB_MULTIPLIER = 3
+
 export const BLANK = {
   keyword: '',
   open: false,
   requireRole: true,
+  subLuck: false,
   winnerCount: 1,
   prize: '',
   openedAt: null,
@@ -83,6 +87,7 @@ export const addEntry = (user) =>
     kickId: user.kickId,
     kickName: user.kickName,
     kickAvatar: user.kickAvatar || null,
+    isSub: Boolean(user.isSub),
     at: new Date().toISOString(),
   })
 
@@ -151,15 +156,28 @@ export const getHits = () => getJson(HITS, { count: 0, lastAt: null, recent: [] 
 
 // --------------------------------------------------------------- the draw
 
-/** Uniform draw without replacement — one entry each, nobody wins twice. */
-export function drawWinners({ entries, winnerCount, seed }) {
-  return pickWeighted({ items: entries, count: winnerCount, seed }).map((w, i) => ({
+/**
+ * Draw without replacement — nobody wins twice.
+ *
+ * Uniform by default. With sub luck on, a subscriber's entry weighs
+ * SUB_MULTIPLIER times as much: still one entry each, just better odds.
+ */
+export const entryWeight = (e, subLuck) => (subLuck && e.isSub ? SUB_MULTIPLIER : 1)
+
+export function drawWinners({ entries, winnerCount, seed, subLuck = false }) {
+  return pickWeighted({
+    items: entries,
+    count: winnerCount,
+    seed,
+    weight: (e) => entryWeight(e, subLuck),
+  }).map((w, i) => ({
     place: i + 1,
     discordId: w.discordId,
     discordName: w.discordName,
     kickId: w.kickId,
     kickName: w.kickName,
     kickAvatar: w.kickAvatar || null,
+    isSub: Boolean(w.isSub),
   }))
 }
 
@@ -184,7 +202,12 @@ export function redrawPlace({ session, entries, place, seed }) {
     throw bad('No eligible entrants left — everyone else has already won or been removed')
   }
 
-  const [replacement] = pickWeighted({ items: eligible, count: 1, seed })
+  const [replacement] = pickWeighted({
+    items: eligible,
+    count: 1,
+    seed,
+    weight: (e) => entryWeight(e, session.subLuck),
+  })
   return {
     winners: winners.map((w) =>
       w.place === place
@@ -195,6 +218,7 @@ export function redrawPlace({ session, entries, place, seed }) {
             kickId: replacement.kickId,
             kickName: replacement.kickName,
             kickAvatar: replacement.kickAvatar || null,
+            isSub: Boolean(replacement.isSub),
           }
         : w),
     record: {

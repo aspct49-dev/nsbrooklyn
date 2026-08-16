@@ -38,6 +38,7 @@ export default function KickGiveaway() {
   const [keyword, setKeyword] = useState('!enter')
   const [winnerCount, setWinnerCount] = useState(1)
   const [requireRole, setRequireRole] = useState(true)
+  const [subLuck, setSubLuck] = useState(false)
   const [spinning, setSpinning] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const [chatroomId, setChatroomId] = useState(null)
@@ -113,7 +114,7 @@ export default function KickGiveaway() {
 
   const start = () => {
     setRevealed(false)
-    post({ action: 'open', keyword, winnerCount: Number(winnerCount), requireRole }, 'Collecting entries')
+    post({ action: 'open', keyword, winnerCount: Number(winnerCount), requireRole, subLuck }, 'Collecting entries')
   }
 
   const spin = async () => {
@@ -129,6 +130,10 @@ export default function KickGiveaway() {
     setRevealed(false)
     post({ action: 'clear' }, 'Cleared')
   }
+
+  // Mirrors the server's weighting so the listed odds are the real ones.
+  const weightOf = (e) => (s?.subLuck && e.isSub ? 3 : 1)
+  const totalWeight = entries.reduce((n, e) => n + weightOf(e), 0) || 1
 
   const winner = s?.winners?.[0] || null
   const winnerChat = winner ? messages[String(winner.kickId)]?.messages || [] : []
@@ -243,6 +248,16 @@ export default function KickGiveaway() {
                 </label>
               </div>
 
+              <label className="kgw-toggle wide">
+                <input
+                  type="checkbox"
+                  checked={subLuck}
+                  onChange={(e) => setSubLuck(e.target.checked)}
+                  disabled={collecting}
+                />
+                <span>Sub luck<br /><small>subscribers count 3&times;</small></span>
+              </label>
+
               <button className="kgw-btn" onClick={start} disabled={busy || collecting}>
                 <span className="dot" /> START COLLECTING
               </button>
@@ -268,6 +283,12 @@ export default function KickGiveaway() {
                     <div className="kgw-entry" key={e.discordId} title={`Discord: ${e.discordName}`}>
                       <EntrantTile entrant={e} size={26} />
                       <span>{e.kickName}</span>
+                      {e.isSub && <span className="kgw-sub" title="Subscriber">SUB</span>}
+                      {s?.subLuck && (
+                        <span className="kgw-odds">
+                          {((weightOf(e) / totalWeight) * 100).toFixed(0)}%
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
