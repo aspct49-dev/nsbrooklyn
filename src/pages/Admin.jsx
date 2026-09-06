@@ -16,7 +16,7 @@ function statusOf(c, isDefault) {
   return { label: `Live${suffix}`, cls: 'live' }
 }
 
-function BoardCard({ casino, value, isDefault, onSave, saving }) {
+function BoardCard({ casino, value, isDefault, onSave, onArchive, saving }) {
   const [start, setStart] = useState(isoToLocal(value?.startAt))
   const [end, setEnd] = useState(isoToLocal(value?.endAt))
   const [msg, setMsg] = useState(null)
@@ -74,9 +74,32 @@ function BoardCard({ casino, value, isDefault, onSave, saving }) {
         </p>
       )}
 
-      <button className="btn btn-primary admin-save" onClick={save} disabled={saving}>
-        {saving ? 'Saving…' : `Save ${casino.name} period`}
-      </button>
+      <div className="gw-actions">
+        <button className="btn btn-primary admin-save" onClick={save} disabled={saving}>
+          {saving ? 'Saving…' : 'Save period'}
+        </button>
+        {/* Only offered once the period is over — archiving a live board would
+            publish a half-finished table as if it were the final result. */}
+        {st.cls === 'ended' && (
+          <button
+            className="btn btn-ghost admin-save"
+            disabled={saving}
+            onClick={async () => {
+              const warn = 'Publish this period to /winners? The standings are '
+                + 'snapshotted now and paid out by rank. Archiving again later '
+                + 'replaces this entry rather than adding a second one.'
+              if (!window.confirm(warn)) return
+              setMsg(null)
+              const r = await onArchive(casino.id, { from: value.startAt, to: value.endAt })
+              setMsg(r.ok
+                ? { text: `Published "${r.entry.label}" — ${r.entry.winners.length} winners` }
+                : { err: true, text: r.error })
+            }}
+          >
+            Archive to /winners
+          </button>
+        )}
+      </div>
       {msg && <p className={`admin-msg ${msg.err ? 'err' : ''}`}>{msg.text}</p>}
     </div>
   )
@@ -93,6 +116,24 @@ export default function Admin() {
       .then(setSettings)
       .catch(() => setSettings({ casinos: {} }))
   }, [])
+
+  const archive = async (casinoId, { from, to }) => {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'archive', casino: casinoId, from, to, paid: 'Paid within 48 hours' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || `archive failed (${res.status})`)
+      return { ok: true, entry: data.entry }
+    } catch (err) {
+      return { ok: false, error: err.message }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const save = async (casinoId, period) => {
     setSaving(true)
@@ -149,7 +190,8 @@ export default function Admin() {
           <h1 className="section-title">Admin Panel</h1>
           {settings?.updatedAt && (
             <p className="admin-meta">
-              Last updated {new Date(settings.updatedAt).toLocaleString()} by {settings.updatedBy}
+              {/* updatedBy is deliberately not on the public settings response */}
+              Last updated {new Date(settings.updatedAt).toLocaleString()}
             </p>
           )}
         </div>
@@ -179,6 +221,7 @@ export default function Admin() {
                   value={value}
                   isDefault={!saved}
                   onSave={save}
+                  onArchive={archive}
                   saving={saving}
                 />
               )

@@ -1,9 +1,12 @@
-import { config, pastWinners } from '../data/leaderboard'
+import { config } from '../data/leaderboard'
 import { fmtMoney, maskName } from '../utils'
+import { useArchive } from '../hooks/useArchive'
 
 const MEDAL = { 1: 'gold', 2: 'silver', 3: 'bronze' }
 
 export default function Winners() {
+  const { periods, loading } = useArchive()
+
   return (
     <section className="section" id="winners">
       <div className="container">
@@ -12,14 +15,16 @@ export default function Winners() {
           <p className="bonus-heading-sub">Under code <span>{config.referralCode}</span></p>
         </div>
 
-        {pastWinners.length === 0 ? (
+        {loading ? (
+          <div className="lb-status">Loading past winners…</div>
+        ) : periods.length === 0 ? (
           <div className="lb-status">
-            No past winners yet — they’ll appear here automatically once the current
-            leaderboard ends.
+            No past winners yet — they’ll appear here once a leaderboard period is
+            archived from the admin panel.
           </div>
         ) : (
           <div className="winners-list">
-            {pastWinners.map((p) => (
+            {periods.map((p) => (
               <div className="winners-card" key={p.id}>
                 <div className="winners-card-head">
                   <h3>{p.label}</h3>
