@@ -24,6 +24,9 @@ function publicSettings(settings) {
   return {
     casinos: settings?.casinos || {},
     archive: Array.isArray(settings?.archive) ? settings.archive : [],
+    // the period the current one replaced, so /admin can offer to publish it
+    // in one click instead of asking for dates that are no longer stored
+    previousPeriod: settings?.previousPeriod || null,
     updatedAt: settings?.updatedAt || null,
   }
 }
@@ -51,6 +54,11 @@ export default async function handler(req, res) {
       assertIso(to, 'to')
       if (new Date(from) >= new Date(to)) {
         throw Object.assign(new Error('start must be before end'), { status: 400 })
+      }
+      // Enforced here, not just hidden in the UI: archiving a period that is
+      // still running publishes a half-finished table as the final result.
+      if (new Date(to) > new Date()) {
+        throw Object.assign(new Error('That period has not finished yet'), { status: 400 })
       }
 
       // Standings come from the API, never from the client — an archive is a
@@ -98,9 +106,20 @@ export default async function handler(req, res) {
       // merge over existing so saving a period never clobbers the stored
       // giveaways, raffles or archive
       const prev = (await getSettings()) || { casinos: {} }
+
+      // Remember the period being replaced. Without this, starting a new board
+      // makes the finished one unreachable — its dates are gone and there is
+      // nothing left to archive from.
+      const outgoing = prev.casinos?.betbolt
+      const replaced = outgoing && casinos.betbolt &&
+        (outgoing.startAt !== casinos.betbolt.startAt || outgoing.endAt !== casinos.betbolt.endAt)
+
       const next = {
         ...prev,
         casinos: { ...prev.casinos, ...casinos },
+        previousPeriod: replaced
+          ? { casino: 'betbolt', from: outgoing.startAt, to: outgoing.endAt }
+          : prev.previousPeriod || null,
         updatedAt: new Date().toISOString(),
         updatedBy: session.name,
       }

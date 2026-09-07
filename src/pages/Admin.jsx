@@ -6,6 +6,7 @@ import { getCasinoRange } from '../hooks/useLeaderboard'
 import { IconDiscord } from '../components/icons'
 import RaffleAdmin from '../components/RaffleAdmin'
 import GiveawayAdmin from '../components/GiveawayAdmin'
+import ArchivePanel from '../components/ArchivePanel'
 
 function statusOf(c, isDefault) {
   if (!c?.startAt || !c?.endAt) return { label: 'Not configured', cls: 'off' }
@@ -127,6 +128,7 @@ export default function Admin() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || `archive failed (${res.status})`)
+      setSettings((prev) => ({ ...prev, archive: data.archive }))
       return { ok: true, entry: data.entry }
     } catch (err) {
       return { ok: false, error: err.message }
@@ -228,6 +230,12 @@ export default function Admin() {
             })}
           </div>
         </div>
+
+        <ArchivePanel
+          settings={settings}
+          saving={saving}
+          onArchive={({ from, to }) => archive('betbolt', { from, to })}
+        />
 
         <GiveawayAdmin />
         <RaffleAdmin />
