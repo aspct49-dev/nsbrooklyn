@@ -13,9 +13,14 @@ import { IconExternal } from '../components/icons'
 
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
-  const { players, allPlayers, casino, error, updatedAt, loading } = useLeaderboard(activeId)
+  const { players, allPlayers, filled, casino, error, updatedAt, loading } = useLeaderboard(activeId)
   const top3 = players.slice(0, 3)
-  const hasStandings = players.length > 0
+  // `players` is padded out to every paying place, so its length says nothing
+  // about whether anyone is actually on the board — `filled` does. Show the
+  // board on a successful fetch even with nobody on it yet (every place reads
+  // as open), but keep the status message when a fetch failed and we have
+  // nothing real to show.
+  const hasStandings = filled > 0 || (!loading && !error)
 
   // Why the board is empty, in the visitor's terms. An upstream hiccup is
   // temporary and self-healing, so it shouldn't read like something is broken

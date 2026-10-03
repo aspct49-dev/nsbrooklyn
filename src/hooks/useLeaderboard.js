@@ -10,6 +10,26 @@ function rank(players, prizes) {
     .map((p, i) => ({ ...p, prize: prizes[i] || 0 }))
 }
 
+/**
+ * Pad the ranked list out to every paying place with open slots.
+ *
+ * These are NOT fake players. Each one is explicitly an unclaimed position —
+ * no name, no wager — so a thin board reads as an invitation rather than as a
+ * dead one. Fictional usernames next to real prize money would misrepresent
+ * the board, which is why the old placeholder list was removed; an empty seat
+ * labelled as empty does not.
+ *
+ * The stats strip totals `allPlayers` (the raw API list), so nothing a slot
+ * carries can inflate a real figure.
+ */
+function padToPaidPlaces(ranked, prizes) {
+  const open = []
+  for (let i = ranked.length; i < prizes.length; i++) {
+    open.push({ open: true, name: null, wagered: 0, prize: prizes[i] || 0 })
+  }
+  return [...ranked, ...open]
+}
+
 const REFRESH_MS = 600_000
 const RETRY_MS = 180_000
 const RATE_LIMIT_MS = 600_000
@@ -175,15 +195,19 @@ export function useLeaderboard(casinoId = casinos[0].id) {
   // page renders a loading/unavailable state instead.
   const source = live?.players ?? []
 
+  const ranked = useMemo(() => rank(source, casino.prizes), [source, casino])
   const players = useMemo(
-    () => rank(source, casino.prizes),
-    [source, casino],
+    () => padToPaidPlaces(ranked, casino.prizes),
+    [ranked, casino],
   )
 
   return {
     loading: !live,
     error,
+    // every paying place, real entrants first then open slots
     players,
+    // how many of those places a real player actually holds
+    filled: ranked.length,
     // full fetched list (not capped to paid places) — used by the stats strip
     allPlayers: source,
     updatedAt: live?.updatedAt ?? null,

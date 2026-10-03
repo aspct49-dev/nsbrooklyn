@@ -481,6 +481,44 @@ img { display: block; max-width: 100%; }
 .lb-title .white { color: var(--text); }
 .lb-sub { color: var(--text-soft); font-family: 'Rubik', sans-serif; margin: 16px auto 22px; max-width: 520px; }
 .lb-actions { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
+/* ---------------------------------------------------- unclaimed places
+   A board with one wagerer on it should read as "nine places still open",
+   not as a dead board. These slots carry the real prize but are visibly
+   empty — never a fake username sitting next to real prize money.
+
+   NOTE: no `opacity` anywhere here. The podium card is a transparent PNG
+   frame and the table rows have no fill of their own, so fading either one
+   lets the bright red page background through and turns it pink. Everything
+   below is done with colour and dashed borders instead. */
+.podium-col.open .avatar.open-avatar {
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.34);
+  border: 2px dashed rgba(255, 200, 60, 0.45);
+  color: rgba(255, 217, 119, 0.8);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 30px; font-weight: 700;
+}
+.podium-name.open-name {
+  color: #ffd977;
+  font-style: italic;
+}
+.wager-pill.open-pill {
+  background: rgba(255, 200, 60, 0.09);
+  border: 1px dashed rgba(255, 200, 60, 0.42);
+  color: #ffd977;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+}
+
+.lb-table tbody tr.lb-row-open .rank-pill { color: var(--text-muted); }
+.lb-open-cell {
+  color: #ffd977;
+  font-style: italic;
+  font-weight: 600;
+}
+.lb-open-dash { color: var(--text-muted); }
+.lb-table tbody tr.lb-row-open .reward-val { color: var(--text-soft); }
+
 /* A board we have left but have not finished paying. Styled as a notice, not
    a promo — there is nothing to click and nowhere to go. */
 .lb-closing {

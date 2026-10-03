@@ -18,13 +18,22 @@ export default function LeaderboardTable({ rows, startRank }) {
         <tbody>
           {rows.map((p, i) => {
             const rank = startRank + i
+            // Open slots have no name, so the rank is the only stable key.
             return (
-              <tr key={p.name}>
+              <tr key={p.open ? `open-${rank}` : p.name} className={p.open ? 'lb-row-open' : ''}>
                 <td><span className={`rank-pill ${MEDAL[rank] || ''}`}>{rank}</span></td>
                 <td>
-                  <div className="user-cell">{maskName(p.name)}</div>
+                  <div className="user-cell">
+                    {p.open ? <span className="lb-open-cell">This could be you</span> : maskName(p.name)}
+                  </div>
                 </td>
-                <td className="right"><span className="wager-val"><span className="cur">$</span>{fmtMoney(p.wagered, 2).slice(1)}</span></td>
+                <td className="right">
+                  {p.open ? (
+                    <span className="lb-open-dash">—</span>
+                  ) : (
+                    <span className="wager-val"><span className="cur">$</span>{fmtMoney(p.wagered, 2).slice(1)}</span>
+                  )}
+                </td>
                 <td className="right"><span className="reward-val">{fmtMoney(p.prize)}</span></td>
               </tr>
             )

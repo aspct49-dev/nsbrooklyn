@@ -10,6 +10,26 @@ const META = {
 function Card({ player, rank }) {
   const m = META[rank]
   const avatar = config.rankAvatars[rank - 1]
+
+  // An unclaimed place. Marked as open rather than dressed up as a player —
+  // the prize is real, so the seat has to be visibly empty.
+  if (player.open) {
+    return (
+      <div className={`podium-col ${m.cls} open`}>
+        <div className="podium-card">
+          <div className="avatar-wrap">
+            <div className="avatar open-avatar" aria-hidden="true">?</div>
+            <span className="rank-badge">{m.label}</span>
+          </div>
+          <div className="podium-name open-name">This could be you</div>
+          <div className="podium-wager-lbl">Unclaimed</div>
+          <div className="wager-pill open-pill">Wager to claim</div>
+          <div className="frame-prize">{fmtMoney(player.prize)}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={`podium-col ${m.cls}`}>
       {/* lb_card.png frame — prize renders inside its bottom plaque */}
