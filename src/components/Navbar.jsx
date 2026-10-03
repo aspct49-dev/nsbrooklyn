@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { config } from '../data/leaderboard'
 import { useAuth, loginUrl, logoutUrl } from '../hooks/useAuth'
 import {
-  IconHome, IconTrophy, IconMedal, IconGift, IconBolt, IconTicket,
+  IconHome, IconTrophy, IconMedal, IconGift, IconBolt, IconTicket, IconSword,
   IconDiscord, IconKick, IconX,
 } from './icons'
 
@@ -12,7 +12,8 @@ const nav = [
   { label: 'Leaderboard', icon: <IconTrophy />, to: '/leaderboard', badge: `$${(config.prizePool / 1000)}K` },
   { label: 'Giveaways', icon: <IconGift />, to: '/giveaways' },
   { label: 'Raffle', icon: <IconTicket />, to: '/raffles' },
-  { label: 'Ranks', icon: <IconBolt />, to: '/milestones' },
+  { label: 'Milestones', icon: <IconBolt />, to: '/milestones' },
+  { label: 'Ranks', icon: <IconSword />, to: '/ranks' },
   { label: 'Winners', icon: <IconMedal />, to: '/winners' },
 ]
 

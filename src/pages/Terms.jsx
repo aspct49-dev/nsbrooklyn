@@ -30,10 +30,27 @@ export default function Terms() {
       <ul>
         <li>To appear and rank on the leaderboard, you must be registered under code {config.referralCode} on {config.casinoNames} and have affiliate tracking enabled.</li>
         <li>Wager totals are sourced from the {config.casinoNames} affiliate API and are subject to its accuracy and timing. Standings may be delayed or cached.</li>
-        <li>Prizes are awarded for the listed competition period and are subject to verification.</li>
+        <li>Prizes are awarded for the listed competition period and are subject to verification. Leaderboard prizes are paid within <strong>72 hours</strong> of the board closing, once standings are final and verified.</li>
         <li>We reserve the right to adjust, withhold, or void prizes and to amend, suspend, or cancel any competition — including in cases of suspected fraud, collusion, multi-accounting, bonus abuse, or breach of {config.casinoNames}’s terms.</li>
         <li>Our decisions on leaderboard results and disputes are final.</li>
       </ul>
+      <p>
+        <strong>Wagers are weighted.</strong> {config.casinoNames} weights a wager according to the
+        game’s RTP, and both the leaderboard and the raffle rank on the
+        weighted figure — so the number shown here will not always match the total in your{' '}
+        {config.casinoNames} account. Every game counts for something, but a higher-RTP game counts
+        for less. The bands are published on the{' '}
+        <a href="/leaderboard">leaderboard</a> and the <a href="/raffles">raffle</a> pages. They are{' '}
+        {config.casinoNames}’s rules, not ours — if they change theirs,
+        the board follows. Where this site and {config.casinoNames}’s own
+        reporting disagree, {config.casinoNames}’s figures decide the
+        outcome; a display error here does not create a prize.
+      </p>
+      <p>
+        <strong>Wager milestones are slots only.</strong> Milestone rewards described on the{' '}
+        <a href="/milestones">milestones</a> page count slot wagers only — table games and live
+        casino do not count toward them.
+      </p>
 
       <h2>4. Rewards &amp; cashback</h2>
       <p>

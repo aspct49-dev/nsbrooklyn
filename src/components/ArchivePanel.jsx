@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { isoToLocal, localToIso } from '../utils'
+import { archivableCasinos, casinos } from '../data/leaderboard'
+
+const ACTIVE = casinos[0].id
 
 /**
  * Publish a finished leaderboard period to /winners.
@@ -11,10 +14,13 @@ import { isoToLocal, localToIso } from '../utils'
  */
 export default function ArchivePanel({ settings, onArchive, saving }) {
   const prev = settings?.previousPeriod
-  const current = settings?.casinos?.betbolt
+  const current = settings?.casinos?.[ACTIVE]
 
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  // Boards from a partner we have left are still archivable — the final
+  // BetBolt period has to be publishable after the switch to Roobet.
+  const [casino, setCasino] = useState(ACTIVE)
   const [msg, setMsg] = useState(null)
 
   useEffect(() => {
@@ -37,7 +43,7 @@ export default function ArchivePanel({ settings, onArchive, saving }) {
     if (new Date(to) > new Date()) {
       return setMsg({ err: true, text: "That period hasn't finished yet." })
     }
-    const r = await onArchive({ from: localToIso(from), to: localToIso(to) })
+    const r = await onArchive({ casino, from: localToIso(from), to: localToIso(to) })
     setMsg(r.ok
       ? { text: `Published "${r.entry.label}" — ${r.entry.winners.length} winners` }
       : { err: true, text: r.error })
@@ -62,6 +68,21 @@ export default function ArchivePanel({ settings, onArchive, saving }) {
             <h3>Archive a period</h3>
             {prev && <span className="admin-status soon">previous period loaded</span>}
           </div>
+
+          {archivableCasinos.length > 1 && (
+            <label className="admin-label">
+              Casino
+              <select
+                className="admin-input"
+                value={casino}
+                onChange={(e) => setCasino(e.target.value)}
+              >
+                {archivableCasinos.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <div className="gw-form-row">
             <label className="admin-label">

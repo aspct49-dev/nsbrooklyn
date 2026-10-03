@@ -18,7 +18,7 @@ export const config = {
   prizePool: 5000, // leaderboard $ pool, shown in the hero + navbar badge
 
   // Partner casino, joined into the legal pages / footer copy.
-  casinoNames: 'BetBolt',
+  casinoNames: 'Roobet',
 
   // Decorative profile pictures by rank (1st, 2nd, 3rd). Ranks past this list
   // fall back to the player's initial. Files live in /public.
@@ -46,17 +46,22 @@ export const config = {
 //  prize ladder and player list. `prizes` are per rank, 1st → last; players
 //  are ranked by wagered amount. (Each prize list sums to that casino's pool.)
 //  With a single entry the leaderboard page hides the casino switcher.
+//
+//  NOTE: `id` is also the key used by /api/leaderboard and by the stored admin
+//  settings, so it has to match a fetcher in api/_lib/leaderboard.js.
 // ============================================================================
 export const casinos = [
   {
-    id: 'betbolt',
-    name: 'BetBolt',
-    url: 'https://betbolt.com/?r=NSB',
-    logo: '/betbolt_logo.png', // transparent wordmark (dark text — inverted to white via CSS)
-    logoInvert: true,
+    id: 'roobet',
+    name: 'Roobet',
+    url: 'https://roobet.com/?ref=nsb',
+    logo: '/roobet_logo.webp', // gold wordmark — already light, so no inversion
+    logoInvert: false,
     periodLabel: 'Monthly',
     prizePool: 5000,
     prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
+    // Shown on the board so nobody has to ask when prizes land.
+    payout: 'Prizes are paid within 72 hours of the board closing',
     // Dev scaffolding only — NOT rendered. The site shows live API standings
     // or an explicit loading/unavailable state; showing these fictional names
     // next to real prize amounts would misrepresent the board.
@@ -73,43 +78,151 @@ export const casinos = [
       { name: 'ghostrider', wagered: 33450 },
     ],
   },
+  {
+    // The board we are leaving. It stays on the site only so the players
+    // already on it can watch it finish and see what they are owed.
+    //
+    // DELIBERATELY NO `url`: we have moved to Roobet, so nothing here sends
+    // anyone to BetBolt — no CTA on the leaderboard, no footer link, no
+    // referral. Every consumer treats a missing `url` as "display only".
+    //
+    // When this period has been paid and published to /winners, delete this
+    // entry and move it to `legacyCasinos` below (and eventually drop its
+    // fetcher in api/_lib/leaderboard.js).
+    id: 'betbolt',
+    name: 'BetBolt',
+    url: null,
+    logo: '/betbolt_logo.png', // dark wordmark — inverted to white via CSS
+    logoInvert: true,
+    periodLabel: 'Final',
+    closing: true,
+    prizePool: 5000,
+    prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
+  },
 ]
 
-// ============================================================================
-//  RANK MILESTONES — a one-off cash reward, paid by NSBROOKLYN, the first
-//  time a player reaches each BetBolt VIP rank under code NSB.
+// Partner casinos we no longer show a board for, kept ONLY so a finished
+// period can still be published to /winners from /admin. Each needs an `id`,
+// a `name` and the `prizes` ladder that period actually paid.
 //
-//  `from`/`to` are BetBolt's own wager range for that rank (levels I–V), and
-//  `perks` is how many of the PERKS list below the rank unlocks — BetBolt
-//  grants them cumulatively, so a count is enough to describe each tier.
-//  Icons are BetBolt's rank art in /public.
+// Empty right now: BetBolt is still in `casinos` above because its final board
+// is running. When that board is paid and archived, move it down here — and
+// once it is published to /winners, drop it and its fetcher entirely.
+export const legacyCasinos = []
+
+// Everything /admin may publish a past period for.
+export const archivableCasinos = [...casinos, ...legacyCasinos]
+
 // ============================================================================
-
-// Every VIP perk in unlock order. A rank's `perks` count unlocks the first N.
-export const rankPerks = [
-  'Daily Reward',
-  'Weekly Reward',
-  'Monthly Reward',
-  'Tailored Bonusing',
-  'VIP Channel',
-  'Level Up Reward',
-  'Tier Up Reward',
-  'Personal Host',
-  'Private Events',
+//  WAGER WEIGHTING — Roobet's own rule, reproduced here because the board and
+//  the raffle both rank on the weighted figure rather than the raw stake.
+//
+//  Banded on RTP, NOT house edge: the two are inverses and quoting the wrong
+//  one is exactly the kind of small error that reads as the board being
+//  rigged. Every game counts for something, dice included. These are Roobet's
+//  numbers — if they change them, this array is the only place to edit.
+// ============================================================================
+export const wagerWeights = [
+  { band: 'RTP of 97% or lower', weight: '100%', note: 'Most slots and the bulk of the lobby' },
+  { band: 'RTP between 97.01% and 98.99%', weight: '50%', note: 'Higher-RTP slots and table games' },
+  { band: 'RTP of 99% and over', weight: '10%', note: 'Dice and the lowest-edge originals' },
 ]
 
+/** Roobet's wording, kept close to theirs because it is their rule. */
+export const wagerNote =
+  'Leaderboard wager amounts may differ from your statistics on Roobet, depending on the games you are playing.'
+
+// ============================================================================
+//  WAGER MILESTONES — a one-off cash reward, paid by NSBROOKLYN, the first
+//  time a player's total wager under code NSB passes each mark.
+//
+//  SLOTS ONLY — table games and live casino do not count toward these.
+//
+//  These hang off wager totals, not off the casino's own rank tiers (those
+//  live in `roobetRanks` below and pay nothing by themselves). `tone` only
+//  picks the card's accent colour, see .ms-node.<tone> in src/index.css.
+// ============================================================================
 export const milestones = [
-  { key: 'rock', name: 'Rock', levels: '', icon: '/rock_0.webp', from: 1_000, to: 10_000, perks: 3, reward: 10 },
-  { key: 'bronze', name: 'Bronze', levels: 'I–V', icon: '/bronze_5.webp', from: 10_000, to: 50_000, perks: 3, reward: 25 },
-  { key: 'silver', name: 'Silver', levels: 'I–V', icon: '/silver_5.webp', from: 75_000, to: 180_000, perks: 3, reward: 75 },
-  { key: 'gold', name: 'Gold', levels: 'I–V', icon: '/gold_5.webp', from: 250_000, to: 550_000, perks: 4, reward: 180 },
-  { key: 'platinum', name: 'Platinum', levels: 'I–V', icon: '/platinum_5.webp', from: 700_000, to: 1_300_000, perks: 6, reward: 400 },
-  { key: 'titanium', name: 'Titanium', levels: 'I–V', icon: '/titanium_5.webp', from: 1_500_000, to: 3_500_000, perks: 8, reward: 1_000 },
-  { key: 'pearl', name: 'Pearl', levels: 'I–V', icon: '/pearl_5.webp', from: 5_000_000, to: 12_000_000, perks: 8, reward: 2_500 },
-  { key: 'diamond', name: 'Diamond', levels: 'I–V', icon: '/diamond_5.webp', from: 15_000_000, to: 100_000_000, perks: 9, reward: 7_000 },
+  { key: 'm1', wager: 1_000, reward: 10, tone: 'silver' },
+  { key: 'm2', wager: 2_500, reward: 25, tone: 'silver' },
+  { key: 'm3', wager: 5_000, reward: 25, tone: 'gold' },
+  { key: 'm4', wager: 10_000, reward: 50, tone: 'gold' },
+  { key: 'm5', wager: 25_000, reward: 100, tone: 'emerald' },
+  { key: 'm6', wager: 50_000, reward: 100, tone: 'emerald' },
+  { key: 'm7', wager: 100_000, reward: 200, tone: 'ruby' },
+  { key: 'm8', wager: 250_000, reward: 400, tone: 'ruby' },
+  { key: 'm9', wager: 500_000, reward: 400, tone: 'diamond' },
+  { key: 'm10', wager: 1_000_000, reward: 800, tone: 'immortal' },
 ]
+
+// What a player has banked once they have passed each milestone. The ladder is
+// cumulative — every milestone pays, so clearing all ten is worth the total,
+// not just the last one.
+export const milestonesCumulative = milestones.reduce((acc, m) => {
+  const running = (acc.length ? acc[acc.length - 1].running : 0) + m.reward
+  return [...acc, { ...m, running }]
+}, [])
 
 export const milestoneTotal = milestones.reduce((sum, m) => sum + m.reward, 0)
+
+// ============================================================================
+//  ROOBET VIP RANKS — Roobet's own progression ladder, shown on /ranks purely
+//  as a reference for how far along a wager total puts you. Reaching one pays
+//  nothing from NSBROOKLYN; the cash is in the wager milestones above.
+//
+//  `wager` is Roobet's published requirement for that tier in USD, `family`
+//  picks the band's accent colour (see .rb-band.<family> in src/index.css),
+//  and `icon` is Roobet's own art for that exact level. The /ranks page groups
+//  these by family at render time, so the list stays flat and ordered.
+// ============================================================================
+export const roobetRanks = [
+  { family: 'beginner',     familyName: 'Beginner',     level: '',    icon: '/ranks/beginner.png',       wager: 0 },
+  { family: 'silver',       familyName: 'Silver',       level: 'I',   icon: '/ranks/silver1.png',        wager: 1_000 },
+  { family: 'silver',       familyName: 'Silver',       level: 'II',  icon: '/ranks/silver2.png',        wager: 2_700 },
+  { family: 'silver',       familyName: 'Silver',       level: 'III', icon: '/ranks/silver3.avif',       wager: 5_500 },
+  { family: 'silver',       familyName: 'Silver',       level: 'IV',  icon: '/ranks/silver4.avif',       wager: 10_000 },
+  { family: 'gold',         familyName: 'Gold',         level: 'I',   icon: '/ranks/gold1.png',          wager: 18_500 },
+  { family: 'gold',         familyName: 'Gold',         level: 'II',  icon: '/ranks/gold2.png',          wager: 32_000 },
+  { family: 'gold',         familyName: 'Gold',         level: 'III', icon: '/ranks/gold3.avif',         wager: 56_000 },
+  { family: 'gold',         familyName: 'Gold',         level: 'IV',  icon: '/ranks/gold4.avif',         wager: 95_000 },
+  { family: 'emerald',      familyName: 'Emerald',      level: 'I',   icon: '/ranks/emerald1.avif',      wager: 160_000 },
+  { family: 'emerald',      familyName: 'Emerald',      level: 'II',  icon: '/ranks/emerald2.avif',      wager: 275_000 },
+  { family: 'emerald',      familyName: 'Emerald',      level: 'III', icon: '/ranks/emerald3.avif',      wager: 460_000 },
+  { family: 'ruby',         familyName: 'Ruby',         level: 'I',   icon: '/ranks/ruby1.avif',         wager: 785_000 },
+  { family: 'ruby',         familyName: 'Ruby',         level: 'II',  icon: '/ranks/ruby2.avif',         wager: 1_300_000 },
+  { family: 'ruby',         familyName: 'Ruby',         level: 'III', icon: '/ranks/ruby3.avif',         wager: 2_250_000 },
+  { family: 'diamond',      familyName: 'Diamond',      level: 'I',   icon: '/ranks/diamond1.avif',      wager: 3_800_000 },
+  { family: 'diamond',      familyName: 'Diamond',      level: 'II',  icon: '/ranks/diamond2.avif',      wager: 6_500_000 },
+  { family: 'diamond',      familyName: 'Diamond',      level: 'III', icon: '/ranks/diamond3.avif',      wager: 10_000_000 },
+  { family: 'champion',     familyName: 'Champion',     level: 'I',   icon: '/ranks/champion1.png',      wager: 18_000_000 },
+  { family: 'champion',     familyName: 'Champion',     level: 'II',  icon: '/ranks/champion2.avif',     wager: 30_000_000 },
+  { family: 'champion',     familyName: 'Champion',     level: 'III', icon: '/ranks/champion3.avif',     wager: 50_000_000 },
+  { family: 'legend',       familyName: 'Legend',       level: 'I',   icon: '/ranks/legend1.png',        wager: 88_000_000 },
+  { family: 'legend',       familyName: 'Legend',       level: 'II',  icon: '/ranks/legend2.png',        wager: 150_000_000 },
+  { family: 'legend',       familyName: 'Legend',       level: 'III', icon: '/ranks/legend3.avif',       wager: 250_000_000 },
+  { family: 'master',       familyName: 'Master',       level: 'I',   icon: '/ranks/master1.png',        wager: 425_000_000 },
+  { family: 'master',       familyName: 'Master',       level: 'II',  icon: '/ranks/master2.png',        wager: 720_000_000 },
+  { family: 'master',       familyName: 'Master',       level: 'III', icon: '/ranks/master3.avif',       wager: 1_200_000_000 },
+  { family: 'grandmaster',  familyName: 'Grandmaster',  level: 'I',   icon: '/ranks/gm1.png',            wager: 2_000_000_000 },
+  { family: 'grandmaster',  familyName: 'Grandmaster',  level: 'II',  icon: '/ranks/gm2.avif',           wager: 3_500_000_000 },
+  { family: 'grandmaster',  familyName: 'Grandmaster',  level: 'III', icon: '/ranks/gm3.avif',           wager: 6_000_000_000 },
+  { family: 'immortal',     familyName: 'Immortal',     level: '',    icon: '/ranks/immortal.avif',      wager: 10_000_000_000 },
+]
+
+export const rankCount = roobetRanks.length
+
+/** Display name for one tier: "Silver III", or just "Immortal" where there
+ *  is only a single level in the family. */
+export const rankName = (r) => (r.level ? `${r.familyName} ${r.level}` : r.familyName)
+
+/** The flat ladder grouped into its families, in ladder order. */
+export const rankBands = roobetRanks.reduce((bands, r) => {
+  const last = bands[bands.length - 1]
+  if (last && last.family === r.family) last.tiers.push(r)
+  else bands.push({ family: r.family, familyName: r.familyName, tiers: [r] })
+  return bands
+}, [])
+
 
 // The four "choose your bonus" cards on the home page.
 // `featured: true` gives the highlighted treatment.
@@ -117,18 +230,20 @@ export const milestoneTotal = milestones.reduce((sum, m) => sum + m.reward, 0)
 export const bonuses = [
   {
     img: '/drink.png',
-    title: 'BETBOLT',
+    title: 'ROOBET',
     subtitle: 'Under code NSB',
     accent: 'gold',
     rows: [
-      'Instant lossback from BetBolt',
-      'Daily, weekly & monthly bonuses',
-      'Juicy level-up bonus',
-      'VIP transfers',
-      'Exclusive VIP program for high rollers',
+      { group: 'First deposit' },
+      'Deposit $50+, wager $1,000 or 5x it → $50',
+      '10% deposit bonus up to $2,500',
+      { group: 'Everyone' },
+      '5% lossback, up to $100 a day',
+      'Free spins daily & weekly',
+      'VIP transfers at 50k+ a month',
     ],
     cta: 'CLAIM BONUS',
-    href: 'https://betbolt.com/?r=NSB',
+    href: 'https://roobet.com/?ref=nsb',
   },
   {
     img: '/orb.png',
@@ -138,7 +253,7 @@ export const bonuses = [
     featured: true,
     rows: [
       'Must be under code NSB',
-      'Wager on BetBolt to enter',
+      'Wager on Roobet to enter',
       'Climb to secure Top Places',
       'Win big rewards & enjoy!',
     ],
@@ -164,18 +279,19 @@ export const bonuses = [
   },
   {
     img: '/gold_pot.png',
-    title: 'RANK REWARDS',
+    title: 'WAGER MILESTONES',
     subtitle: 'From me personally',
     accent: 'gold',
     rows: [
-      { group: 'Every BetBolt VIP rank' },
-      '$10 at Rock up to $7,000 at Diamond',
-      '$11,190 across all eight ranks',
-      { group: 'Plus' },
-      'Bi-weekly lossback up to 10%',
+      { group: 'Ten cash milestones' },
+      '$10 at $1,000 wagered',
+      'Up to $800 at $1M wagered',
+      '$2,110 if you clear them all',
+      { group: 'Slots only' },
+      'Every milestone you pass pays',
       'Claimed instantly via Discord',
     ],
-    cta: 'VIEW RANK REWARDS',
+    cta: 'VIEW MILESTONES',
     to: '/milestones',
   },
 ]
@@ -185,7 +301,7 @@ export const bonuses = [
 //
 // NOTE: `prize` is whatever that period actually paid — the July board ran on
 // the old $2,500 ladder, before the pool doubled to $5,000. Don't restate old
-// periods at current rates.
+// periods at current rates. These are BetBolt-era boards, kept for the record.
 export const pastWinners = [
   {
     id: '2026-07',

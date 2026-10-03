@@ -234,7 +234,7 @@ export default function Admin() {
         <ArchivePanel
           settings={settings}
           saving={saving}
-          onArchive={({ from, to }) => archive('betbolt', { from, to })}
+          onArchive={({ casino, from, to }) => archive(casino, { from, to })}
         />
 
         <GiveawayAdmin />

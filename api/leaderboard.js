@@ -1,4 +1,4 @@
-// GET /api/leaderboard?casino=betbolt&from=ISO&to=ISO
+// GET /api/leaderboard?casino=roobet&from=ISO&to=ISO
 // Proxies the casino APIs so the secret key / password stay server-side.
 // Caching/429 backoff lives in _lib/leaderboard.js: fresh cache is served
 // without polling upstream, and stale data is served through failures.

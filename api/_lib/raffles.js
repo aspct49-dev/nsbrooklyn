@@ -7,6 +7,12 @@
 // so anyone can replay `drawWinners()` and land on the same names.
 import { getSettings, saveSettings } from './settingsStore.js'
 import { pickWeighted, ensureSeed, makeSeed, hashSeed } from './fairdraw.js'
+import { casinos } from '../../src/data/leaderboard.js'
+
+// Single partner casino — new raffles always run on whichever one is active.
+// Already-stored raffles keep the casino they were created with, so a raffle
+// from a previous partner still resolves against that partner's fetcher.
+const ACTIVE_CASINO = casinos[0].id
 
 export { ensureSeed, makeSeed, hashSeed }
 
@@ -16,7 +22,7 @@ export const DEFAULT_RAFFLES = [
   {
     id: 'weekly-2026-07-31',
     title: 'Weekly $250 Raffle',
-    casino: 'betbolt',
+    casino: ACTIVE_CASINO,
     startAt: '2026-08-01T03:00:00.000Z',
     endAt: '2026-08-08T03:00:00.000Z',
     wagerPerTicket: 100,
@@ -215,7 +221,7 @@ export function normalizeRaffle(input, existing) {
     // keep the id stable on edit so an already-drawn raffle isn't orphaned
     id: existing?.id || `${slug(title)}-${Date.now().toString(36)}`,
     title,
-    casino: 'betbolt', // single partner casino — see src/data/leaderboard.js
+    casino: ACTIVE_CASINO,
     startAt: input.startAt,
     endAt: input.endAt,
     wagerPerTicket: num(input?.wagerPerTicket ?? 100, 'Wager per ticket', { min: 1, max: 1_000_000 }),

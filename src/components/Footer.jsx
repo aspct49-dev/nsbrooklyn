@@ -26,8 +26,11 @@ export default function Footer() {
             <Link to="/leaderboard">Leaderboard</Link>
             <Link to="/giveaways">Giveaways</Link>
             <Link to="/raffles">Wager Raffle</Link>
-            <Link to="/milestones">Rank Rewards</Link>
-            {casinos.map((c) => (
+            <Link to="/milestones">Milestones</Link>
+            <Link to="/ranks">VIP Ranks</Link>
+            {/* Only boards we actually send players to. A casino with no url
+                is one we have left — its board is display-only. */}
+            {casinos.filter((c) => c.url).map((c) => (
               <a key={c.id} href={c.url} target="_blank" rel="noreferrer">Play on {c.name}</a>
             ))}
           </div>
@@ -49,7 +52,14 @@ export default function Footer() {
 
         {/* Responsible gambling / 18+ bar */}
         <div className="rg-bar">
-          <span className="rg-18">18+</span>
+          {/* The age chip and the GambleAware mark read as one credential, so
+              they sit together rather than the 18+ standing on its own. */}
+          <div className="rg-marks">
+            <span className="rg-18">18+</span>
+            <a href="https://www.begambleaware.org/" target="_blank" rel="noreferrer" aria-label="GambleAware">
+              <img className="rg-aware" src="/gambleaware.png" alt="GambleAware" width={163} height={24} />
+            </a>
+          </div>
           <p>
             Gamble responsibly. Gambling can be addictive — please play within your limits and never
             wager more than you can afford to lose. If you or someone you know has a gambling problem,
@@ -71,6 +81,11 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} {config.brandName}. All rights reserved.</span>
+          <nav className="f-policies" aria-label="Policies">
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/responsible-gambling">Responsible Gambling</Link>
+          </nav>
           <div style={{ display: 'flex', gap: 16 }}>
             <a href={s.discord} target="_blank" rel="noreferrer" aria-label="Discord"><IconDiscord /></a>
             <a href={s.x} target="_blank" rel="noreferrer" aria-label="X"><IconX /></a>

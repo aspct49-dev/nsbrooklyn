@@ -8,6 +8,7 @@ import Leaderboard from './pages/Leaderboard'
 import Giveaways from './pages/Giveaways'
 import Raffles from './pages/Raffles'
 import Milestones from './pages/Milestones'
+import Ranks from './pages/Ranks'
 import Winners from './pages/Winners'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
@@ -19,12 +20,12 @@ import KickGiveaway from './pages/KickGiveaway'
 // and browser tabs. (Social scrapers read the static tags in index.html.)
 const ROUTE_META = {
   '/': {
-    title: 'NSBROOKLYN — $5,000 BetBolt Leaderboard (Code NSB)',
-    description: 'Wager on BetBolt under code NSB and climb the $5,000 wager leaderboard. Daily giveaways, wager milestones, rakeback and deposit bonuses.',
+    title: 'NSBROOKLYN — $5,000 Roobet Leaderboard (Code NSB)',
+    description: 'Wager on Roobet under code NSB and climb the $5,000 wager leaderboard. Daily giveaways, cash wager milestones, lossback and deposit bonuses.',
   },
   '/leaderboard': {
     title: 'NSBROOKLYN — $5,000 Wager Leaderboard (Code NSB)',
-    description: 'Live BetBolt wager leaderboard for code NSB. Climb the ranks and win your share of the $5,000 prize pool.',
+    description: 'Live Roobet wager leaderboard for code NSB. Climb the ranks and win your share of the $5,000 prize pool.',
   },
   '/giveaways': {
     title: 'NSBROOKLYN — Daily Discord Giveaways',
@@ -32,11 +33,15 @@ const ROUTE_META = {
   },
   '/raffles': {
     title: 'NSBROOKLYN — Weekly $250 Wager Raffle',
-    description: 'Every $100 wagered on BetBolt under code NSB earns a raffle ticket. 5 winners share $250 every week — provably fair draws.',
+    description: 'Every $100 wagered on Roobet under code NSB earns a raffle ticket. 5 winners share $250 every week — provably fair draws.',
   },
   '/milestones': {
-    title: 'NSBROOKLYN — BetBolt Rank Milestone Rewards',
-    description: 'Reach a BetBolt VIP rank under code NSB and get paid on top — $10 at Rock up to $7,000 at Diamond, $11,190 across every rank.',
+    title: 'NSBROOKLYN — Roobet Wager Milestone Rewards',
+    description: 'Pass a wager milestone on Roobet under code NSB and get paid on top — $10 at $1K up to $800 at $1M, $2,110 across all ten. Slots only.',
+  },
+  '/ranks': {
+    title: 'NSBROOKLYN — Roobet VIP Ranks (Beginner to Immortal)',
+    description: 'Every Roobet VIP rank and its wager requirement, from Beginner to Immortal — all 31 tiers, under code NSB.',
   },
   '/winners': {
     title: 'NSBROOKLYN — Past Leaderboard Winners',
@@ -84,6 +89,7 @@ export default function App() {
             <Route path="/giveaways" element={<Giveaways />} />
             <Route path="/raffles" element={<Raffles />} />
             <Route path="/milestones" element={<Milestones />} />
+            <Route path="/ranks" element={<Ranks />} />
             <Route path="/winners" element={<Winners />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

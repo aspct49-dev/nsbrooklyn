@@ -4,7 +4,7 @@
 // Secrets come from environment variables — they must NEVER be imported by
 // client code in src/.
 //
-// Caching model (protects against BetBolt's aggressive 429 rate limits):
+// Caching model (protects against the upstream affiliate API's rate limits):
 //   - fresh cache (< TTL)          → served directly, upstream never called
 //   - stale cache + upstream OK    → cache refreshed, new data served
 //   - stale cache + upstream fails → stale data served (marked `stale`)
@@ -36,6 +36,60 @@ function upstreamError(name, res) {
   return Object.assign(new Error(`${name} API ${res.status}`), { status })
 }
 
+/**
+ * Roobet affiliate standings.
+ *
+ * GET https://roobetconnect.com/affiliate/v2/stats
+ *   ?userId=<affiliate uid>&startDate=<ISO>&endDate=<ISO>
+ *   Authorization: Bearer <affiliateStats token>
+ *
+ * Returns a bare JSON array (one row per referred player who wagered in the
+ * window), newest token docs call the fields `username`, `wagered` and
+ * `weightedWagered`. Unlike BetBolt there is no limit/sort parameter — the
+ * whole referred list comes back and we rank it ourselves.
+ */
+async function fetchRoobet({ from, to, env }) {
+  const token = env.ROOBET_API_TOKEN
+  const userId = env.ROOBET_USER_ID
+  if (!token) throw Object.assign(new Error('ROOBET_API_TOKEN not configured'), { status: 500 })
+  if (!userId) throw Object.assign(new Error('ROOBET_USER_ID not configured'), { status: 500 })
+
+  const url = new URL('https://roobetconnect.com/affiliate/v2/stats')
+  url.searchParams.set('userId', userId)
+  url.searchParams.set('startDate', from)
+  url.searchParams.set('endDate', to)
+
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) throw upstreamError('Roobet', res)
+  const body = await res.json()
+  const rows = Array.isArray(body) ? body : body?.data || []
+
+  const players = rows
+    .map((u) => ({
+      name: u.username ?? u.name ?? '',
+      // Roobet weights wager by game (table games and low-house-edge slots
+      // count for less), and the board pays on the weighted figure — that is
+      // the number players are told counts. `wagered` is only a fallback in
+      // case a response ever omits the weighted one.
+      wagered: Number(u.weightedWagered ?? u.wagered) || 0,
+    }))
+    .filter((p) => p.name)
+
+  // Rows came back but none of them mapped — that means the field names moved,
+  // not that nobody wagered. Without this the board just renders empty and
+  // looks like a quiet week.
+  if (rows.length && !players.length) {
+    console.error('Roobet: %d rows but no usable names; sample keys: %j',
+      rows.length, Object.keys(rows[0] || {}))
+  }
+
+  return players
+}
+
+// Legacy — kept ONLY so a finished BetBolt period can still be fetched and
+// published to /winners from /admin. Nothing on the public site points at
+// BetBolt any more; remove this (and BETBOLT_API_KEY) once the final BetBolt
+// board has been archived.
 async function fetchBetbolt({ from, to, env }) {
   const key = env.BETBOLT_API_KEY
   if (!key) throw Object.assign(new Error('BETBOLT_API_KEY not configured'), { status: 500 })
@@ -57,7 +111,7 @@ async function fetchBetbolt({ from, to, env }) {
   }))
 }
 
-const FETCHERS = { betbolt: fetchBetbolt }
+const FETCHERS = { roobet: fetchRoobet, betbolt: fetchBetbolt }
 
 async function fetchFresh({ casino, from, to, env, key }) {
   try {

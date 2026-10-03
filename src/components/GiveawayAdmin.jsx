@@ -73,7 +73,7 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
           className="admin-input"
           value={form.prize}
           onChange={set('prize')}
-          placeholder="e.g. $50 Cash, 1x Nitro, $25 BetBolt balance"
+          placeholder="e.g. $50 Cash, 1x Nitro, $25 Roobet balance"
           maxLength={120}
           required
         />

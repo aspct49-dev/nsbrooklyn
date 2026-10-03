@@ -8,6 +8,7 @@ import LeaderboardTable from '../components/LeaderboardTable'
 import CasinoPicker from '../components/CasinoPicker'
 import CasinoBrand from '../components/CasinoBrand'
 import LeaderboardStats from '../components/LeaderboardStats'
+import WagerRules from '../components/WagerRules'
 import { IconExternal } from '../components/icons'
 
 export default function Leaderboard() {
@@ -54,16 +55,35 @@ export default function Leaderboard() {
               <span className="label">CODE:</span>
               <span className="code">{config.referralCode}</span>
             </div>
-            <a className="btn btn-primary" href={casino.url} target="_blank" rel="noreferrer">
-              Visit {casino.name} <IconExternal />
-            </a>
+            {/* No `url` means a board we no longer send players to — the
+                BetBolt one is display-only while it finishes. */}
+            {casino.url && (
+              <a className="btn btn-primary" href={casino.url} target="_blank" rel="noreferrer">
+                Visit {casino.name} <IconExternal />
+              </a>
+            )}
           </div>
         </div>
+
+        {/* A board we have left: say so plainly rather than leaving people to
+            wonder why there is no way to join it. */}
+        {casino.closing && (
+          <div className="lb-closing">
+            <span className="lb-closing-tag">Final board</span>
+            <p>
+              We&rsquo;ve moved to {casinos[0].name}. This {casino.name} board is still running to
+              the end of its period and will be paid in full — it stays here so you can watch it
+              finish. New wagers should go to the {casinos[0].name} board.
+            </p>
+          </div>
+        )}
 
         {hasStandings && <Podium top3={top3} />}
 
         <div className="lb-ends-lbl">Leaderboard ends in</div>
         <Countdown endDate={periodEnd} />
+
+        {casino.payout && <p className="lb-payout">{casino.payout}</p>}
 
         {hasStandings ? (
           <>
@@ -76,6 +96,11 @@ export default function Leaderboard() {
             {emptyMessage}
           </div>
         )}
+
+        {/* On the page the board is on, not one click away — someone querying
+            their position is standing right here when they do it. The bands are
+            Roobet's rule, so they only apply to the Roobet board. */}
+        {!casino.closing && <WagerRules context="leaderboard" />}
 
         <p className="section-sub" style={{ textAlign: 'center', marginTop: 22, fontSize: 13 }}>
           Usernames are masked for privacy. Standings update as wagers are processed.

@@ -286,7 +286,7 @@ export default function GiveawayAdmin() {
         <div>
           <h2 className="admin-section-title">Raffles</h2>
           <p className="section-sub">
-            Run a wager raffle: every $X wagered on BetBolt during the window earns a
+            Run a wager raffle: every $X wagered on Roobet during the window earns a
             ticket, then draw the winners here. The draw is provably fair — the seed is
             committed when the raffle goes live and published after the draw.
           </p>

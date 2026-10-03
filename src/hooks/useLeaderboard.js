@@ -62,7 +62,7 @@ function monthBounds(year, monthIndex) {
 }
 
 /**
- * The BetBolt board runs on Eastern time: it closes at 10:59:59 PM ET on the
+ * The board runs on Eastern time: it closes at 10:59:59 PM ET on the
  * last day of the month, and the next period opens a minute later at 11:00 PM
  * ET. Because that boundary sits an hour before ET midnight, the final hour of
  * a month already belongs to the next period — hence the nudge below.

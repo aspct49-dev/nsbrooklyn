@@ -1,10 +1,13 @@
-import { config } from '../data/leaderboard'
+import { config, casinos } from '../data/leaderboard'
 import { fmtMoney, maskName } from '../utils'
 import { useRaffle, rafflePhase } from '../hooks/useRaffle'
 import Countdown from '../components/Countdown'
+import WagerRules from '../components/WagerRules'
 import { IconTicket, IconExternal } from '../components/icons'
 
 const MEDAL = { 1: 'gold', 2: 'silver', 3: 'bronze' }
+
+const [casino] = casinos
 
 const fmtDate = (iso) =>
   new Date(iso).toLocaleString([], {
@@ -218,8 +221,8 @@ export default function Raffles() {
               <span className="label">CODE:</span>
               <span className="code">{config.referralCode}</span>
             </div>
-            <a className="btn btn-primary" href="https://betbolt.com/?r=NSB" target="_blank" rel="noreferrer">
-              Wager on BetBolt <IconExternal />
+            <a className="btn btn-primary" href={casino.url} target="_blank" rel="noreferrer">
+              Wager on {casino.name} <IconExternal />
             </a>
           </div>
         </div>
@@ -229,7 +232,7 @@ export default function Raffles() {
           <div className="gw-step">
             <span className="gw-step-n">1</span>
             <h4>Play under code {config.referralCode}</h4>
-            <p>Sign up on BetBolt with code {config.referralCode} so your wagers are tracked.</p>
+            <p>Sign up on {casino.name} with code {config.referralCode} so your wagers are tracked.</p>
           </div>
           <div className="gw-step">
             <span className="gw-step-n">2</span>
@@ -325,6 +328,10 @@ export default function Raffles() {
             ))}
           </div>
         )}
+
+        {/* Tickets are earned on the same weighted figure the board ranks on,
+            so the bands belong here too. */}
+        <WagerRules context="raffle" />
 
         <p className="section-sub" style={{ textAlign: 'center', marginTop: 22, fontSize: 13 }}>
           Usernames are masked for privacy. Ticket counts update as wagers are processed. 18+ only.

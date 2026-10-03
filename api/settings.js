@@ -8,9 +8,9 @@ import { requireAdmin } from './_lib/session.js'
 import { getSettings, saveSettings } from './_lib/settingsStore.js'
 import { assertIso, getLeaderboard } from './_lib/leaderboard.js'
 import { listArchive, saveArchive, buildEntry, periodId } from './_lib/archive.js'
-import { casinos as CASINO_CONFIG } from '../src/data/leaderboard.js'
+import { casinos as CASINO_CONFIG, archivableCasinos } from '../src/data/leaderboard.js'
 
-const CASINOS = ['betbolt']
+const CASINOS = CASINO_CONFIG.map((c) => c.id)
 
 /**
  * Only what the site actually needs.
@@ -45,8 +45,10 @@ export default async function handler(req, res) {
         throw Object.assign(new Error(`Unknown action "${body?.action}"`), { status: 400 })
       }
 
-      const casinoId = body?.casino || 'betbolt'
-      const casino = CASINO_CONFIG.find((c) => c.id === casinoId)
+      // archivableCasinos, not CASINO_CONFIG — a finished board on a partner
+      // we have since left still has to be publishable to /winners.
+      const casinoId = body?.casino || CASINOS[0]
+      const casino = archivableCasinos.find((c) => c.id === casinoId)
       if (!casino) throw Object.assign(new Error(`Unknown casino "${casinoId}"`), { status: 400 })
 
       const { from, to } = body
@@ -110,15 +112,16 @@ export default async function handler(req, res) {
       // Remember the period being replaced. Without this, starting a new board
       // makes the finished one unreachable — its dates are gone and there is
       // nothing left to archive from.
-      const outgoing = prev.casinos?.betbolt
-      const replaced = outgoing && casinos.betbolt &&
-        (outgoing.startAt !== casinos.betbolt.startAt || outgoing.endAt !== casinos.betbolt.endAt)
+      const outgoing = prev.casinos?.[CASINOS[0]]
+      const incoming = casinos[CASINOS[0]]
+      const replaced = outgoing && incoming &&
+        (outgoing.startAt !== incoming.startAt || outgoing.endAt !== incoming.endAt)
 
       const next = {
         ...prev,
         casinos: { ...prev.casinos, ...casinos },
         previousPeriod: replaced
-          ? { casino: 'betbolt', from: outgoing.startAt, to: outgoing.endAt }
+          ? { casino: CASINOS[0], from: outgoing.startAt, to: outgoing.endAt }
           : prev.previousPeriod || null,
         updatedAt: new Date().toISOString(),
         updatedBy: session.name,

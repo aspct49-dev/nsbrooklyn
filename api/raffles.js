@@ -3,7 +3,7 @@
 //                       Admins additionally get `all` (drafts included).
 // POST /api/raffles — admin-only: { action: 'save' | 'status' | 'draw' | 'delete' }
 //
-// Entries are derived from the BetBolt standings for the raffle's own
+// Entries are derived from the casino standings for the raffle's own
 // window, so the ticket counts always match what the casino reports.
 import { sendJson, readBody } from './_lib/http.js'
 import { readSession, isAdmin as sessionIsAdmin, requireAdmin } from './_lib/session.js'

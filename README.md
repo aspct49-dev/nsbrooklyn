@@ -1,7 +1,7 @@
-# NSBROOKLYN — BetBolt Leaderboard, Giveaways & Milestones
+# NSBROOKLYN — Roobet Leaderboard, Giveaways & Milestones
 
 A React + Vite affiliate site for code **NSB**: a home page (hero, bonus cards,
-leaderboard promo), a live **$5,000 BetBolt leaderboard**, **Discord giveaways**,
+leaderboard promo), a live **$5,000 Roobet leaderboard**, **Discord giveaways**,
 a **weekly wager raffle** with provably-fair draws, and a **wager milestone**
 ladder.
 
@@ -21,7 +21,7 @@ maroon/red + gold colorway.
 ## Tech
 - **React 18 + Vite** SPA, **React Router** (`/`, `/leaderboard`, `/giveaways`,
   `/raffles`, `/milestones`, `/winners`, `/admin`, plus legal pages).
-- Standings come from the BetBolt affiliate API through `/api/leaderboard`, which
+- Standings come from the Roobet affiliate API through `/api/leaderboard`, which
   proxies it server-side (the API key never reaches the browser) and caches
   aggressively with 429 backoff.
 - Discord OAuth login with a signed-cookie session; `/admin` is gated on
@@ -30,7 +30,7 @@ maroon/red + gold colorway.
 ## Getting started
 ```bash
 npm install
-cp .env.example .env.local   # fill in the BetBolt + Discord values
+cp .env.example .env.local   # fill in the Roobet + Discord values
 npm run dev                  # http://localhost:5173
 ```
 - `npm run build` → production build in `dist/`
@@ -59,7 +59,7 @@ simultaneous clicks can't clobber each other). The admin hits **Draw** and the
 winner appears on the public page immediately.
 
 ## Wager raffle ([`api/_lib/raffles.js`](api/_lib/raffles.js))
-Also managed at `/admin`. Every `wagerPerTicket` dollars wagered on BetBolt
+Also managed at `/admin`. Every `wagerPerTicket` dollars wagered on Roobet
 inside the raffle window earns one ticket, counted from the same standings API
 the leaderboard uses so the numbers always agree. The built-in default raffle
 runs until an admin saves their own.

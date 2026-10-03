@@ -27,3 +27,21 @@ export function isoToLocal(iso) {
 }
 
 export const localToIso = (local) => (local ? new Date(local).toISOString() : null)
+
+/**
+ * Compact wager amounts for the milestone + rank cards.
+ * 0 -> "$0", 2700 -> "$2.7K", 2_250_000 -> "$2.25M", 1.2e9 -> "$1.2B".
+ * Roobet's ladder runs to $10B, so B has to be covered. Trailing zeros are
+ * trimmed so round numbers don't read as "$10.00M".
+ */
+export function fmtWager(n) {
+  const v = Number(n) || 0
+  if (v === 0) return '$0'
+  for (const [size, suffix] of [[1e9, 'B'], [1e6, 'M'], [1e3, 'K']]) {
+    if (v >= size) {
+      const trimmed = (v / size).toFixed(2).replace(/\.?0+$/, '')
+      return `$${trimmed}${suffix}`
+    }
+  }
+  return `$${v.toLocaleString('en-US')}`
+}

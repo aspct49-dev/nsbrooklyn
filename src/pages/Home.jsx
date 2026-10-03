@@ -5,7 +5,7 @@ import BonusCards from '../components/BonusCards'
 import PromoBanner from '../components/PromoBanner'
 import { IconExternal, IconGift } from '../components/icons'
 
-const [betbolt] = casinos
+const [casino] = casinos
 
 export default function Home() {
   return (
@@ -15,13 +15,13 @@ export default function Home() {
         <section className="hero">
           <img className="hero-art" src="/nsbrooklyn.png" alt="" aria-hidden="true" />
           <div className="hero-inner">
-            <span className="hero-tag"><span className="dot" /> BETBOLT PARTNER · CODE {config.referralCode}</span>
+            <span className="hero-tag"><span className="dot" /> ROOBET PARTNER · CODE {config.referralCode}</span>
             <h1>
               <span className="grad">{fmtMoney(config.prizePool)}</span><br />
               LEADERBOARD
             </h1>
             <p>
-              Climb to the top of the {betbolt.name} leaderboard under
+              Climb to the top of the {casino.name} leaderboard under
               code <strong>{config.referralCode}</strong> and win your share of crazy prizes —
               plus daily giveaways and wager milestones on top.
             </p>
@@ -32,8 +32,8 @@ export default function Home() {
               </div>
             </div>
             <div className="hero-actions">
-              <a className="btn btn-primary" href={betbolt.url} target="_blank" rel="noreferrer">
-                Play on {betbolt.name} <IconExternal />
+              <a className="btn btn-primary" href={casino.url} target="_blank" rel="noreferrer">
+                Play on {casino.name} <IconExternal />
               </a>
               <Link className="btn btn-ghost" to="/giveaways">
                 <IconGift /> Daily giveaway

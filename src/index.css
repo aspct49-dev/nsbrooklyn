@@ -481,6 +481,42 @@ img { display: block; max-width: 100%; }
 .lb-title .white { color: var(--text); }
 .lb-sub { color: var(--text-soft); font-family: 'Rubik', sans-serif; margin: 16px auto 22px; max-width: 520px; }
 .lb-actions { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
+/* A board we have left but have not finished paying. Styled as a notice, not
+   a promo — there is nothing to click and nowhere to go. */
+.lb-closing {
+  display: flex; align-items: flex-start; gap: 14px;
+  max-width: 760px; margin: 24px auto 0;
+  padding: 15px 18px;
+  background: rgba(255, 200, 60, 0.07);
+  border: 1px solid rgba(255, 200, 60, 0.3);
+  border-radius: 14px;
+}
+.lb-closing-tag {
+  flex: none;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #ffd977;
+  background: rgba(255, 200, 60, 0.13);
+  border: 1px solid rgba(255, 200, 60, 0.36);
+  border-radius: 999px;
+  padding: 6px 11px;
+  margin-top: 1px;
+}
+.lb-closing p { margin: 0; color: var(--text-soft); font-size: 13.5px; line-height: 1.55; }
+
+/* When prizes land, directly under the countdown that says when the board
+   closes — the two questions are asked together. */
+.lb-payout {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+@media (max-width: 560px) {
+  .lb-closing { flex-direction: column; gap: 10px; }
+}
+
 .lb-ends-lbl {
   text-align: center;
   font-family: 'Rubik', sans-serif; font-weight: 700;
@@ -691,9 +727,19 @@ img { display: block; max-width: 100%; }
 .footer .f-col a:hover { color: #ff8c8c; }
 .footer-bottom {
   margin-top: 34px; padding-top: 22px; border-top: 1px solid rgba(255, 40, 40, 0.22);
-  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
   color: #ffbfbf; font-size: 13px;
 }
+/* The policy links are a legal row, not navigation — small caps, set apart
+   from the Navigate column that carries the actual destinations. */
+.f-policies { display: flex; gap: 22px; flex-wrap: wrap; }
+.f-policies a {
+  color: #ffbfbf;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: color 0.15s;
+}
+.f-policies a:hover { color: #fff; }
 .disclaimer { color: var(--text-muted); font-size: 12px; max-width: 760px; margin-top: 10px; line-height: 1.6; }
 
 /* responsible-gambling / 18+ bar */
@@ -704,6 +750,13 @@ img { display: block; max-width: 100%; }
   border: 1px solid rgba(255, 77, 87, 0.28);
   border-radius: 14px;
 }
+/* age chip + GambleAware read as one credential, so they travel together */
+.rg-marks { display: flex; align-items: center; gap: 14px; flex: none; }
+.rg-aware {
+  height: 20px; width: auto; display: block;
+  opacity: 0.8; transition: opacity 0.15s;
+}
+.rg-marks a:hover .rg-aware { opacity: 1; }
 .rg-18 {
   flex: none;
   width: 46px; height: 46px; border-radius: 50%;
@@ -714,6 +767,72 @@ img { display: block; max-width: 100%; }
 .rg-bar p { color: var(--text-soft); font-size: 13px; line-height: 1.55; margin: 0; }
 .rg-bar a { color: var(--blue-2); font-weight: 700; }
 .rg-bar a:hover { color: #fff; }
+
+@media (max-width: 620px) {
+  .rg-bar { flex-direction: column; align-items: flex-start; gap: 13px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+}
+
+/* ----------------------------------------------------- wager weighting rules
+   Roobet weights a wager by the game's RTP and the board ranks on the weighted
+   figure, so the bands are published on the pages that use them rather than
+   buried in the terms. */
+.wr-card {
+  margin-top: 34px;
+  background: linear-gradient(180deg, #230f16 0%, #150a0f 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 24px 24px 22px;
+  box-shadow: var(--shadow);
+}
+.wr-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 21px; color: #fff; margin: 0;
+}
+.wr-lede {
+  color: var(--text-soft); font-size: 14px; line-height: 1.6;
+  margin-top: 10px; max-width: 70ch;
+}
+.wr-bands { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.wr-band {
+  display: flex; align-items: center; gap: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 15px;
+}
+.wr-band-pct {
+  flex: none; min-width: 62px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 21px; color: #ffd977;
+  text-align: center;
+}
+.wr-band-text { display: flex; flex-direction: column; min-width: 0; }
+.wr-band-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.wr-band-note { font-size: 12.5px; color: var(--text-muted); }
+
+.wr-notice {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin-top: 18px; padding: 13px 15px;
+  background: rgba(255, 77, 87, 0.07);
+  border: 1px solid rgba(255, 77, 87, 0.3);
+  border-radius: 12px;
+  color: var(--text-soft); font-size: 13px; line-height: 1.55;
+}
+.wr-notice-mark {
+  flex: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 13px;
+  color: #fff; background: linear-gradient(135deg, #ff5a63, #c11322);
+  margin-top: 1px;
+}
+
+@media (max-width: 560px) {
+  .wr-card { padding: 20px 16px 18px; }
+  .wr-band { gap: 11px; padding: 10px 12px; }
+  .wr-band-pct { min-width: 52px; font-size: 18px; }
+}
 
 /* ---------------------------------------------------------------- legal pages */
 .legal-card {
@@ -1290,10 +1409,12 @@ img { display: block; max-width: 100%; }
    overlaps. The right side (socials + name chip) is the wider one, so it goes
    first — the socials are in the footer anyway — and only then do the links
    fold into the drawer. Admins carry an extra tab, so they hit this sooner. */
-@media (max-width: 1480px) {
+@media (max-width: 1560px) {
   .nb-socials { display: none; }
 }
-@media (max-width: 1200px) {
+/* 7 link tabs now (Milestones and Ranks are separate pages), so the centre
+   column is ~115px wider than it was and has to fold sooner. */
+@media (max-width: 1320px) {
   .nb-links { display: none; }
   .hamburger { display: block; }
   /* the centre column collapses to nothing — drop the gaps around it too */
@@ -1495,6 +1616,12 @@ img { display: block; max-width: 100%; }
 .lb-brand .casino-brand { font-size: 34px; }
 .lb-brand .cb-logoimg.invert {
   filter: invert(1) hue-rotate(180deg) drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
+}
+/* A logo that is already light (Roobet's gold wordmark) skips the inversion,
+   so it needs the same glow applied on its own or the big leaderboard lockup
+   sits flat against the red background. */
+.lb-brand .cb-logoimg:not(.invert) {
+  filter: drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
 }
 .lb-brand .cb-cube {
   filter: drop-shadow(0 4px 16px rgba(239, 45, 60, 0.4));
@@ -1915,159 +2042,341 @@ img { display: block; max-width: 100%; }
 }
 .admin-grid.one { grid-template-columns: minmax(0, 1fr); max-width: 620px; }
 
-/* ======================================================= rank milestones
-   Card structure ported from the tegens rewards page, recoloured to the NSB
-   palette. Each card sets a --tier accent taken from that rank's own metal,
-   which drives the icon glow, range figure and perk checkmarks. */
-.rk-callout {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+/* ============================================== wager milestones (/milestones)
+   A cumulative ladder, not a card grid: every rung pays, so the page is built
+   around the running total rather than around each reward in isolation. The
+   rail down the left ties the rungs together, and the fill bar on each rung
+   shows how far through the $2,110 that rung leaves you. */
+.ms-hero {
+  display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
   background:
-    radial-gradient(620px 220px at 10% 0%, rgba(255, 200, 60, 0.16), transparent 70%),
-    linear-gradient(160deg, #2a1216 0%, #150a0f 100%);
-  border: 1px solid rgba(255, 200, 60, 0.35);
+    radial-gradient(1200px 180px at 10% 0%, rgba(255, 200, 60, 0.13), transparent 70%),
+    linear-gradient(180deg, #2b131a 0%, #170b10 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 30px 30px 28px;
+  box-shadow: var(--shadow);
+  margin-bottom: 34px;
+}
+.ms-hero-main { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ms-hero-kicker {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ms-hero-amt {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: clamp(46px, 8vw, 76px); font-weight: 700; line-height: 1;
+  color: #ffd977;
+  text-shadow: 0 0 44px rgba(255, 200, 60, 0.4);
+}
+.ms-hero-sub { color: var(--text-soft); font-size: 15px; max-width: 460px; margin-top: 4px; }
+.ms-hero-side { display: flex; flex-direction: column; gap: 9px; flex: 0 0 auto; }
+.ms-fact {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 22px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 15px;
+  min-width: 210px;
+}
+.ms-fact-k {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ms-fact-v {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 18px; color: #fff;
+}
+/* "slots only" is a condition, not a prize — flag it rather than gild it */
+.ms-fact.slots { border-color: rgba(255, 200, 60, 0.34); background: rgba(255, 200, 60, 0.08); }
+.ms-fact.slots .ms-fact-v { color: #ffd977; font-size: 15px; }
+
+/* The level stack lives inside ONE dark panel. An earlier version drew a bare
+   connector rail outside the rows, but the page background is bright red and a
+   thin line on red read as a stray stripe instead of a ladder. */
+.ms-levels {
+  background: linear-gradient(180deg, #230f16 0%, #150a0f 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: var(--shadow);
+  margin-bottom: 36px;
+}
+
+.ms-level {
+  --tier: var(--blue-2);
+  position: relative;
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1.05fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  padding: 13px 18px 13px 12px;
+  border-radius: 14px;
+  transition: background 0.18s ease;
+}
+.ms-level:hover { background: rgba(255, 255, 255, 0.035); }
+/* hairline between levels, inset so it does not touch the panel edge */
+.ms-level + .ms-level::before {
+  content: '';
+  position: absolute; left: 112px; right: 18px; top: 0;
+  height: 1px; background: var(--border);
+}
+
+.ms-level.silver   { --tier: #b9c4d8; }
+.ms-level.gold     { --tier: #ffc23d; }
+.ms-level.emerald  { --tier: #2fd9a3; }
+.ms-level.ruby     { --tier: #ff4d6d; }
+.ms-level.diamond  { --tier: #4fb8f5; }
+.ms-level.immortal { --tier: #ff2d6f; }
+
+/* ---- the level mark: a hexagon echoing Roobet's own rank art ---- */
+.ms-level-mark {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px 0;
+}
+.ms-level-lbl {
+  font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ms-level-hex {
+  display: grid; place-items: center;
+  width: 62px; height: 56px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(165deg,
+    color-mix(in srgb, var(--tier) 95%, #fff) 0%,
+    var(--tier) 42%,
+    color-mix(in srgb, var(--tier) 58%, #000) 100%);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 25px; font-weight: 700; line-height: 1;
+  color: #1a0b10;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--tier) 70%, #fff);
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--tier) 55%, transparent));
+}
+/* the connector: a short segment joining one hexagon to the next, drawn
+   inside the dark panel so it reads as a path rather than a stray line */
+.ms-level:not(:last-child) .ms-level-mark::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 26px;
+  background: linear-gradient(180deg, var(--tier), color-mix(in srgb, var(--tier) 18%, transparent));
+  border-radius: 999px;
+}
+
+.ms-level-req { display: flex; flex-direction: column; min-width: 0; }
+.ms-level-req-v {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 25px; font-weight: 700; color: #fff; line-height: 1.1;
+}
+.ms-level-req-k {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ms-level-pay {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 9px 20px;
+  border-radius: 12px;
+  background: rgba(255, 200, 60, 0.09);
+  border: 1px solid rgba(255, 200, 60, 0.32);
+  flex: none;
+}
+.ms-level-pay-k {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ms-level-pay-v {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 27px; font-weight: 700; color: #ffd977; line-height: 1;
+}
+
+/* the running total — the reason this is a ladder and not a grid */
+.ms-level-run { display: grid; gap: 6px; min-width: 0; }
+.ms-level-run-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ms-level-run-k {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.ms-level-run-v {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--text);
+}
+.ms-level-run-bar {
+  display: block; height: 6px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  position: relative; overflow: hidden;
+}
+.ms-level-run-bar::after {
+  content: '';
+  position: absolute; inset: 0 auto 0 0;
+  width: var(--pct);
+  min-width: 6px; /* level 1 is 0.5% of the total — keep it visible */
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--tier), #ffd977);
+}
+
+@media (max-width: 920px) {
+  /* four columns stop fitting — mark on the left, the rest stacked beside it */
+  .ms-level {
+    grid-template-columns: 74px minmax(0, 1fr);
+    grid-template-areas: 'mark req' 'mark pay' 'mark run';
+    gap: 8px 16px;
+    padding: 14px 14px 14px 10px;
+  }
+  .ms-level-mark { grid-area: mark; align-self: start; }
+  .ms-level-req { grid-area: req; }
+  .ms-level-pay { grid-area: pay; align-items: flex-start; padding: 7px 14px; }
+  .ms-level-pay-v { font-size: 22px; }
+  .ms-level-run { grid-area: run; }
+  .ms-level-hex { width: 54px; height: 48px; font-size: 21px; }
+  .ms-level + .ms-level::before { left: 96px; right: 14px; }
+  .ms-level:not(:last-child) .ms-level-mark::after { display: none; }
+}
+
+.ms-cta { display: flex; justify-content: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.ms-cta .btn { gap: 10px; }
+.ms-fine {
+  text-align: center; margin-top: 22px; font-size: 13px;
+  max-width: 820px; margin-left: auto; margin-right: auto;
+}
+
+@media (max-width: 860px) {
+  .ms-hero { padding: 24px 20px; gap: 20px; }
+  .ms-hero-side { width: 100%; }
+  .ms-fact { min-width: 0; }
+}
+
+/* ================================================== Roobet VIP ranks (/ranks)
+   31 tiers is too many for a flat grid to read, so the ladder is banded by
+   family: a labelled stripe per family with its levels running left to right.
+   Each band carries its own accent so the climb is legible at a glance. */
+.rb-hero {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  background:
+    radial-gradient(900px 200px at 85% 0%, rgba(255, 45, 111, 0.16), transparent 70%),
+    linear-gradient(180deg, #2b131a 0%, #170b10 100%);
+  border: 1px solid var(--border-strong);
   border-radius: 20px;
   padding: 26px 30px;
-  margin-bottom: 40px;
   box-shadow: var(--shadow);
+  margin-bottom: 30px;
 }
-.rk-callout-badge {
-  flex: none;
-  width: 116px; height: 116px;
-  border-radius: 50%;
-  display: grid; place-items: center; align-content: center;
-  background: linear-gradient(135deg, #ffd977, #d99b1f);
-  color: #2a1a02;
-  box-shadow: 0 0 38px -8px rgba(255, 200, 60, 0.7);
-  font-family: 'Chakra Petch', sans-serif;
-  text-align: center;
+.rb-hero-art {
+  width: 104px; height: 66px; object-fit: contain; flex: none;
+  filter: drop-shadow(0 0 26px rgba(255, 45, 111, 0.55));
 }
-.rk-callout-badge .amt { font-size: 27px; font-weight: 700; line-height: 1; }
-.rk-callout-badge .per {
-  font-size: 11px; font-weight: 700; margin-top: 4px;
-  letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8;
-}
-.rk-callout-text { flex: 1; min-width: 0; }
-.rk-callout-text h3 {
+.rb-hero-text { flex: 1 1 340px; min-width: 0; }
+.rb-hero-text h3 {
   font-family: 'Rubik', sans-serif; font-weight: 800;
-  font-size: clamp(19px, 2.4vw, 26px); line-height: 1.15;
+  font-size: 25px; color: #fff; margin: 0;
 }
-.rk-callout-text h3 .gld { color: #ffd977; }
-.rk-callout-text h3 .wht { color: #fff; }
-.rk-callout-text p { color: var(--text-soft); font-size: 14.5px; margin-top: 8px; max-width: 660px; }
-.rk-callout-cta { flex: none; white-space: nowrap; }
-
-.rk-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 20px;
-  align-items: stretch;
-  margin-bottom: 10px;
-}
-
-.rk-tier {
-  --tier: var(--blue-2);
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(180deg, #231019 0%, #150a0f 100%);
-  border: 1px solid var(--border-strong);
-  border-radius: 18px;
-  padding: 24px 22px 22px;
-  box-shadow: var(--shadow);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-.rk-tier:hover {
-  transform: translateY(-5px);
-  border-color: color-mix(in srgb, var(--tier) 55%, transparent);
-}
-.rk-tier.rock     { --tier: #8b97ad; }
-.rk-tier.bronze   { --tier: #e07a4a; }
-.rk-tier.silver   { --tier: #b9c4d8; }
-.rk-tier.gold     { --tier: #ffc23d; }
-.rk-tier.platinum { --tier: #7b8cf5; }
-.rk-tier.titanium { --tier: #3fd0e0; }
-.rk-tier.pearl    { --tier: #c77dff; }
-.rk-tier.diamond  { --tier: #4fb8f5; }
-/* NOTE: don't fade the base-rank card with `opacity` — the page background is
-   bright red and shows straight through, turning the card pink instead of the
-   dark maroon every other card uses. The muted reward slot below is enough to
-   signal that Rock doesn't pay. */
-
-.rk-tier-head { text-align: center; }
-.rk-tier-icon {
-  width: 76px; height: 76px; object-fit: contain; margin: 0 auto;
-  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--tier) 65%, transparent));
-}
-.rk-tier-name {
-  font-family: 'Rubik', sans-serif; font-weight: 800;
-  font-size: 20px; margin-top: 8px; color: #fff;
-}
-.rk-tier-name .rk-levels { color: var(--text-muted); font-size: 14px; font-weight: 700; }
-.rk-range {
-  display: flex; align-items: baseline; justify-content: center; gap: 8px;
-  font-family: 'Chakra Petch', sans-serif; font-weight: 700;
-  font-size: 24px; color: var(--tier);
-  margin-top: 8px;
-}
-.rk-range .dash { color: var(--text-muted); font-weight: 400; }
-.rk-range-lbl {
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-muted); margin-top: 4px;
-}
-
-.rk-reward {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  margin: 16px 0;
-  padding: 14px 12px;
-  border-radius: 13px;
-  background: rgba(255, 200, 60, 0.08);
-  border: 1px solid rgba(255, 200, 60, 0.32);
-}
-.rk-reward-lbl {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-muted);
-}
-.rk-reward-amt {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 30px; font-weight: 700; color: #ffd977; line-height: 1;
-}
-.rk-tier.base .rk-reward { background: rgba(255, 255, 255, 0.04); border-color: var(--border); }
-.rk-reward-base { font-size: 13px; color: var(--text-muted); font-weight: 600; }
-
-.rk-perks { display: flex; flex-direction: column; gap: 7px; margin-top: auto; }
-.rk-perk {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(0, 0, 0, 0.28);
+.rb-hero-text h3 .gld { color: #ffd977; }
+.rb-hero-text p { color: var(--text-soft); font-size: 14.5px; margin-top: 8px; max-width: 620px; }
+.rb-hero-link { color: #ffd977; font-weight: 700; }
+.rb-hero-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.rb-hero-stats span {
+  font-size: 12.5px; color: var(--text-soft);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 9px 12px;
+  border-radius: 999px;
+  padding: 6px 13px;
 }
-.rk-perk-ic {
-  flex: none;
-  width: 26px; height: 26px; border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--tier);
-  border: 1.5px solid color-mix(in srgb, var(--tier) 55%, transparent);
-  background: color-mix(in srgb, var(--tier) 10%, transparent);
+.rb-hero-stats b { color: #fff; font-family: 'Chakra Petch', sans-serif; font-size: 13.5px; }
+.rb-hero-cta { flex: none; white-space: nowrap; }
+
+.rb-ladder { display: flex; flex-direction: column; gap: 12px; }
+.rb-band {
+  --tier: var(--blue-2);
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--tier) 13%, #1d0d13) 0%, #150a0f 60%);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--tier);
+  border-radius: 16px;
+  padding: 14px 18px;
 }
-.rk-perk-lbl { font-weight: 700; font-size: 13px; color: var(--text); }
-.rk-perk.locked { opacity: 0.55; }
-.rk-perk.locked .rk-perk-ic {
+.rb-band.beginner    { --tier: #8b97ad; }
+.rb-band.silver      { --tier: #b9c4d8; }
+.rb-band.gold        { --tier: #ffc23d; }
+.rb-band.emerald     { --tier: #2fd9a3; }
+.rb-band.ruby        { --tier: #ff4d6d; }
+.rb-band.diamond     { --tier: #4fb8f5; }
+.rb-band.champion    { --tier: #ff9f43; }
+.rb-band.legend      { --tier: #c77dff; }
+.rb-band.master      { --tier: #5ad1e0; }
+.rb-band.grandmaster { --tier: #7b8cf5; }
+.rb-band.immortal    { --tier: #ff2d6f; }
+
+.rb-band-label {
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  border-right: 1px solid var(--border);
+  padding-right: 14px;
+}
+.rb-band-name {
+  font-family: 'Rubik', sans-serif; font-weight: 800;
+  font-size: 18px; color: var(--tier); line-height: 1.15;
+}
+.rb-band-count {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
   color: var(--text-muted);
-  border-color: var(--border-strong);
-  background: rgba(255, 255, 255, 0.03);
 }
-.rk-perk.locked .rk-perk-lbl { color: var(--text-muted); font-weight: 600; }
 
-.ms-cta { display: flex; justify-content: center; margin-top: 8px; }
-.ms-cta .btn { gap: 10px; }
+.rb-band-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 10px;
+}
+.rb-tier {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 8px 9px;
+  text-align: center;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.rb-tier:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--tier) 60%, transparent);
+}
+.rb-tier-icon {
+  width: 54px; height: 34px; object-fit: contain; margin-bottom: 5px;
+  filter: drop-shadow(0 0 13px color-mix(in srgb, var(--tier) 55%, transparent));
+}
+.rb-tier-name {
+  font-family: 'Rubik', sans-serif; font-weight: 800;
+  font-size: 12.5px; color: #fff; line-height: 1.25;
+}
+.rb-tier-wager {
+  font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+  font-size: 13.5px; color: var(--tier);
+}
+.rb-fine {
+  text-align: center; margin-top: 24px; font-size: 13px;
+  max-width: 820px; margin-left: auto; margin-right: auto;
+}
 
-@media (max-width: 980px) {
-  .rk-callout { flex-direction: column; text-align: center; gap: 18px; padding: 24px 20px; }
-  .rk-callout-text p { margin-left: auto; margin-right: auto; }
+@media (max-width: 760px) {
+  .rb-hero { padding: 22px 20px; gap: 18px; }
+  .rb-hero-cta { width: 100%; justify-content: center; }
+  /* the label column stops paying for itself — put it above the tiers */
+  .rb-band { grid-template-columns: minmax(0, 1fr); gap: 11px; }
+  .rb-band-label {
+    flex-direction: row; align-items: baseline; gap: 9px;
+    border-right: none; border-bottom: 1px solid var(--border);
+    padding: 0 0 9px;
+  }
 }
 
 /* ================================================ Discord-entry giveaways */
