@@ -285,7 +285,8 @@ export default function Giveaways() {
 
         <p className="section-sub" style={{ textAlign: 'center', marginTop: 22, fontSize: 13 }}>
           One entry per Discord account. Multi-accounting voids all entries. Winners are
-          contacted on Discord — make sure your DMs are open. 18+ only.
+          contacted on Discord — make sure your DMs are open. Prizes are paid within{' '}
+          {config.payoutWindow} of being confirmed. 18+ only.
         </p>
       </div>
     </section>

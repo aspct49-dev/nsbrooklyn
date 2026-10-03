@@ -74,8 +74,8 @@ export default function Footer() {
         <p className="disclaimer">
           {config.brandName} is an independent affiliate of {config.casinoNames} and is not owned or
           operated by either casino. We may earn a commission when you sign up or play using code{' '}
-          {config.referralCode} or our links. Nothing here is a guarantee of winnings; gambling
-          involves real financial risk. You must be of legal age in your jurisdiction to participate.
+          {config.referralCode} or our links. {config.payoutNote} Nothing here is a guarantee of
+          winnings; gambling involves real financial risk. You must be of legal age in your jurisdiction to participate.
           Please play responsibly. 18+ only.
         </p>
 

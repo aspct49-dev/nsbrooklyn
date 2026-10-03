@@ -71,7 +71,17 @@ export default function KickGiveaway() {
     startPolling(collecting || showWinner)
   }, [collecting, showWinner, startPolling])
 
+  // Restore the controls from the live round, so a refresh mid-round shows
+  // what it is actually running rather than the defaults — a round started
+  // with Certified off would otherwise come back showing it on.
+  //
+  // Each is keyed on the server's own value, so editing a control while
+  // setting up the next round is not clobbered by the next poll: the effect
+  // only re-runs when the stored round changes, not on every fetch.
   useEffect(() => { if (s?.keyword) setKeyword(s.keyword) }, [s?.keyword])
+  useEffect(() => { if (s) setRequireRole(Boolean(s.requireRole)) }, [s?.requireRole])
+  useEffect(() => { if (s) setSubLuck(Boolean(s.subLuck)) }, [s?.subLuck])
+  useEffect(() => { if (s?.winnerCount) setWinnerCount(s.winnerCount) }, [s?.winnerCount])
 
   // Filter in the browser so we aren't posting every message, but the server
   // re-checks the keyword and eligibility — the client decides nothing.

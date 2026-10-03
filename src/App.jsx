@@ -15,6 +15,7 @@ import Terms from './pages/Terms'
 import ResponsibleGambling from './pages/ResponsibleGambling'
 import Admin from './pages/Admin'
 import KickGiveaway from './pages/KickGiveaway'
+import GiveawayOverlay from './pages/GiveawayOverlay'
 
 // Per-route <title> + description so each page is distinct for search engines
 // and browser tabs. (Social scrapers read the static tags in index.html.)
@@ -74,33 +75,50 @@ function RouteMeta() {
   return null
 }
 
+/**
+ * The site proper: artwork layer, navbar, routed page, footer.
+ *
+ * Split from App so the stream overlay can sit outside it. An OBS browser
+ * source has to be nothing but the card on a transparent page — a navbar and
+ * a footer would be composited over the stream too.
+ */
+function SiteShell() {
+  return (
+    <div className="app" id="top">
+      <Particles />
+      <Navbar />
+
+      <div className="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/giveaways" element={<Giveaways />} />
+          <Route path="/raffles" element={<Raffles />} />
+          <Route path="/milestones" element={<Milestones />} />
+          <Route path="/ranks" element={<Ranks />} />
+          <Route path="/winners" element={<Winners />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/responsible-gambling" element={<ResponsibleGambling />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/kick-giveaway" element={<KickGiveaway />} />
+        </Routes>
+
+        <Footer />
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <RouteMeta />
-      <div className="app" id="top">
-        <Particles />
-        <Navbar />
-
-        <div className="main">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/giveaways" element={<Giveaways />} />
-            <Route path="/raffles" element={<Raffles />} />
-            <Route path="/milestones" element={<Milestones />} />
-            <Route path="/ranks" element={<Ranks />} />
-            <Route path="/winners" element={<Winners />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/responsible-gambling" element={<ResponsibleGambling />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/kick-giveaway" element={<KickGiveaway />} />
-          </Routes>
-
-          <Footer />
-        </div>
-      </div>
+      <Routes>
+        {/* Outside SiteShell on purpose — see above. */}
+        <Route path="/overlay/giveaway" element={<GiveawayOverlay />} />
+        <Route path="*" element={<SiteShell />} />
+      </Routes>
     </BrowserRouter>
   )
 }

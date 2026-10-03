@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { SPIN_MS } from '../lib/overlay'
 
 const CARD = 104   // card width + gap, must match .kgw-reel-card in the CSS
 const RUNWAY = 44  // cards scrolled past before landing
@@ -59,10 +60,11 @@ export default function SpinReel({ entrants, winner, spinning, onDone }) {
       setOffset(RUNWAY * CARD - width / 2 + CARD / 2)
     })
 
+    // SPIN_MS is shared with the stream overlay so both reels land together.
     const done = setTimeout(() => {
       setSettled(true)
       onDone?.()
-    }, 5200)
+    }, SPIN_MS)
 
     return () => {
       cancelAnimationFrame(id)

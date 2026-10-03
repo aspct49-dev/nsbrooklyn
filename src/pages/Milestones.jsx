@@ -121,7 +121,8 @@ export default function Milestones() {
           <a href="/leaderboard">leaderboard</a> and <a href="/raffles">raffle</a> rank on{' '}
           {casino.name}’s weighted wager instead — the bands are
           published on those pages. Any wager abuse found by me or {casino.name} disqualifies the
-          prize, which rolls to the next player in line. 18+ only.
+          prize, which rolls to the next player in line. Milestone rewards are paid within{' '}
+          {config.payoutWindow} of being confirmed. 18+ only.
         </p>
       </div>
     </section>

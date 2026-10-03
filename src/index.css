@@ -2964,3 +2964,222 @@ img { display: block; max-width: 100%; }
   border-radius: 5px;
   padding: 1px 7px;
 }
+
+/* ===========================================================================
+   Stream overlay — an OBS browser source at /overlay/giveaway.
+
+   The page IS the source, so the viewport is the box drawn in OBS. The card
+   is sized in `vw`, so widening the source enlarges it crisply instead of
+   stretching a bitmap. Designed at a 500px-wide source, where 1vw is 5px;
+   any width works, and the height only has to clear the card (roughly 40% of
+   the width, a little more on a multi-winner draw).
+
+   The `ov` class is put on <html> by a snippet in index.html before React
+   mounts — waiting for React would flash the site's red page in the source.
+   =========================================================================== */
+html.ov,
+html.ov body {
+  background: transparent;
+}
+html.ov body {
+  margin: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+/* the site's artwork layers paint the whole viewport; the stream goes there */
+html.ov body::before,
+html.ov body::after {
+  display: none;
+}
+
+.ovg {
+  padding: 2.4vw;
+  opacity: 0;
+  transform: translateY(-3vw) scale(0.97);
+  transform-origin: top center;
+  transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ovg[data-show='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+.ovg-card {
+  position: relative;
+  padding: 3.6vw 4vw 3.4vw;
+  border-radius: 4vw;
+  border: 0.3vw solid rgba(255, 200, 60, 0.42);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 60, 60, 0.3), transparent 60%),
+    linear-gradient(165deg, rgba(43, 19, 26, 0.97), rgba(16, 8, 11, 0.98));
+  box-shadow:
+    0 0 0 0.25vw rgba(255, 200, 60, 0.1),
+    0 2vw 6vw rgba(0, 0, 0, 0.55);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.ovg[data-phase='drawing'] .ovg-card { animation: ovg-charge 0.9s ease infinite alternate; }
+.ovg[data-phase='winner'] .ovg-card {
+  border-color: rgba(255, 217, 119, 0.85);
+  animation: ovg-land 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 1;
+}
+
+.ovg-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3.4vw;
+}
+
+.ovg-mark {
+  width: 15vw; height: 15vw;
+  border-radius: 50%;
+  padding: 0.6vw;
+  background: conic-gradient(from 200deg, #ff2c35, #ffd977, #ff6d6d, #ff2c35);
+  box-shadow: 0 0 3.5vw rgba(255, 60, 60, 0.45);
+}
+.ovg-mark img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 0.6vw solid #140a0d;
+  background: #140a0d;
+}
+
+.ovg-head { min-width: 0; display: flex; flex-direction: column; gap: 0.6vw; }
+
+.ovg-label {
+  display: inline-flex; align-items: center; gap: 1.2vw;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 2.7vw;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: #ffd977;
+}
+
+/* One line tall and clipped, so the reel's names slide through a window
+   rather than pushing the card's height around while it spins. */
+.ovg-name-box {
+  display: block;
+  height: 1.18em;
+  overflow: hidden;
+  font-size: 7.4vw;
+  line-height: 1.18;
+}
+.ovg-name {
+  display: block;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 800; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #fff;
+}
+.ovg-name.cta { font-size: 0.84em; }
+.ovg-name.cta em { font-style: normal; color: #ffd977; }
+.ovg-name.reel { animation: ovg-flip 0.11s ease-out; }
+.ovg-name.win {
+  background: linear-gradient(95deg, #ffd977, #fff 45%, #ff8c8c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ovg-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* The glow goes on the window, not the name: a filter on text drawn with
+   background-clip makes Chrome paint the whole gradient box — a bright
+   rectangle behind the name — before the clip is applied. */
+.ovg[data-phase='winner'] .ovg-name-box {
+  filter: drop-shadow(0 0 1.4vw rgba(255, 200, 60, 0.5));
+}
+
+.ovg-badge {
+  display: inline-flex; align-items: center; gap: 1vw;
+  align-self: start;
+  padding: 1vw 2.2vw;
+  border-radius: 999px;
+  border: 0.25vw solid rgba(255, 200, 60, 0.34);
+  background: rgba(10, 5, 7, 0.72);
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 2.8vw;
+  font-variant-numeric: tabular-nums;
+  color: #fff; white-space: nowrap;
+}
+.ovg-badge.live {
+  color: #ff8c8c;
+  border-color: rgba(255, 90, 99, 0.55);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.ovg-badge.prize { align-self: center; color: #ffd977; }
+
+/* Winners past the first, so a multi-winner draw does not hide the rest. */
+.ovg-others {
+  display: flex; flex-wrap: wrap; gap: 1.4vw;
+  margin-top: 2.6vw;
+}
+.ovg-other {
+  display: inline-flex; align-items: baseline; gap: 1vw;
+  padding: 0.9vw 2vw;
+  border-radius: 999px;
+  border: 0.22vw solid rgba(255, 200, 60, 0.26);
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 3vw; color: #fff;
+  font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+}
+.ovg-other b { color: #ffd977; font-size: 0.85em; }
+
+.ovg-bottom {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 3vw; margin-top: 3.2vw;
+}
+.ovg-field {
+  min-width: 0; display: flex; flex-direction: column; gap: 0.4vw;
+  padding-left: 2.6vw;
+  border-left: 0.8vw solid #ff2c35;
+  border-radius: 0.3vw;
+}
+.ovg-field .ovg-label { color: #cfb2b8; font-size: 2.4vw; }
+.ovg-field strong {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 800; font-size: 5.2vw; line-height: 1.05;
+  color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ovg-count {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  animation: ovg-tick 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ovg-dot {
+  width: 1.5vw; height: 1.5vw; border-radius: 50%;
+  background: #ff5a63;
+  animation: ovg-pulse 1.6s ease-out infinite;
+}
+
+@keyframes ovg-flip {
+  from { transform: translateY(-55%); opacity: 0.2; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes ovg-pop {
+  0% { transform: scale(1.35); opacity: 0; }
+  55% { transform: scale(0.97); opacity: 1; }
+  100% { transform: none; }
+}
+@keyframes ovg-tick {
+  from { transform: translateY(-25%); color: #ffd977; }
+  to { transform: none; }
+}
+@keyframes ovg-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 90, 99, 0.6); }
+  100% { box-shadow: 0 0 0 2vw rgba(255, 90, 99, 0); }
+}
+@keyframes ovg-charge {
+  from { box-shadow: 0 0 0 0.25vw rgba(255, 200, 60, 0.14), 0 2vw 6vw rgba(0, 0, 0, 0.55); }
+  to { box-shadow: 0 0 0 0.6vw rgba(255, 200, 60, 0.4), 0 0 7vw rgba(255, 60, 60, 0.45); }
+}
+@keyframes ovg-land {
+  0% { box-shadow: 0 0 0 1vw rgba(255, 217, 119, 0.7), 0 0 12vw rgba(255, 200, 60, 0.7); }
+  100% { box-shadow: 0 0 0 0.25vw rgba(255, 200, 60, 0.1), 0 2vw 6vw rgba(0, 0, 0, 0.55); }
+}
+
+/* OBS honours this if the streamer has animation turned off system-wide. */
+@media (prefers-reduced-motion: reduce) {
+  .ovg { transition: none; }
+}
+

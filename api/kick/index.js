@@ -3,6 +3,7 @@
 //   GET  /api/kick            — link status for the logged-in user
 //   GET  /api/kick?start=1    — begin the Kick OAuth link flow (302)
 //   GET  /api/kick?admin=1    — admin: the chat giveaway session + entries
+//   GET  /api/kick?overlay=1  — PUBLIC: the little the OBS overlay needs
 //   POST /api/kick            — { action }
 //        unlink                        (any logged-in user)
 //        open | close | clear | draw   (admin)
@@ -60,6 +61,46 @@ async function adminView(res, extra = {}) {
     hits,
     roleGate: roleGateConfigured(),
     ...extra,
+  })
+}
+
+/**
+ * State for the OBS stream overlay.
+ *
+ * Public on purpose, and the only branch that runs without a session: an OBS
+ * browser source carries no cookies, so this cannot be gated the way the admin
+ * view is. What makes that safe is what it returns — it is built field by
+ * field from nothing, rather than by trimming the admin view, so a field added
+ * to the session later cannot leak here by default.
+ *
+ * Kick display names only: the Discord account behind an entry, the Kick user
+ * id and the draw seed never appear. The names are already public — they were
+ * typed into public chat to enter.
+ */
+async function overlayView(res) {
+  const s = await getSession()
+  const entries = await listEntries()
+
+  const names = [...new Set(entries.map((e) => e.kickName).filter(Boolean))]
+  const drawn = Boolean(s.drawnAt)
+
+  res.setHeader('Cache-Control', 'no-store')
+  return sendJson(res, 200, {
+    // the server's clock, so the reel can time itself against the draw
+    // without trusting the streaming PC's
+    now: Date.now(),
+    open: Boolean(s.open),
+    keyword: s.keyword || '',
+    prize: s.prize || '',
+    entryCount: entries.length,
+    // the pool the reel spins through; winners stay in it, since the reel
+    // has to be able to land on them
+    names,
+    winners: drawn
+      ? (s.winners || []).map((w) => ({ place: w.place, name: w.kickName, isSub: Boolean(w.isSub) }))
+      : [],
+    drawnAt: drawn ? new Date(s.drawnAt).getTime() : null,
+    subLuck: Boolean(s.subLuck),
   })
 }
 
@@ -196,6 +237,10 @@ async function handleAdminAction(req, res, body) {
 
 export default async function handler(req, res) {
   try {
+    // Before the login check: the OBS browser source has no session. Safe
+    // because overlayView builds its reply from scratch — see above.
+    if (req.method === 'GET' && getQuery(req).overlay) return await overlayView(res)
+
     const session = readSession(req)
     if (!session) throw Object.assign(new Error('Log in with Discord first'), { status: 401 })
 

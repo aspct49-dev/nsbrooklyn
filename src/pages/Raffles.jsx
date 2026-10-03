@@ -334,7 +334,8 @@ export default function Raffles() {
         <WagerRules context="raffle" />
 
         <p className="section-sub" style={{ textAlign: 'center', marginTop: 22, fontSize: 13 }}>
-          Usernames are masked for privacy. Ticket counts update as wagers are processed. 18+ only.
+          Usernames are masked for privacy. Ticket counts update as wagers are processed.
+          Prizes are paid within {config.payoutWindow} of the draw. 18+ only.
         </p>
       </div>
     </section>

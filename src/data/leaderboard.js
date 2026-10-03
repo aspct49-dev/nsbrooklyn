@@ -17,6 +17,15 @@ export const config = {
   contactEmail: 'support@nsbrooklyn.com',
   prizePool: 5000, // leaderboard $ pool, shown in the hero + navbar badge
 
+  // Every prize on this site is paid by hand — leaderboard places, raffle
+  // tickets, giveaway wins and wager milestones alike — so they all carry the
+  // same window. Stated once here and reused everywhere it is shown, so the
+  // pages cannot quietly drift apart on what was promised.
+  payoutWindow: '72 hours',
+  payoutNote:
+    'All rewards — leaderboard places, raffles, giveaways and wager milestones — '
+    + 'are paid within 72 hours of being confirmed.',
+
   // Partner casino, joined into the legal pages / footer copy.
   casinoNames: 'Roobet',
 
@@ -61,7 +70,7 @@ export const casinos = [
     prizePool: 5000,
     prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
     // Shown on the board so nobody has to ask when prizes land.
-    payout: 'Prizes are paid within 72 hours of the board closing',
+    payout: 'Prizes are paid within 72 hours of the board closing',  // see config.payoutNote
     // Dev scaffolding only — NOT rendered. The site shows live API standings
     // or an explicit loading/unavailable state; showing these fictional names
     // next to real prize amounts would misrepresent the board.

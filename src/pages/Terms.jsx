@@ -30,7 +30,7 @@ export default function Terms() {
       <ul>
         <li>To appear and rank on the leaderboard, you must be registered under code {config.referralCode} on {config.casinoNames} and have affiliate tracking enabled.</li>
         <li>Wager totals are sourced from the {config.casinoNames} affiliate API and are subject to its accuracy and timing. Standings may be delayed or cached.</li>
-        <li>Prizes are awarded for the listed competition period and are subject to verification. Leaderboard prizes are paid within <strong>72 hours</strong> of the board closing, once standings are final and verified.</li>
+        <li>Prizes are awarded for the listed competition period and are subject to verification. Leaderboard prizes are paid within <strong>{config.payoutWindow}</strong> of the board closing, once standings are final and verified.</li>
         <li>We reserve the right to adjust, withhold, or void prizes and to amend, suspend, or cancel any competition — including in cases of suspected fraud, collusion, multi-accounting, bonus abuse, or breach of {config.casinoNames}’s terms.</li>
         <li>Our decisions on leaderboard results and disputes are final.</li>
       </ul>
@@ -52,7 +52,17 @@ export default function Terms() {
         casino do not count toward them.
       </p>
 
-      <h2>4. Rewards &amp; cashback</h2>
+      <h2>4. Payment of prizes</h2>
+      <p>
+        {config.payoutNote} The window runs from the point a prize is confirmed — for a
+        leaderboard that is when the period closes and standings are final, for a raffle or
+        giveaway it is the draw, and for a wager milestone it is when we have verified the
+        wager. Prizes are paid by hand, so verification has to happen first. Where we need
+        something from you to pay out — a username, a screenshot, an open Discord DM — the
+        window starts when you have provided it.
+      </p>
+
+      <h2>5. Rewards &amp; cashback</h2>
       <p>
         Any rewards, rakeback, or cashback promotions described on this site (including any
         “{config.brandName} pays you back as you wager” offer) are provided at our discretion, may
@@ -60,28 +70,28 @@ export default function Terms() {
         and amounts are determined using {config.casinoNames} affiliate data.
       </p>
 
-      <h2>5. No guarantees; gambling risk</h2>
+      <h2>6. No guarantees; gambling risk</h2>
       <p>
         Nothing on this site is a guarantee of winnings. Gambling involves real financial risk and
         you may lose money. Only gamble with funds you can afford to lose. See our{' '}
         <a href="/responsible-gambling">Responsible Gambling</a> page.
       </p>
 
-      <h2>6. Intellectual property</h2>
+      <h2>7. Intellectual property</h2>
       <p>
         The {config.brandName} name, logo, and site content are owned by us or our licensors and may
         not be copied or reused without permission. Third-party names and logos (including
         {' '}{config.casinoNames}) belong to their respective owners.
       </p>
 
-      <h2>7. Third-party links</h2>
+      <h2>8. Third-party links</h2>
       <p>
         This site links to third-party websites, including {config.casinoNames}. We are not responsible for
         the content, terms, or practices of those sites. Your use of them is at your own risk and
         governed by their terms.
       </p>
 
-      <h2>8. Limitation of liability</h2>
+      <h2>9. Limitation of liability</h2>
       <p>
         To the maximum extent permitted by law, {config.brandName} is not liable for any losses or
         damages arising from your use of this site, your gambling activity, reliance on any
@@ -89,25 +99,25 @@ export default function Terms() {
         without warranties of any kind.
       </p>
 
-      <h2>9. Indemnity</h2>
+      <h2>10. Indemnity</h2>
       <p>
         You agree to indemnify and hold {config.brandName} harmless from any claims arising out of
         your use of the site or breach of these terms.
       </p>
 
-      <h2>10. Governing law</h2>
+      <h2>11. Governing law</h2>
       <p>
         These terms are governed by the laws of the operator’s jurisdiction. Any disputes will be
         subject to the courts of that jurisdiction.
       </p>
 
-      <h2>11. Changes</h2>
+      <h2>12. Changes</h2>
       <p>
         We may update these Terms at any time. Continued use of the site after changes are posted
         means you accept the revised Terms.
       </p>
 
-      <h2>12. Contact</h2>
+      <h2>13. Contact</h2>
       <p>
         Questions? Reach us on{' '}
         <a href={config.socials.discord} target="_blank" rel="noreferrer">Discord</a> or at{' '}
