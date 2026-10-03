@@ -13,6 +13,19 @@ const fmtDate = (iso) =>
     month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   })
 
+/**
+ * What a giveaway's gate is called, for the card and the locked notice.
+ *
+ * Falls back to "Certified" for giveaways stored before roles were picked per
+ * giveaway — those run on DISCORD_REQUIRED_ROLE_IDS, which is that role.
+ */
+function roleLabel(giveaway) {
+  const names = (giveaway.roles || []).map((r) => r.name).filter(Boolean)
+  if (!names.length) return 'Certified'
+  if (names.length === 1) return names[0]
+  return `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}`
+}
+
 function Avatar({ user, size }) {
   const style = size ? { width: size, height: size } : undefined
   return user.avatar
@@ -40,13 +53,15 @@ function EntryControl({ giveaway, user, onEnter, busy, error, discordUrl }) {
   }
   // Say up front that they can't enter, rather than letting them click and
   // bounce off a refusal.
-  if (giveaway.requireRole && user.hasRole === false) {
+  // roleOk is judged per giveaway on the server, since two giveaways can want
+  // different roles — a page-wide verdict would lock the wrong people out.
+  if (giveaway.requireRole && giveaway.roleOk === false) {
     return (
       <>
-        <div className="gv-locked">🔒 Certified role required</div>
+        <div className="gv-locked">🔒 {roleLabel(giveaway)} required</div>
         <div className="gv-note">
-          This one is for Certified members of the Discord. Join the server and pick
-          up the role, then come back — your entry will work straight away.
+          This one is for {roleLabel(giveaway)} members of the Discord. Join the server
+          and pick up the role, then come back — your entry will work straight away.
         </div>
         {discordUrl && (
           <a className="gv-enter discord" href={discordUrl} target="_blank" rel="noreferrer" style={{ marginTop: 10 }}>
@@ -146,7 +161,7 @@ function GiveawayCard({ giveaway, user, onEnter, busy, error, past, discordUrl }
           {giveaway.description && <p className="gv-desc">{giveaway.description}</p>}
         </div>
         <div className="gv-prize">
-          {giveaway.requireRole && <span className="gv-req">Certified only</span>}
+          {giveaway.requireRole && <span className="gv-req">{roleLabel(giveaway)} only</span>}
           <span className="gv-prize-lbl">Prize</span>
           <span className="gv-prize-val">{giveaway.prize}</span>
           {giveaway.winnerCount > 1 && (

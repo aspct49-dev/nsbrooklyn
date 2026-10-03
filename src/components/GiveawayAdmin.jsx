@@ -22,17 +22,28 @@ function blankGiveaway() {
     endAt: end.toISOString(),
     winnerCount: 1,
     requireRole: false,
+    roles: [],
     status: 'live',
   }
 }
 
-function GiveawayForm({ initial, onSave, onCancel, busy }) {
+function GiveawayForm({ initial, onSave, onCancel, busy, roles, rolesError }) {
   const [form, setForm] = useState(() => ({
     ...initial,
+    roles: initial.roles || [],
     startAt: isoToLocal(initial.startAt),
     endAt: isoToLocal(initial.endAt),
   }))
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const picked = new Set((form.roles || []).map((r) => r.id))
+  const toggleRole = (role) => setForm((f) => {
+    const has = (f.roles || []).some((r) => r.id === role.id)
+    return {
+      ...f,
+      roles: has ? f.roles.filter((r) => r.id !== role.id) : [...(f.roles || []), role],
+    }
+  })
 
   const submit = (e) => {
     e.preventDefault()
@@ -45,6 +56,7 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
       endAt: localToIso(form.endAt),
       winnerCount: Number(form.winnerCount),
       requireRole: Boolean(form.requireRole),
+      roles: form.requireRole ? form.roles || [] : [],
       status: form.status,
     })
   }
@@ -112,13 +124,42 @@ function GiveawayForm({ initial, onSave, onCancel, busy }) {
           onChange={(e) => setForm((f) => ({ ...f, requireRole: e.target.checked }))}
         />
         <span>
-          Certified role required
+          Discord role required
           <small>
-            Only members of the Discord server holding the required role can enter.
-            Checked on the server for every entry.
+            Only members of the Discord server holding one of the roles below can
+            enter. Checked on the server for every entry.
           </small>
         </span>
       </label>
+
+      {/* Pick none and the gate falls back to DISCORD_REQUIRED_ROLE_IDS, which
+          is what every giveaway made before this selector existed used. */}
+      {form.requireRole && (
+        <div className="gw-roles">
+          <span className="admin-label-text">Which role</span>
+          {rolesError && <p className="admin-msg err">{rolesError}</p>}
+          {!rolesError && !roles.length && <p className="admin-utc">Loading server roles…</p>}
+          <div className="gw-role-list">
+            {roles.map((r) => (
+              <label className={`gw-role ${picked.has(r.id) ? 'on' : ''}`} key={r.id}>
+                <input
+                  type="checkbox"
+                  checked={picked.has(r.id)}
+                  onChange={() => toggleRole(r)}
+                />
+                <span>{r.name}</span>
+              </label>
+            ))}
+          </div>
+          <p className="admin-utc">
+            {picked.size === 0
+              ? 'None picked — the site default role applies.'
+              : picked.size === 1
+                ? `Only ${[...(form.roles || [])][0].name} can enter.`
+                : `Holding any one of ${form.roles.length} roles lets someone enter.`}
+          </p>
+        </div>
+      )}
 
       <label className="admin-label">
         Status
@@ -155,7 +196,11 @@ function GiveawayRow({ giveaway, onEdit, onDraw, onRedrawPlace, onStatus, onDele
 
       <p className="admin-utc">
         <b>{giveaway.prize}</b>{giveaway.winnerCount > 1 && ` × ${giveaway.winnerCount} winners`}
-        {giveaway.requireRole && ' · Certified role required'}
+        {giveaway.requireRole && (
+          giveaway.roles?.length
+            ? ` · ${giveaway.roles.map((r) => r.name).join(' or ')} only`
+            : ' · default role required'
+        )}
       </p>
       {giveaway.description && <p className="admin-utc">{giveaway.description}</p>}
       <p className="admin-utc">
@@ -237,6 +282,22 @@ export default function GiveawayAdmin() {
   const [entrants, setEntrants] = useState(null) // { title, list }
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
+  const [roles, setRoles] = useState([])
+  const [rolesError, setRolesError] = useState(null)
+
+  // The server's roles, for the per-giveaway gate. Fetched once; a failure is
+  // reported in the form rather than silently leaving an empty list, which
+  // would read as "this server has no roles".
+  useEffect(() => {
+    fetch('/api/giveaways', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'roles' }),
+    })
+      .then((r) => r.json())
+      .then((d) => (d.error ? setRolesError(d.error) : setRoles(d.roles || [])))
+      .catch((e) => setRolesError(e.message))
+  }, [])
 
   const load = async () => {
     try {
@@ -341,6 +402,8 @@ export default function GiveawayAdmin() {
             onSave={save}
             onCancel={() => setEditing(null)}
             busy={busy}
+            roles={roles}
+            rolesError={rolesError}
           />
         </div>
       )}

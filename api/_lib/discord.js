@@ -75,26 +75,28 @@ export function requiredRoleIds() {
 // A busy chat can fire many messages a second, and each would otherwise be a
 // Discord API call. Cache per instance for a short while — short enough that
 // removing someone's role takes effect quickly.
+//
+// The MEMBER'S ROLES are cached, not a yes/no answer. Different giveaways can
+// now require different roles, and a cached boolean would answer the wrong
+// question: someone checked against Certified would have that verdict reused
+// for a Swoobz-gated giveaway.
 const ROLE_TTL_MS = 60_000
-const roleCache = new Map() // discordId -> { ok, at }
+const roleCache = new Map() // discordId -> { roles | reason, at }
 
 /**
- * Is this Discord user in the server with one of the required roles?
- * Returns { ok, reason } — never throws for the ordinary "not a member" and
- * "no role" cases, so callers can treat them as a plain refusal.
+ * The roles this Discord user holds in the server.
+ * Returns { ok: true, roles: string[] } or { ok: false, reason } — never
+ * throws for the ordinary "not a member" case, so callers can treat it as a
+ * plain refusal.
  */
-export async function hasRequiredRole(discordId, { force = false } = {}) {
+export async function memberRoles(discordId, { force = false } = {}) {
   const token = process.env.DISCORD_BOT_TOKEN
   const guild = process.env.DISCORD_GUILD_ID
-  const wanted = requiredRoleIds()
-
-  if (!token || !guild || !wanted.length) {
-    return { ok: false, reason: 'role-gate-not-configured' }
-  }
+  if (!token || !guild) return { ok: false, reason: 'role-gate-not-configured' }
 
   const hit = roleCache.get(discordId)
   if (!force && hit && Date.now() - hit.at < ROLE_TTL_MS) {
-    return { ok: hit.ok, reason: hit.reason, cached: true }
+    return { ...hit.value, cached: true }
   }
 
   const res = await fetch(
@@ -102,24 +104,40 @@ export async function hasRequiredRole(discordId, { force = false } = {}) {
     { headers: { Authorization: `Bot ${token}` } },
   )
 
-  let result
+  let value
   if (res.status === 404) {
-    result = { ok: false, reason: 'not-in-server' }
+    value = { ok: false, reason: 'not-in-server' }
   } else if (res.status === 403) {
     // almost always the Server Members Intent being switched off
     console.error('Discord role check forbidden — is the Server Members Intent enabled?')
-    result = { ok: false, reason: 'bot-forbidden' }
+    value = { ok: false, reason: 'bot-forbidden' }
   } else if (!res.ok) {
     console.error('Discord role check failed', res.status)
-    result = { ok: false, reason: `discord-${res.status}` }
+    value = { ok: false, reason: `discord-${res.status}` }
   } else {
     const member = await res.json()
-    const roles = Array.isArray(member?.roles) ? member.roles : []
-    result = roles.some((r) => wanted.includes(String(r)))
-      ? { ok: true }
-      : { ok: false, reason: 'missing-role' }
+    value = { ok: true, roles: (Array.isArray(member?.roles) ? member.roles : []).map(String) }
   }
 
-  roleCache.set(discordId, { ...result, at: Date.now() })
-  return result
+  roleCache.set(discordId, { value, at: Date.now() })
+  return value
+}
+
+/**
+ * Does this Discord user hold one of the roles that satisfy a gate?
+ *
+ * `roleIds` names the roles for THIS gate — a giveaway may choose its own.
+ * Falling back to the env list keeps every caller that predates per-giveaway
+ * roles (the Kick picker, older stored giveaways) working unchanged.
+ */
+export async function hasRequiredRole(discordId, { force = false, roleIds } = {}) {
+  const wanted = (roleIds?.length ? roleIds : requiredRoleIds()).map(String)
+  if (!wanted.length) return { ok: false, reason: 'role-gate-not-configured' }
+
+  const member = await memberRoles(discordId, { force })
+  if (!member.ok) return { ok: false, reason: member.reason, cached: member.cached }
+
+  return member.roles.some((r) => wanted.includes(r))
+    ? { ok: true, cached: member.cached }
+    : { ok: false, reason: 'missing-role', cached: member.cached }
 }

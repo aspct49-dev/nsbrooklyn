@@ -13,7 +13,7 @@ import {
   addEntry, listEntries, countEntries, clearEntries, hasEntered,
   drawWinners, ensureSeed, redrawPlace, makeSeed, phaseOf, isOpen, STATUSES,
 } from './_lib/giveaways.js'
-import { hasRequiredRole, roleGateConfigured } from './_lib/discord.js'
+import { hasRequiredRole, memberRoles, roleGateConfigured, requiredRoleIds } from './_lib/discord.js'
 
 // Why an entry was refused, in the entrant's words rather than the code's.
 const ROLE_REFUSALS = {
@@ -70,10 +70,21 @@ async function handleGet(req, res) {
   const past = withCounts.filter((g) => g.phase === 'ended').sort(byNewest)
 
   // Only ask Discord about roles when a visible giveaway actually needs it —
-  // no reason to hit their API on every page load otherwise.
+  // no reason to hit their API on every page load otherwise. The member's
+  // roles are fetched ONCE and each giveaway judged against its own list: a
+  // single page-wide verdict cannot answer for giveaways that want different
+  // roles.
   let hasRole = null
-  if (session && roleGateConfigured() && withCounts.some((g) => g.requireRole)) {
-    hasRole = (await hasRequiredRole(session.id)).ok
+  if (session && withCounts.some((g) => g.requireRole)) {
+    const member = await memberRoles(session.id)
+    const held = member.ok ? member.roles : []
+    for (const g of withCounts) {
+      if (!g.requireRole) continue
+      const wanted = (g.roles?.length ? g.roles.map((r) => r.id) : requiredRoleIds()).map(String)
+      g.roleOk = member.ok && wanted.some((id) => held.includes(id))
+    }
+    // kept for anything still reading the old page-wide flag
+    hasRole = withCounts.some((g) => g.requireRole && g.roleOk)
   }
 
   const payload = {
@@ -113,7 +124,9 @@ async function handleEnter(req, res, body) {
   // Checked server-side on every entry, so the button can't be used to
   // sidestep the requirement.
   if (giveaway.requireRole) {
-    const role = await hasRequiredRole(session.id)
+    const role = await hasRequiredRole(session.id, {
+      roleIds: giveaway.roles?.map((r) => r.id),
+    })
     if (!role.ok) {
       throw Object.assign(new Error(ROLE_REFUSALS[role.reason] || ROLE_REFUSALS.default), { status: 403 })
     }
@@ -222,6 +235,32 @@ async function handleAdmin(req, res, body, action) {
     await saveGiveaways(list, session.name)
     await clearEntries(existing.id) // don't leave orphaned entrant records
     return sendJson(res, 200, { all: list.map((g) => publicGiveaway(g, { phase: phaseOf(g) })) })
+  }
+
+  // The server's own roles, so the admin picks a real one instead of pasting
+  // a snowflake. Read live rather than configured in env, so adding a role to
+  // Discord needs no redeploy.
+  if (action === 'roles') {
+    const token = process.env.DISCORD_BOT_TOKEN
+    const guild = process.env.DISCORD_GUILD_ID
+    if (!token || !guild) {
+      return sendJson(res, 200, { roles: [], error: 'DISCORD_BOT_TOKEN / DISCORD_GUILD_ID not configured' })
+    }
+    const r = await fetch(`https://discord.com/api/v10/guilds/${guild}/roles`, {
+      headers: { Authorization: `Bot ${token}` },
+    })
+    if (!r.ok) {
+      console.error('Discord role list failed', r.status)
+      return sendJson(res, 200, { roles: [], error: `Discord returned ${r.status}` })
+    }
+    const all = await r.json()
+    const roles = (Array.isArray(all) ? all : [])
+      // @everyone is every member, and a managed role belongs to a bot or an
+      // integration — neither is something to gate a giveaway on.
+      .filter((x) => x.name !== '@everyone' && !x.managed)
+      .sort((a, b) => b.position - a.position)
+      .map((x) => ({ id: String(x.id), name: x.name }))
+    return sendJson(res, 200, { roles, defaults: requiredRoleIds() })
   }
 
   if (action === 'entries') {

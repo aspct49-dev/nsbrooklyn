@@ -17,6 +17,25 @@ export const STATUSES = ['draft', 'live', 'ended']
 const entriesKey = (id) => `nsb:giveaway-entries:${id}`
 
 /** Public view — never leaks an undrawn seed. */
+/**
+ * Clean the role list coming from the admin form.
+ *
+ * Ids are kept as strings (Discord snowflakes exceed Number's safe range) and
+ * the name is only a label — the gate always matches on the id.
+ */
+function normalizeRoles(input) {
+  if (!Array.isArray(input)) return []
+  const seen = new Set()
+  const out = []
+  for (const r of input.slice(0, 10)) {
+    const id = String(r?.id ?? '').trim()
+    if (!/^\d{5,25}$/.test(id) || seen.has(id)) continue
+    seen.add(id)
+    out.push({ id, name: String(r?.name ?? '').trim().slice(0, 60) || id })
+  }
+  return out
+}
+
 export function publicGiveaway(g, extra = {}) {
   const { seed, ...rest } = g
   return { ...rest, seed: g.drawnAt ? seed : null, ...extra }
@@ -208,6 +227,17 @@ export function normalizeGiveaway(input, existing) {
     endAt: input.endAt,
     winnerCount,
     requireRole: Boolean(input?.requireRole),
+    // Which roles satisfy this giveaway's gate. Stored with their names so
+    // the public card can say "Swoobz only" without another Discord call, and
+    // so the record keeps what was actually required at the time even if a
+    // role is renamed later.
+    //
+    // Empty means "whatever DISCORD_REQUIRED_ROLE_IDS says" — that is what
+    // every giveaway stored before per-giveaway roles existed falls back to.
+    // Only meaningful with the gate on, and the server decides that — not the
+    // form. An ungated giveaway carrying a role list is a trap for whoever
+    // reads the record later.
+    roles: input?.requireRole ? normalizeRoles(input?.roles) : [],
     status: STATUSES.includes(input?.status) ? input.status : 'draft',
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     // draw results are never client-supplied — they only ever come from the
