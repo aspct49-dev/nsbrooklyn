@@ -87,37 +87,29 @@ export const casinos = [
       { name: 'ghostrider', wagered: 33450 },
     ],
   },
-  {
-    // The board we are leaving. It stays on the site only so the players
-    // already on it can watch it finish and see what they are owed.
-    //
-    // DELIBERATELY NO `url`: we have moved to Roobet, so nothing here sends
-    // anyone to BetBolt — no CTA on the leaderboard, no footer link, no
-    // referral. Every consumer treats a missing `url` as "display only".
-    //
-    // When this period has been paid and published to /winners, delete this
-    // entry and move it to `legacyCasinos` below (and eventually drop its
-    // fetcher in api/_lib/leaderboard.js).
-    id: 'betbolt',
-    name: 'BetBolt',
-    url: null,
-    logo: '/betbolt_logo.png', // dark wordmark — inverted to white via CSS
-    logoInvert: true,
-    periodLabel: 'Final',
-    closing: true,
-    prizePool: 5000,
-    prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
-  },
 ]
 
 // Partner casinos we no longer show a board for, kept ONLY so a finished
 // period can still be published to /winners from /admin. Each needs an `id`,
 // a `name` and the `prizes` ladder that period actually paid.
 //
-// Empty right now: BetBolt is still in `casinos` above because its final board
-// is running. When that board is paid and archived, move it down here — and
-// once it is published to /winners, drop it and its fetcher entirely.
-export const legacyCasinos = []
+// Nothing here is rendered to visitors: no tab, no link, no logo. The entry
+// exists purely so /admin can still fetch a finished period's standings and
+// publish them. Delete an entry once its last board is on /winners.
+export const legacyCasinos = [
+  {
+    // Taken off the site on 15 Oct 2026 — no tab, no links, nothing a visitor
+    // can reach. It stays here ONLY so its last period (5 Sep – 5 Oct 2026,
+    // 38 players) can still be published to /winners from /admin.
+    //
+    // Once that is on /winners: delete this entry, drop fetchBetbolt from
+    // api/_lib/leaderboard.js, and remove BETBOLT_API_KEY from .env.local and
+    // the Vercel dashboard.
+    id: 'betbolt',
+    name: 'BetBolt (ended)',
+    prizes: [2200, 1200, 600, 300, 200, 160, 120, 100, 80, 40],
+  },
+]
 
 // Everything /admin may publish a past period for.
 export const archivableCasinos = [...casinos, ...legacyCasinos]

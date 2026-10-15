@@ -519,29 +519,6 @@ img { display: block; max-width: 100%; }
 .lb-open-dash { color: var(--text-muted); }
 .lb-table tbody tr.lb-row-open .reward-val { color: var(--text-soft); }
 
-/* A board we have left but have not finished paying. Styled as a notice, not
-   a promo — there is nothing to click and nowhere to go. */
-.lb-closing {
-  display: flex; align-items: flex-start; gap: 14px;
-  max-width: 760px; margin: 24px auto 0;
-  padding: 15px 18px;
-  background: rgba(255, 200, 60, 0.07);
-  border: 1px solid rgba(255, 200, 60, 0.3);
-  border-radius: 14px;
-}
-.lb-closing-tag {
-  flex: none;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: #ffd977;
-  background: rgba(255, 200, 60, 0.13);
-  border: 1px solid rgba(255, 200, 60, 0.36);
-  border-radius: 999px;
-  padding: 6px 11px;
-  margin-top: 1px;
-}
-.lb-closing p { margin: 0; color: var(--text-soft); font-size: 13.5px; line-height: 1.55; }
-
 /* When prizes land, directly under the countdown that says when the board
    closes — the two questions are asked together. */
 .lb-payout {
@@ -551,9 +528,6 @@ img { display: block; max-width: 100%; }
   color: var(--text-soft);
 }
 
-@media (max-width: 560px) {
-  .lb-closing { flex-direction: column; gap: 10px; }
-}
 
 .lb-ends-lbl {
   text-align: center;
