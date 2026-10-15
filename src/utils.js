@@ -45,3 +45,13 @@ export function fmtWager(n) {
   }
   return `$${v.toLocaleString('en-US')}`
 }
+
+/**
+ * The wager figure a board is currently showing.
+ *
+ * `wagered` is always the weighted total — the one prizes are paid on — so the
+ * raw view has to ask for `rawWagered` explicitly rather than the two swapping
+ * places behind everyone's back.
+ */
+export const wagerOf = (player, metric) =>
+  (metric === 'raw' ? player?.rawWagered : player?.wagered) || 0

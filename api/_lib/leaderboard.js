@@ -67,11 +67,14 @@ async function fetchRoobet({ from, to, env }) {
   const players = rows
     .map((u) => ({
       name: u.username ?? u.name ?? '',
-      // Roobet weights wager by game (table games and low-house-edge slots
-      // count for less), and the board pays on the weighted figure — that is
-      // the number players are told counts. `wagered` is only a fallback in
-      // case a response ever omits the weighted one.
+      // `wagered` is ALWAYS the weighted figure — it is what the board ranks
+      // on, what prizes are paid on, and what a raffle ticket is earned with.
+      // Nothing downstream should have to know which of the two it is holding,
+      // so the raw total travels under its own name rather than swapping in.
       wagered: Number(u.weightedWagered ?? u.wagered) || 0,
+      // The unweighted stake, for the leaderboard's weighted/raw switcher.
+      // Shown only; it never decides a rank that pays.
+      rawWagered: Number(u.wagered) || 0,
     }))
     .filter((p) => p.name)
 

@@ -1,5 +1,5 @@
 import { config } from '../data/leaderboard'
-import { fmtMoney, maskName, initials } from '../utils'
+import { fmtMoney, maskName, initials, wagerOf } from '../utils'
 
 const META = {
   1: { cls: 'first', label: '1st' },
@@ -7,7 +7,7 @@ const META = {
   3: { cls: 'third', label: '3rd' },
 }
 
-function Card({ player, rank }) {
+function Card({ player, rank, metric }) {
   const m = META[rank]
   const avatar = config.rankAvatars[rank - 1]
 
@@ -41,9 +41,9 @@ function Card({ player, rank }) {
           <span className="rank-badge">{m.label}</span>
         </div>
         <div className="podium-name">{maskName(player.name)}</div>
-        <div className="podium-wager-lbl">Wagered</div>
+        <div className="podium-wager-lbl">{metric === 'raw' ? 'Wagered (raw)' : 'Wagered'}</div>
         <div className="wager-pill">
-          <span className="cur">$</span>{fmtMoney(player.wagered, 2).slice(1)}
+          <span className="cur">$</span>{fmtMoney(wagerOf(player, metric), 2).slice(1)}
         </div>
         <div className="frame-prize">{fmtMoney(player.prize)}</div>
       </div>
@@ -51,14 +51,14 @@ function Card({ player, rank }) {
   )
 }
 
-export default function Podium({ top3 }) {
+export default function Podium({ top3, metric = 'weighted' }) {
   // Render 2nd, 1st, 3rd so 1st sits raised in the center.
   const [first, second, third] = top3
   return (
     <div className="podium">
-      {second && <Card player={second} rank={2} />}
-      {first && <Card player={first} rank={1} />}
-      {third && <Card player={third} rank={3} />}
+      {second && <Card player={second} rank={2} metric={metric} />}
+      {first && <Card player={first} rank={1} metric={metric} />}
+      {third && <Card player={third} rank={3} metric={metric} />}
     </div>
   )
 }

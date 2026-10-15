@@ -1,4 +1,4 @@
-import { fmtMoney } from '../utils'
+import { fmtMoney, wagerOf } from '../utils'
 
 // $169,234.56 → "$169.2k", $1,234,567 → "$1.23M", small values stay exact.
 function fmtCompact(n) {
@@ -9,13 +9,15 @@ function fmtCompact(n) {
 
 /* Stats strip for the active board: totals derived from the fetched
    standings, plus the casino's configured prize pool. */
-export default function LeaderboardStats({ allPlayers, casino, updatedAt }) {
-  const totalWagered = allPlayers.reduce((s, p) => s + (p.wagered || 0), 0)
-  const topWager = allPlayers.length ? Math.max(...allPlayers.map((p) => p.wagered || 0)) : 0
+export default function LeaderboardStats({ allPlayers, casino, updatedAt, metric = 'weighted' }) {
+  // Follows the board's own switch, so the totals always describe the figure
+  // on screen rather than quietly reporting a different one.
+  const totalWagered = allPlayers.reduce((s, p) => s + wagerOf(p, metric), 0)
+  const topWager = allPlayers.length ? Math.max(...allPlayers.map((p) => wagerOf(p, metric))) : 0
 
   const tiles = [
     { label: 'Total Players', value: String(allPlayers.length) },
-    { label: 'Total Wagered', value: fmtCompact(totalWagered), gold: true },
+    { label: metric === 'raw' ? 'Total Wagered (raw)' : 'Total Wagered', value: fmtCompact(totalWagered), gold: true },
     { label: 'Top Wager', value: fmtCompact(topWager) },
     { label: 'Prize Pool', value: fmtMoney(casino.prizePool), gold: true },
   ]

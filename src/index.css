@@ -519,6 +519,60 @@ img { display: block; max-width: 100%; }
 .lb-open-dash { color: var(--text-muted); }
 .lb-table tbody tr.lb-row-open .reward-val { color: var(--text-soft); }
 
+/* ---- weighted / unweighted switch ----
+   The board pays on the weighted figure, so that side is the default and the
+   hint under each label says which is which — a bare "raw/weighted" pair means
+   nothing to someone who has not read the wager rules further down. */
+/* The podium has no top margin of its own and its first-place card is the
+   tallest, so the clearance has to come from here — on the wrapper, so it
+   holds whether or not the raw-view note is showing. */
+.lb-metric-wrap { margin: 22px 0 34px; }
+
+.lb-metric {
+  display: flex; justify-content: center; gap: 8px;
+  margin: 0 auto;
+  padding: 5px;
+  width: fit-content; max-width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: rgba(0, 0, 0, 0.3);
+}
+.lb-metric-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 14px;
+  color: var(--text-soft);
+  background: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.lb-metric-btn small {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600; font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+.lb-metric-btn:hover { color: #fff; }
+.lb-metric-btn.on {
+  background: rgba(255, 200, 60, 0.11);
+  border: 1px solid rgba(255, 200, 60, 0.38);
+  color: #ffd977;
+}
+.lb-metric-btn.on small { color: rgba(255, 217, 119, 0.8); }
+
+.lb-metric-note {
+  max-width: 620px; margin: 14px auto 0;
+  text-align: center; font-size: 13px; line-height: 1.5;
+  color: var(--text-soft);
+}
+.lb-metric-note strong { color: #ffd977; }
+
+@media (max-width: 480px) {
+  .lb-metric-btn { padding: 8px 12px; font-size: 13px; }
+  .lb-metric-btn small { font-size: 9.5px; }
+}
+
 /* When prizes land, directly under the countdown that says when the board
    closes — the two questions are asked together. */
 .lb-payout {

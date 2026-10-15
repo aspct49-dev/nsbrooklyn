@@ -25,9 +25,26 @@ function rank(players, prizes) {
 function padToPaidPlaces(ranked, prizes) {
   const open = []
   for (let i = ranked.length; i < prizes.length; i++) {
-    open.push({ open: true, name: null, wagered: 0, prize: prizes[i] || 0 })
+    open.push({ open: true, name: null, wagered: 0, rawWagered: 0, prize: prizes[i] || 0 })
   }
   return [...ranked, ...open]
+}
+
+/**
+ * Re-order the board for display without touching who wins what.
+ *
+ * Prizes are assigned by WEIGHTED rank, because that is what Roobet pays on,
+ * and each player carries the prize that gives them. Switching to the raw view
+ * only changes the order rows appear in — so someone top by raw stake but
+ * third by weighted still shows the prize they will actually be paid, instead
+ * of the board quietly implying they have won the top one.
+ *
+ * Open slots stay at the bottom either way; they have nothing to sort by.
+ */
+export function orderBy(players, metric) {
+  if (metric !== 'raw') return players
+  const real = players.filter((p) => !p.open).sort((a, b) => (b.rawWagered || 0) - (a.rawWagered || 0))
+  return [...real, ...players.filter((p) => p.open)]
 }
 
 const REFRESH_MS = 600_000

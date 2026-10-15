@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { config, casinos } from '../data/leaderboard'
 import { fmtMoney } from '../utils'
-import { useLeaderboard, getCasinoRange } from '../hooks/useLeaderboard'
+import { useLeaderboard, getCasinoRange, orderBy } from '../hooks/useLeaderboard'
 import Countdown from '../components/Countdown'
 import Podium from '../components/Podium'
 import LeaderboardTable from '../components/LeaderboardTable'
@@ -14,7 +14,10 @@ import { IconExternal } from '../components/icons'
 export default function Leaderboard() {
   const [activeId, setActiveId] = useState(casinos[0].id)
   const { players, allPlayers, filled, casino, error, updatedAt, loading } = useLeaderboard(activeId)
-  const top3 = players.slice(0, 3)
+  // 'weighted' is the figure the board pays on, so it is what loads first.
+  const [metric, setMetric] = useState('weighted')
+  const rows = useMemo(() => orderBy(players, metric), [players, metric])
+  const top3 = rows.slice(0, 3)
   // `players` is padded out to every paying place, so its length says nothing
   // about whether anyone is actually on the board — `filled` does. Show the
   // board on a successful fetch even with nobody on it yet (every place reads
@@ -70,7 +73,39 @@ export default function Leaderboard() {
           </div>
         </div>
 
-        {hasStandings && <Podium top3={top3} />}
+        {hasStandings && (
+          <div className="lb-metric-wrap">
+            <div className="lb-metric" role="group" aria-label="Wager figure">
+              {[
+                ['weighted', 'Weighted', 'What prizes are paid on'],
+                ['raw', 'Unweighted', 'Total stake, before weighting'],
+              ].map(([key, label, hint]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`lb-metric-btn ${metric === key ? 'on' : ''}`}
+                  aria-pressed={metric === key}
+                  onClick={() => setMetric(key)}
+                >
+                  {label}
+                  <small>{hint}</small>
+                </button>
+              ))}
+            </div>
+
+            {/* Rows re-order, prizes do not: a player keeps the prize their
+                weighted rank earns them, so the raw view cannot imply someone
+                has won a place they have not. */}
+            {metric === 'raw' && (
+              <p className="lb-metric-note">
+                Ranked by total stake. Prizes are still paid on <strong>weighted</strong> wager —
+                each reward below is the one that player actually wins.
+              </p>
+            )}
+          </div>
+        )}
+
+        {hasStandings && <Podium top3={top3} metric={metric} />}
 
         <div className="lb-ends-lbl">Leaderboard ends in</div>
         <Countdown endDate={periodEnd} />
@@ -79,8 +114,8 @@ export default function Leaderboard() {
 
         {hasStandings ? (
           <>
-            <LeaderboardStats allPlayers={allPlayers} casino={casino} updatedAt={updatedAt} />
-            <LeaderboardTable rows={players} startRank={1} />
+            <LeaderboardStats allPlayers={allPlayers} casino={casino} updatedAt={updatedAt} metric={metric} />
+            <LeaderboardTable rows={rows} startRank={1} metric={metric} />
           </>
         ) : (
           // the raw upstream error stays as an attribute for debugging only
